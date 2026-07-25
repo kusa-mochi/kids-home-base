@@ -1,0 +1,42 @@
+# 開発環境で、DockerイメージのビルドとDocker Hubへのプッシュを行うためのDocker Compose ymlファイル
+# ビルドターゲット：Raspberry Pi 4B (arm64v8)
+# ビルドイメージにはバックエンドのビルド出力と、フロントエンドのビルド出力を含め、compose.pull.ymlで定義されたイメージをプルすることができる。
+
+services:
+  # バックエンドのビルド
+  build-backend:
+    image: whoatemyapplepie/kids-home-base-backend:latest
+    build:
+      context: ./dockerfile_go_builder
+    user: builder
+    volumes:
+      - ../src/backend:/home/builder/app
+    ports:
+      - "21226:21226"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # ビルドターゲット（Raspberry Pi 4B）に対応したバックエンドのビルドを実行する。
+        GOOS=linux GOARCH=arm64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
+
+  # フロントエンドのビルド
+  build-frontend:
+    image: whoatemyapplepie/kids-home-base-frontend:latest
+    build:
+      context: ./dockerfile_node_builder
+    user: builder
+    volumes:
+      - ../src/frontend:/home/builder/app
+    ports:
+      - "3000:3000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # フロントエンドのビルドを実行する。
+        npm install
+        npm run build
+
+  # ビルド出力を用いてDockerイメージをビルドする。
+  # Docker Hubにプッシュする。
