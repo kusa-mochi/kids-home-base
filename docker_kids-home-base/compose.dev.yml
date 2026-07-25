@@ -1,0 +1,41 @@
+# 開発環境で、デバッグ実行するためのDocker Compose ymlファイル
+# ビルドターゲット：x64
+
+services:
+  # バックエンドのビルド
+  build-backend:
+    image: whoatemyapplepie/kids-home-base-backend:latest
+    build:
+      context: ./dockerfile_go_builder
+    user: builder
+    volumes:
+      - ../src/backend:/home/builder/app
+    ports:
+      - "21226:21226"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # ビルドターゲット（x64）に対応したバックエンドのビルドを実行する。
+        GOOS=linux GOARCH=amd64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
+
+  # フロントエンドのデバッグ実行
+  build-frontend:
+    image: whoatemyapplepie/kids-home-base-frontend:latest
+    build:
+      context: ./dockerfile_node_builder
+    user: builder
+    volumes:
+      - ../src/frontend:/home/builder/app
+    ports:
+      - "3000:3000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # フロントエンドをデバッグ実行する。
+        npm install
+        npm run dev
+
+  # ビルド出力を用いてDockerイメージをビルドする。
+  # Docker Hubにプッシュする。
