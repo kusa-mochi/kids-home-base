@@ -1,0 +1,5 @@
+# 運用環境（Raspberry Pi 4B）でDockerイメージをプルするためのDocker Compose ymlファイル
+# Dockerイメージは、compose.build.ymlでビルドされたイメージをDocker Hubからプルする。
+
+services:
+  # Docker HubからDockerイメージをプルして、運用環境でコンテナを起動する。
