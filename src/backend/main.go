@@ -46,8 +46,6 @@ func main() {
 
 	for {
 		c := <-apiRequest
-		if err := c.Execute(); err != nil {
-			log.Println("Error executing command:", err)
-		}
+		c.Execute()
 	}
 }
