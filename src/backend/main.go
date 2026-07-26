@@ -20,6 +20,8 @@ func main() {
 			c.AbortWithStatus(204)
 			return
 		}
+
+		c.Next()
 	})
 
 	r.GET("/ping", func(c *gin.Context) {

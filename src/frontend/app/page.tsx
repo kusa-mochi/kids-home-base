@@ -35,16 +35,19 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-          onClick={() => handleClickToGet()}
-        />
-        <button className={styles.button} onClick={() => handleClickToPost()}>POST test</button>
+        <div onClick={() => handleClickToGet()}>
+          <Image
+            className={styles.logo}
+            src="/next.svg"
+            alt="Next.js logo"
+            width={100}
+            height={20}
+            priority
+          />
+        </div>
+        <button className={styles.button} onClick={() => handleClickToPost()}>
+          POST test
+        </button>
       </main>
     </div>
   );

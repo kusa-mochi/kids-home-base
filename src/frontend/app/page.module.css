@@ -94,6 +94,11 @@ a.secondary {
   border-color: var(--button-secondary-border);
 }
 
+.button {
+  width: 200px;
+  height: 100px;
+}
+
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   a.primary:hover {
