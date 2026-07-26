@@ -1,12 +1,14 @@
 package main
 
 import (
+	"kids_home_base/api_handlers"
+	"kids_home_base/commands"
 	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
 	// まずはテスト用に gin で簡単なGETメソッドAPIとPOSTメソッドAPIを作成します。
 	r := gin.Default()
 
@@ -24,24 +26,28 @@ func main() {
 		c.Next()
 	})
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-		log.Println("ping API is called.")
-	})
+	//// APIハンドラ登録
 
-	r.POST("/echo", func(c *gin.Context) {
-		var json map[string]interface{}
-		if err := c.ShouldBindJSON(&json); err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(200, json)
-		log.Println("echo API is called with data:", json)
-	})
+	r.GET("/ping", func(c *gin.Context) { api_handlers.PingHandler(c, apiRequest) })
+	r.POST("/echo", func(c *gin.Context) { api_handlers.EchoHandler(c, apiRequest) })
+
+	//// サーバー起動
 
 	if err := r.Run(":21226"); err != nil { // デフォルトで :21226 でリッスンします
 		log.Fatal(err)
+	}
+}
+
+func main() {
+	// APIハンドラからのリクエストをメインゴルーチンで受け取るためのチャネルを初期化する。
+	apiRequest := make(chan commands.ICommand)
+
+	go RunAPIServerGoroutine(apiRequest)
+
+	for {
+		c := <-apiRequest
+		if err := c.Execute(); err != nil {
+			log.Println("Error executing command:", err)
+		}
 	}
 }
