@@ -1,4 +1,4 @@
-# バックエンド（Go 1.26.4）をビルドするためのDockerfile
+# バックエンド（Go 1.25.10）をビルドするためのDockerfile
 FROM alpine:3.23.5
 
 # パッケージリストの更新
@@ -13,7 +13,10 @@ RUN apk update && \
     go=1.25.10-r0
 
 # Goの環境変数を設定
-ENV GOPATH=/go
+ENV GOPATH=/home/builder/go
+ENV GOBIN=$GOPATH/bin
+ENV GOMODCACHE=/home/builder/go/pkg/mod
+ENV GOCACHE=/home/builder/.cache/go-build
 
 # GoのバイナリをPATHに追加
 ENV PATH=$GOPATH/bin:$PATH
