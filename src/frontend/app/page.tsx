@@ -45,7 +45,7 @@ export default function Home() {
             priority
           />
         </div>
-        <button className={styles.button} onClick={() => handleClickToPost()}>
+        <button className={styles.logoButton} onClick={() => handleClickToPost()}>
           POST test
         </button>
       </main>
