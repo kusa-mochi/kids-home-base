@@ -18,6 +18,7 @@ services:
       - -c
       - |
         # ビルドターゲット（Raspberry Pi 4B）に対応したバックエンドのビルドを実行する。
+        go mod tidy
         GOOS=linux GOARCH=arm64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
 
   # フロントエンドのビルド
