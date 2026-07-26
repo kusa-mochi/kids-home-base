@@ -11,13 +11,14 @@ services:
     user: builder
     volumes:
       - ../src/backend:/home/builder/app
-    ports:
-      - "21226:21226"
     command:
       - /bin/sh
       - -c
       - |
         # ビルドターゲット（Raspberry Pi 4B）に対応したバックエンドのビルドを実行する。
+        go mod download
+        go mod verify
+        mkdir -p /home/builder/app/bin
         GOOS=linux GOARCH=arm64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
 
   # フロントエンドのビルド
@@ -28,8 +29,6 @@ services:
     user: builder
     volumes:
       - ../src/frontend:/home/builder/app
-    ports:
-      - "3000:3000"
     command:
       - /bin/sh
       - -c

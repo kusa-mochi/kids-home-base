@@ -16,8 +16,13 @@ services:
       - /bin/sh
       - -c
       - |
-        # ビルドターゲット（x64）に対応したバックエンドのビルドを実行する。
+        # ビルドターゲット（x64）に対応したバックエンドのビルド・実行を行う。
+        go mod download
+        go mod verify
+        mkdir -p /home/builder/app/bin
         GOOS=linux GOARCH=amd64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
+        chmod +x /home/builder/app/bin/kids-home-base-backend
+        /home/builder/app/bin/kids-home-base-backend
 
   # フロントエンドのデバッグ実行
   build-frontend:
