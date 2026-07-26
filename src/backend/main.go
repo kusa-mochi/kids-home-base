@@ -10,6 +10,18 @@ func main() {
 	// まずはテスト用に gin で簡単なGETメソッドAPIとPOSTメソッドAPIを作成します。
 	r := gin.Default()
 
+	// CORS設定追加。
+	// まずは開発目的で、localhost:3000 からのアクセスを許可する設定を追加します。
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+	})
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -27,5 +39,5 @@ func main() {
 		log.Println("echo API is called with data:", json)
 	})
 
-	r.Run() // デフォルトで :8080 でリッスンします
+	r.Run(":21226") // デフォルトで :21226 でリッスンします
 }
