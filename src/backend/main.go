@@ -41,5 +41,7 @@ func main() {
 		log.Println("echo API is called with data:", json)
 	})
 
-	r.Run(":21226") // デフォルトで :21226 でリッスンします
+	if err := r.Run(":21226"); err != nil { // デフォルトで :21226 でリッスンします
+		log.Fatal(err)
+	}
 }
