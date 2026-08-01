@@ -1,5 +1,7 @@
 package commands
 
+import dbmanager "kids_home_base/db_manager"
+
 type ICommand interface {
-	Execute()
+	Execute(dbManager *dbmanager.DBManager)
 }

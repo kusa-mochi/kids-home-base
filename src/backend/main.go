@@ -3,9 +3,11 @@ package main
 import (
 	"kids_home_base/api_handlers"
 	"kids_home_base/commands"
+	dbmanager "kids_home_base/db_manager"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
@@ -39,6 +41,9 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
 }
 
 func main() {
+	// データベースの初期化と接続
+	dbManager := dbmanager.NewDBManager()
+
 	// APIハンドラからのリクエストをメインゴルーチンで受け取るためのチャネルを初期化する。
 	apiRequest := make(chan commands.ICommand)
 
@@ -46,6 +51,6 @@ func main() {
 
 	for {
 		c := <-apiRequest
-		c.Execute()
+		c.Execute(dbManager) // データベース接続を渡して Execute を呼び出す
 	}
 }

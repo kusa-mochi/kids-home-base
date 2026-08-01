@@ -1,6 +1,9 @@
 package commands
 
-import "log"
+import (
+	dbmanager "kids_home_base/db_manager"
+	"log"
+)
 
 type TestPingCommand struct {
 	Response chan error
@@ -12,7 +15,7 @@ func NewTestPingCommand() *TestPingCommand {
 	}
 }
 
-func (c *TestPingCommand) Execute() {
+func (c *TestPingCommand) Execute(dbManager *dbmanager.DBManager) {
 	log.Println("ping API is called.")
 	c.Response <- nil
 }
