@@ -2,7 +2,7 @@ package commands
 
 import (
 	dbmanager "kids_home_base/db_manager"
-	"log"
+	"kids_home_base/logger"
 )
 
 type TestPingCommand struct {
@@ -16,6 +16,6 @@ func NewTestPingCommand() *TestPingCommand {
 }
 
 func (c *TestPingCommand) Execute(dbManager *dbmanager.DBManager) {
-	log.Println("ping API is called.")
+	logger.InfPrintln("ping API is called.")
 	c.Response <- nil
 }

@@ -2,7 +2,7 @@ package commands
 
 import (
 	dbmanager "kids_home_base/db_manager"
-	"log"
+	"kids_home_base/logger"
 )
 
 type TestEchoCommand struct {
@@ -18,6 +18,6 @@ func NewTestEchoCommand(data map[string]interface{}) *TestEchoCommand {
 }
 
 func (c *TestEchoCommand) Execute(dbManager *dbmanager.DBManager) {
-	log.Println("echo API is called with data:", c.data)
+	logger.InfPrintln("echo API is called with data:", c.data)
 	c.Response <- nil
 }
