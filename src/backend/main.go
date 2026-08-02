@@ -4,6 +4,7 @@ import (
 	"kids_home_base/api_handlers"
 	"kids_home_base/commands"
 	dbmanager "kids_home_base/db_manager"
+	"kids_home_base/logger"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,8 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
 
 	//// サーバー起動
 
+	logger.InfPrintln("API server is listening at 21226 port.")
+
 	if err := r.Run(":21226"); err != nil { // デフォルトで :21226 でリッスンします
 		log.Fatal(err)
 	}
@@ -44,10 +47,17 @@ func main() {
 	// データベースの初期化と接続
 	dbManager := dbmanager.NewDBManager()
 
+	// ロガーの初期化
+	logger.InitLogger(dbManager)
+
+	logger.DbgPrintln("init fin.")
+
 	// APIハンドラからのリクエストをメインゴルーチンで受け取るためのチャネルを初期化する。
 	apiRequest := make(chan commands.ICommand)
 
 	go RunAPIServerGoroutine(apiRequest)
+
+	logger.DbgPrintln("command goroutine is running.")
 
 	for {
 		c := <-apiRequest

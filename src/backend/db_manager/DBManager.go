@@ -111,7 +111,7 @@ func NewDBManager() *DBManager {
 	}
 
 	// ログの初期データ（例として1件のログを挿入しています。）
-	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message) SELECT 1, 'INF', 'ログテスト' WHERE NOT EXISTS (SELECT 1 FROM logs);`)
+	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) SELECT 1, 'INF', 'ログテスト', CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM logs);`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -129,4 +129,10 @@ func NewDBManager() *DBManager {
 	}
 
 	return &DBManager{db: db}
+}
+
+// ログをデータベースに追加する関数。
+func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) error {
+	m.db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`, userId, logLevel, messageToAdd)
+	return nil
 }
