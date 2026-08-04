@@ -32,6 +32,48 @@ export default function Home() {
       });
   }
 
+  function handleClickToLogin() {
+    const username = (document.getElementById("username") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement).value;
+
+    // :21226/login APIにPOSTリクエストを送信する。
+    fetch("http://localhost:21226/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: username, password: password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        // レスポンスからトークンを取得してlocalStorageに保存する
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+  function handleClickToJwtTest() {
+    // :21226/auth/jwt-test APIにGETリクエストを送信する。
+    fetch("http://localhost:21226/auth/jwt-test", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -45,8 +87,25 @@ export default function Home() {
             priority
           />
         </div>
-        <button className={styles.logoButton} onClick={() => handleClickToPost()}>
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToPost()}
+        >
           POST test
+        </button>
+        <input id="username" type="text" placeholder="Username" />
+        <input id="password" type="password" placeholder="Password" />
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToLogin()}
+        >
+          LOGIN test
+        </button>
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToJwtTest()}
+        >
+          JWT Test
         </button>
       </main>
     </div>
