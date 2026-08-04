@@ -249,3 +249,15 @@ func (m *DBManager) DeleteRecurringSchedule(id int) error {
 
 	return err
 }
+
+// ユーザーIDに基づいてパスワードハッシュを取得する関数。
+func (m *DBManager) GetPasswordHashByUserId(userId string) (string, error) {
+	var passwordHash string
+	err := m.db.QueryRow(`SELECT password_hash FROM users WHERE user_id_text = ?`, userId).Scan(&passwordHash)
+	if err != nil {
+		log.Fatal("query row error in GetPasswordHashByUserId:", err.Error())
+		return "", err
+	}
+
+	return passwordHash, nil
+}
