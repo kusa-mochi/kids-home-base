@@ -121,10 +121,6 @@ func NewDBManager() *DBManager {
 func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) error {
 	_, err := m.db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`, userId, logLevel, messageToAdd)
 
-	if err != nil {
-		log.Fatal("exec error in AddLog:", err.Error())
-	}
-
 	return err
 }
 
@@ -132,7 +128,6 @@ func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) err
 func (m *DBManager) GetTodaySchedule() ([]datastructures.ScheduleItem, error) {
 	rows, err := m.db.Query(`SELECT * FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime')`)
 	if err != nil {
-		log.Fatal("query error in GetTodaySchedule:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -148,7 +143,6 @@ func (m *DBManager) GetTodaySchedule() ([]datastructures.ScheduleItem, error) {
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Fatal("rows error in GetTodaySchedule:", err.Error())
 		return nil, err
 	}
 
@@ -159,7 +153,6 @@ func (m *DBManager) GetTodaySchedule() ([]datastructures.ScheduleItem, error) {
 func (m *DBManager) GetTomorrowSchedule() ([]datastructures.ScheduleItem, error) {
 	rows, err := m.db.Query(`SELECT * FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime', '+1 day')`)
 	if err != nil {
-		log.Fatal("query error in GetTomorrowSchedule:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -175,7 +168,6 @@ func (m *DBManager) GetTomorrowSchedule() ([]datastructures.ScheduleItem, error)
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Fatal("rows error in GetTomorrowSchedule:", err.Error())
 		return nil, err
 	}
 
@@ -186,20 +178,12 @@ func (m *DBManager) GetTomorrowSchedule() ([]datastructures.ScheduleItem, error)
 func (m *DBManager) AddSchedule(s *datastructures.ScheduleItem) error {
 	_, err := m.db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) VALUES (?, ?)`, s.Dt, s.Task)
 
-	if err != nil {
-		log.Fatal("exec error in AddSchedule:", err.Error())
-	}
-
 	return err
 }
 
 // DBの計画要素を更新する関数。
 func (m *DBManager) UpdateSchedule(s *datastructures.ScheduleItem) error {
 	_, err := m.db.Exec(`UPDATE schedules SET schedule_datetime = ?, schedule_task = ? WHERE id = ?`, s.Dt, s.Task, s.Id)
-
-	if err != nil {
-		log.Fatal("exec error in UpdateSchedule:", err.Error())
-	}
 
 	return err
 }
@@ -208,20 +192,12 @@ func (m *DBManager) UpdateSchedule(s *datastructures.ScheduleItem) error {
 func (m *DBManager) DeleteSchedule(id int) error {
 	_, err := m.db.Exec(`DELETE FROM schedules WHERE id = ?`, id)
 
-	if err != nil {
-		log.Fatal("exec error in DeleteSchedule:", err.Error())
-	}
-
 	return err
 }
 
 // 定期的な計画要素を追加する関数。
 func (m *DBManager) AddRecurringSchedule(s *datastructures.RecurringScheduleItem) error {
 	_, err := m.db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?)`, s.DayOfWeek, s.StartTime, s.StartDate, s.EndDate, s.Task)
-
-	if err != nil {
-		log.Fatal("exec error in AddRecurringSchedule:", err.Error())
-	}
 
 	return err
 }
@@ -230,20 +206,12 @@ func (m *DBManager) AddRecurringSchedule(s *datastructures.RecurringScheduleItem
 func (m *DBManager) UpdateRecurringSchedule(s *datastructures.RecurringScheduleItem) error {
 	_, err := m.db.Exec(`UPDATE recurring_schedules SET day_of_week = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.DayOfWeek, s.StartTime, s.StartDate, s.EndDate, s.Task, s.Id)
 
-	if err != nil {
-		log.Fatal("exec error in UpdateRecurringSchedule:", err.Error())
-	}
-
 	return err
 }
 
 // 定期的な計画要素を削除する関数。
 func (m *DBManager) DeleteRecurringSchedule(id int) error {
 	_, err := m.db.Exec(`DELETE FROM recurring_schedules WHERE id = ?`, id)
-
-	if err != nil {
-		log.Fatal("exec error in DeleteRecurringSchedule:", err.Error())
-	}
 
 	return err
 }
@@ -253,7 +221,6 @@ func (m *DBManager) GetPasswordHashByUserId(userId string) (string, error) {
 	var passwordHash string
 	err := m.db.QueryRow(`SELECT password_hash FROM users WHERE user_id_text = ?`, userId).Scan(&passwordHash)
 	if err != nil {
-		log.Fatal("query row error in GetPasswordHashByUserId(user_id_text =", userId, "):", err.Error())
 		return "", err
 	}
 
