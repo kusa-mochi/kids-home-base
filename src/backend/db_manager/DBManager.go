@@ -87,13 +87,11 @@ func NewDBManager() *DBManager {
 
 	// 各テーブルにデータが存在しない場合は、初期データを挿入する。
 
-	// 大人ユーザーIDの初期データ（dad, mom）
-	// TODO: パスワードのハッシュ値は適切に生成する必要があります。ここでは例として "kenepiyo" のハッシュ値を使用しています。
-	_, err = db.Exec(`INSERT INTO users (user_id_text, password_hash) SELECT 'dad', 'e99a18c428cb38d5f260853678922e03' WHERE NOT EXISTS (SELECT 1 FROM users);`)
-	if err != nil {
-		log.Fatal("exec error in NewDBManager:", err.Error())
-	}
-	_, err = db.Exec(`INSERT INTO users (user_id_text, password_hash) SELECT 'mom', 'e99a18c428cb38d5f260853678922e03' WHERE NOT EXISTS (SELECT 1 FROM users);`)
+	// 大人ユーザーIDの初期データ（user_id_textが 'dad' および 'mom' のユーザーをそれぞれ作成する）
+	_, err = db.Exec(`INSERT OR IGNORE INTO users (user_id_text, password_hash) VALUES 
+						('dad', 'f13843b19f1bcf72b792d78e54f54de907528e8e8e3bb0b3ad69763beeda9f88'),
+						('mom', 'f13843b19f1bcf72b792d78e54f54de907528e8e8e3bb0b3ad69763beeda9f88');
+					`)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
