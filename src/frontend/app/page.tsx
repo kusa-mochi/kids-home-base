@@ -33,7 +33,7 @@ export default function Home() {
   }
 
   function handleClickToLogin() {
-    const username = (document.getElementById("username") as HTMLInputElement).value;
+    const userId = (document.getElementById("user_id") as HTMLInputElement).value;
     const password = (document.getElementById("password") as HTMLInputElement).value;
 
     // :21226/login APIにPOSTリクエストを送信する。
@@ -42,14 +42,14 @@ export default function Home() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username: username, password: password }),
+      body: JSON.stringify({ user_id: userId, password: password }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
         // レスポンスからトークンを取得してlocalStorageに保存する
-        if (data.token) {
-          localStorage.setItem("token", data.token);
+        if (data.access_token) {
+          localStorage.setItem("token", data.access_token);
         }
       })
       .catch((error) => {
@@ -93,7 +93,7 @@ export default function Home() {
         >
           POST test
         </button>
-        <input id="username" type="text" placeholder="Username" />
+        <input id="user_id" type="text" placeholder="User ID" />
         <input id="password" type="password" placeholder="Password" />
         <button
           className={styles.logoButton}

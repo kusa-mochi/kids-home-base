@@ -253,7 +253,7 @@ func (m *DBManager) GetPasswordHashByUserId(userId string) (string, error) {
 	var passwordHash string
 	err := m.db.QueryRow(`SELECT password_hash FROM users WHERE user_id_text = ?`, userId).Scan(&passwordHash)
 	if err != nil {
-		log.Fatal("query row error in GetPasswordHashByUserId:", err.Error())
+		log.Fatal("query row error in GetPasswordHashByUserId(user_id_text =", userId, "):", err.Error())
 		return "", err
 	}
 

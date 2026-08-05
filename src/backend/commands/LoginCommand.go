@@ -5,6 +5,7 @@ import (
 	"fmt"
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
+	"kids_home_base/logger"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -38,15 +39,18 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 	// ユーザーから渡されたパスワード。
 	password := c.Password
 
+	logger.InfPrintln("LoginCommand userID:", userID)
+
 	// ユーザーから渡されたパスワードと秘密鍵からHS256によりハッシュ値を計算する。
 	passwordHash := fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
 
 	// ユーザー名に基づいてデータベースからパスワードハッシュを取得する。
 	correctPasswordHash, err := dbManager.GetPasswordHashByUserId(userID)
 	if err != nil {
+		logger.ErrPrintln("LoginCommand user", userID, "not found:", err)
 		c.Response <- LoginResponse{
 			Success:     false,
-			Message:     "User not found",
+			Message:     "Invalid User ID or Password",
 			AccessToken: "",
 		}
 		return
@@ -54,9 +58,10 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 
 	// パスワードハッシュが一致しない場合
 	if passwordHash != correctPasswordHash {
+		logger.ErrPrintln("LoginCommand invalid password")
 		c.Response <- LoginResponse{
 			Success:     false,
-			Message:     "Invalid password",
+			Message:     "Invalid User ID or Password",
 			AccessToken: "",
 		}
 		return
@@ -70,11 +75,12 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 		"exp":      jwt.NewNumericDate(time.Now().Add(1 * time.Hour)), // 1時間後に有効期限が切れる
 	})
 
-	tokenString, err := token.SignedString(conf.JWTSecretKey)
+	tokenString, err := token.SignedString([]byte(conf.JWTSecretKey))
 	if err != nil {
+		logger.ErrPrintln("LoginCommand failed to generate JWT:", err)
 		c.Response <- LoginResponse{
 			Success:     false,
-			Message:     "Failed to generate access token",
+			Message:     fmt.Sprint("Failed to generate access token", err),
 			AccessToken: "",
 		}
 		return

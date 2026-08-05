@@ -10,11 +10,17 @@ import (
 // クライアントから渡されたユーザーIDとパスワードを検証し、JWTトークンを生成して返す。
 func LoginHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	// クライアントから渡されたユーザーIDとパスワードを取得する。
-	userID := c.PostForm("user_id")
-	password := c.PostForm("password")
+	var loginRequest struct {
+		UserID   string `json:"user_id"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(400, gin.H{"message": "Invalid request"})
+		return
+	}
 
 	// ユーザーIDとパスワードの組み合わせが問題なければ、JWTトークンを生成して返す。問題があれば、エラーメッセージを返す。
-	loginCommand := commands.NewLoginCommand(userID, password)
+	loginCommand := commands.NewLoginCommand(loginRequest.UserID, loginRequest.Password)
 
 	// コマンドをAPIリクエストチャンネルに送信する。
 	apiRequest <- loginCommand
