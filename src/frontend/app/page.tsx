@@ -57,12 +57,18 @@ export default function Home() {
       });
   }
   function handleClickToJwtTest() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found in localStorage.");
+      return;
+    }
+
     // :21226/auth/jwt-test APIにGETリクエストを送信する。
     fetch("http://localhost:21226/auth/jwt-test", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((response) => response.json())
