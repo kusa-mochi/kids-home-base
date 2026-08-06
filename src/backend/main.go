@@ -9,30 +9,11 @@ import (
 	"kids_home_base/logger"
 	"log"
 
-	"encoding/json"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
-
-// 設定ファイルの読み込みを行う関数。
-func LoadConfig() (*datastructures.Config, error) {
-	// 設定ファイル conf/backend_conf.json を読み込む。
-	file, err := os.Open("conf/backend_conf.json")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-	var config datastructures.Config
-	if err := decoder.Decode(&config); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
-}
 
 func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey string) {
 	// まずはテスト用に gin で簡単なGETメソッドAPIとPOSTメソッドAPIを作成します。
@@ -75,10 +56,16 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 }
 
 func main() {
-	// 設定ファイルの読み込み
-	conf, err := LoadConfig()
-	if err != nil {
-		log.Fatal("Failed to load config:", err)
+	// 引数でJWT秘密鍵とソルトを受け取る。
+	if len(os.Args) < 3 {
+		log.Fatal("Usage: go run main.go <JWTSecretKey> <Salt>")
+	}
+	jwtSecretKey := os.Args[1]
+	salt := os.Args[2]
+
+	conf := datastructures.Config{
+		JWTSecretKey: jwtSecretKey,
+		Salt:         salt,
 	}
 
 	// データベースの初期化と接続
@@ -98,6 +85,6 @@ func main() {
 
 	for {
 		c := <-apiRequest
-		c.Execute(dbManager, conf) // データベース接続と設定ファイルの値を渡して Execute を呼び出す
+		c.Execute(dbManager, &conf) // データベース接続と設定ファイルの値を渡して Execute を呼び出す
 	}
 }
