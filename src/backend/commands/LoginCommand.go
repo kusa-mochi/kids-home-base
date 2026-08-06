@@ -2,6 +2,7 @@ package commands
 
 import (
 	"crypto/sha256"
+	"crypto/sha512"
 	"fmt"
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
@@ -41,8 +42,11 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 
 	logger.InfPrintln("LoginCommand userID:", userID)
 
-	// ユーザーから渡されたパスワードと秘密鍵からHS256によりハッシュ値を計算する。
-	passwordHash := fmt.Sprintf("%x", sha256.Sum256([]byte(password)))
+	// ユーザーから渡されたパスワードと設定ファイルのソルトからSHA-256によりハッシュ値を計算する。
+	passwordHash := fmt.Sprintf("%x", sha256.Sum256([]byte(password+conf.Salt)))
+
+	// passwordHashとソルトとパスワードからSHA-512によりさらにハッシュ値を計算する。
+	passwordHash2 := fmt.Sprintf("%x", sha512.Sum512([]byte(conf.Salt+passwordHash+password)))
 
 	// ユーザー名に基づいてデータベースからパスワードハッシュを取得する。
 	correctPasswordHash, err := dbManager.GetPasswordHashByUserId(userID)
@@ -57,7 +61,7 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 	}
 
 	// パスワードハッシュが一致しない場合
-	if passwordHash != correctPasswordHash {
+	if passwordHash2 != correctPasswordHash {
 		logger.ErrPrintln("LoginCommand invalid password")
 		c.Response <- LoginResponse{
 			Success:     false,
