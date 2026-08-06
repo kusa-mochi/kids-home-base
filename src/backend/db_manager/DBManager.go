@@ -40,7 +40,7 @@ func NewDBManager() *DBManager {
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id_text TEXT NOT NULL,
+		user_id_text TEXT NOT NULL UNIQUE,
 		password_hash TEXT NOT NULL
 	);`)
 	if err != nil {
