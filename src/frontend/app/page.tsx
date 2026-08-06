@@ -33,8 +33,14 @@ export default function Home() {
   }
 
   function handleClickToLogin() {
-    const userId = (document.getElementById("user_id") as HTMLInputElement).value;
-    const password = (document.getElementById("password") as HTMLInputElement).value;
+    const userIdElement = document.getElementById("user_id") as HTMLInputElement | null;
+    const passwordElement = document.getElementById("password") as HTMLInputElement | null;
+    if (!userIdElement || !passwordElement) {
+      console.error("User ID or Password input element not found.");
+      return;
+    }
+    const userId = userIdElement.value;
+    const password = passwordElement.value;
 
     // :21226/login APIにPOSTリクエストを送信する。
     fetch("http://localhost:21226/login", {
