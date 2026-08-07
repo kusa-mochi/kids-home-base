@@ -45,7 +45,7 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 	// ユーザーから渡されたパスワードと設定ファイルのソルトからSHA-256によりハッシュ値を計算する。
 	passwordHash := fmt.Sprintf("%x", sha256.Sum256([]byte(password+conf.Salt)))
 
-	// passwordHashとソルトとパスワードからSHA-512によりさらにハッシュ値を計算する。
+	// passwordHashとソルトとパスワードからSHA-512によりさらにハッシュ値を計算する。（ストレッチング）
 	passwordHash2 := fmt.Sprintf("%x", sha512.Sum512([]byte(conf.Salt+passwordHash+password)))
 
 	// ユーザー名に基づいてデータベースからパスワードハッシュを取得する。
