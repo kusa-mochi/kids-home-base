@@ -1,6 +1,10 @@
 package commands
 
-import "log"
+import (
+	datastructures "kids_home_base/data_structures"
+	dbmanager "kids_home_base/db_manager"
+	"kids_home_base/logger"
+)
 
 type TestEchoCommand struct {
 	data     map[string]interface{}
@@ -14,7 +18,7 @@ func NewTestEchoCommand(data map[string]interface{}) *TestEchoCommand {
 	}
 }
 
-func (c *TestEchoCommand) Execute() {
-	log.Println("echo API is called with data:", c.data)
+func (c *TestEchoCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructures.Config) {
+	logger.InfPrintln("echo API is called with data:", c.data)
 	c.Response <- nil
 }

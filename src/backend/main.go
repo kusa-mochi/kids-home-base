@@ -2,13 +2,20 @@ package main
 
 import (
 	"kids_home_base/api_handlers"
+	"kids_home_base/api_middlewares"
 	"kids_home_base/commands"
+	datastructures "kids_home_base/data_structures"
+	dbmanager "kids_home_base/db_manager"
+	"kids_home_base/logger"
 	"log"
 
+	"os"
+
 	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
+func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey string) {
 	// まずはテスト用に gin で簡単なGETメソッドAPIとPOSTメソッドAPIを作成します。
 	r := gin.Default()
 
@@ -17,7 +24,7 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
@@ -30,8 +37,18 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
 
 	r.GET("/ping", func(c *gin.Context) { api_handlers.PingHandler(c, apiRequest) })
 	r.POST("/echo", func(c *gin.Context) { api_handlers.EchoHandler(c, apiRequest) })
+	r.POST("/login", func(c *gin.Context) { api_handlers.LoginHandler(c, apiRequest) })
+
+	//// JWT認証ミドルウェアを使用するAPIグループ
+	authGroup := r.Group("/auth")
+	authGroup.Use(api_middlewares.JWTMiddleware(jwtSecretKey))
+	{
+		authGroup.GET("/jwt-test", api_handlers.JwtTestHandler)
+	}
 
 	//// サーバー起動
+
+	logger.InfPrintln("API server is listening at 21226 port.")
 
 	if err := r.Run(":21226"); err != nil { // デフォルトで :21226 でリッスンします
 		log.Fatal(err)
@@ -39,13 +56,39 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand) {
 }
 
 func main() {
+	// 環境変数から初期パスワードハッシュとJWT秘密鍵とソルトを受け取る。
+	initialPasswordHash := os.Getenv("INITIAL_PASSWORD_HASH")
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	salt := os.Getenv("SALT")
+
+	// 環境変数が設定されていない場合
+	if initialPasswordHash == "" || jwtSecretKey == "" || salt == "" {
+		log.Fatal("Environment variables INITIAL_PASSWORD_HASH, JWT_SECRET_KEY, and SALT must be set")
+	}
+
+	conf := datastructures.Config{
+		InitialPasswordHash: initialPasswordHash,
+		JWTSecretKey:        jwtSecretKey,
+		Salt:                salt,
+	}
+
+	// データベースの初期化と接続
+	dbManager := dbmanager.NewDBManager(conf.InitialPasswordHash)
+
+	// ロガーの初期化
+	logger.InitLogger(dbManager)
+
+	logger.DbgPrintln("init fin.")
+
 	// APIハンドラからのリクエストをメインゴルーチンで受け取るためのチャネルを初期化する。
 	apiRequest := make(chan commands.ICommand)
 
-	go RunAPIServerGoroutine(apiRequest)
+	go RunAPIServerGoroutine(apiRequest, conf.JWTSecretKey)
+
+	logger.DbgPrintln("command goroutine is running.")
 
 	for {
 		c := <-apiRequest
-		c.Execute()
+		c.Execute(dbManager, &conf) // データベース接続と設定ファイルの値を渡して Execute を呼び出す
 	}
 }

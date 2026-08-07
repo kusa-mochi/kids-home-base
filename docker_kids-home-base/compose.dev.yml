@@ -12,6 +12,10 @@ services:
       - ../src/backend:/home/builder/app
     ports:
       - "21226:21226"
+    environment:
+      - INITIAL_PASSWORD_HASH=${INITIAL_PASSWORD_HASH}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SALT=${SALT}
     command:
       - /bin/sh
       - -c

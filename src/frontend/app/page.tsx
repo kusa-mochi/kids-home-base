@@ -32,6 +32,60 @@ export default function Home() {
       });
   }
 
+  function handleClickToLogin() {
+    const userIdElement = document.getElementById("user_id") as HTMLInputElement | null;
+    const passwordElement = document.getElementById("password") as HTMLInputElement | null;
+    if (!userIdElement || !passwordElement) {
+      console.error("User ID or Password input element not found.");
+      return;
+    }
+    const userId = userIdElement.value;
+    const password = passwordElement.value;
+
+    // :21226/login APIにPOSTリクエストを送信する。
+    fetch("http://localhost:21226/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_id: userId, password: password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        // レスポンスからトークンを取得してlocalStorageに保存する
+        if (data.access_token) {
+          localStorage.setItem("token", data.access_token);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+  function handleClickToJwtTest() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found in localStorage.");
+      return;
+    }
+
+    // :21226/auth/jwt-test APIにGETリクエストを送信する。
+    fetch("http://localhost:21226/auth/jwt-test", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -45,8 +99,25 @@ export default function Home() {
             priority
           />
         </div>
-        <button className={styles.logoButton} onClick={() => handleClickToPost()}>
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToPost()}
+        >
           POST test
+        </button>
+        <input id="user_id" type="text" placeholder="User ID" />
+        <input id="password" type="password" placeholder="Password" />
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToLogin()}
+        >
+          LOGIN test
+        </button>
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToJwtTest()}
+        >
+          JWT Test
         </button>
       </main>
     </div>
