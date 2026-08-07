@@ -56,13 +56,15 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 }
 
 func main() {
-	// 引数で初期パスワードハッシュとJWT秘密鍵とソルトを受け取る。
-	if len(os.Args) < 4 {
-		log.Fatal("Usage: go run main.go <InitialPasswordHash> <JWTSecretKey> <Salt>")
+	// 環境変数から初期パスワードハッシュとJWT秘密鍵とソルトを受け取る。
+	initialPasswordHash := os.Getenv("INITIAL_PASSWORD_HASH")
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	salt := os.Getenv("SALT")
+
+	// 環境変数が設定されていない場合
+	if initialPasswordHash == "" || jwtSecretKey == "" || salt == "" {
+		log.Fatal("Environment variables INITIAL_PASSWORD_HASH, JWT_SECRET_KEY, and SALT must be set")
 	}
-	initialPasswordHash := os.Args[1]
-	jwtSecretKey := os.Args[2]
-	salt := os.Args[3]
 
 	conf := datastructures.Config{
 		InitialPasswordHash: initialPasswordHash,

@@ -14,7 +14,7 @@ services:
       - "21226:21226"
     environment:
       - INITIAL_PASSWORD_HASH=${INITIAL_PASSWORD_HASH}
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SALT=${SALT}
     command:
       - /bin/sh
@@ -26,7 +26,7 @@ services:
         mkdir -p /home/builder/app/bin
         GOOS=linux GOARCH=amd64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
         chmod +x /home/builder/app/bin/kids-home-base-backend
-        /home/builder/app/bin/kids-home-base-backend ${INITIAL_PASSWORD_HASH} ${JWT_SECRET} ${SALT}
+        /home/builder/app/bin/kids-home-base-backend
 
   # フロントエンドのデバッグ実行
   build-frontend:
