@@ -14,7 +14,7 @@ type DBManager struct {
 	db *sql.DB
 }
 
-func NewDBManager() *DBManager {
+func NewDBManager(initialPasswordHash string) *DBManager {
 	// SQLiteのデータベースファイル名
 	dbFileName := "kids_home_base.db"
 
@@ -89,9 +89,9 @@ func NewDBManager() *DBManager {
 
 	// 大人ユーザーIDの初期データ（user_id_textが 'dad' および 'mom' のユーザーをそれぞれ作成する）
 	_, err = db.Exec(`INSERT OR IGNORE INTO users (user_id_text, password_hash) VALUES 
-						('dad', 'd1077b6cbe44cfc005546014971d99b2942f7a587516ff002e48a0624dd8c8cd352891ff878508a15b61b7be4bfa54ab9d18e55f72baf89b6681930bbd9dabc6'),
-						('mom', 'd1077b6cbe44cfc005546014971d99b2942f7a587516ff002e48a0624dd8c8cd352891ff878508a15b61b7be4bfa54ab9d18e55f72baf89b6681930bbd9dabc6');
-					`)
+						('dad', ?),
+						('mom', ?);
+					`, initialPasswordHash, initialPasswordHash)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}

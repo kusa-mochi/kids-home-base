@@ -56,20 +56,22 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 }
 
 func main() {
-	// 引数でJWT秘密鍵とソルトを受け取る。
-	if len(os.Args) < 3 {
-		log.Fatal("Usage: go run main.go <JWTSecretKey> <Salt>")
+	// 引数で初期パスワードハッシュとJWT秘密鍵とソルトを受け取る。
+	if len(os.Args) < 4 {
+		log.Fatal("Usage: go run main.go <InitialPasswordHash> <JWTSecretKey> <Salt>")
 	}
-	jwtSecretKey := os.Args[1]
-	salt := os.Args[2]
+	initialPasswordHash := os.Args[1]
+	jwtSecretKey := os.Args[2]
+	salt := os.Args[3]
 
 	conf := datastructures.Config{
-		JWTSecretKey: jwtSecretKey,
-		Salt:         salt,
+		InitialPasswordHash: initialPasswordHash,
+		JWTSecretKey:        jwtSecretKey,
+		Salt:                salt,
 	}
 
 	// データベースの初期化と接続
-	dbManager := dbmanager.NewDBManager()
+	dbManager := dbmanager.NewDBManager(conf.InitialPasswordHash)
 
 	// ロガーの初期化
 	logger.InitLogger(dbManager)
