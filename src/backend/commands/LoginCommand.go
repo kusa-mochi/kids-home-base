@@ -1,15 +1,16 @@
 package commands
 
 import (
-	"crypto/sha256"
-	"crypto/sha512"
 	"fmt"
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
 	"time"
 
+	"crypto/subtle"
+
 	jwt "github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/argon2"
 )
 
 type LoginResponse struct {
@@ -42,11 +43,8 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 
 	logger.InfPrintln("LoginCommand userID:", userID)
 
-	// ユーザーから渡されたパスワードと設定ファイルのソルトからSHA-256によりハッシュ値を計算する。
-	passwordHash := fmt.Sprintf("%x", sha256.Sum256([]byte(password+conf.Salt)))
-
-	// passwordHashとソルトとパスワードからSHA-512によりさらにハッシュ値を計算する。（ストレッチング）
-	passwordHash2 := fmt.Sprintf("%x", sha512.Sum512([]byte(conf.Salt+passwordHash+password)))
+	// パスワードをArgon2idを用いてハッシュ化する。
+	passwordHash := fmt.Sprintf("%x", argon2.IDKey([]byte(password), []byte(conf.Salt), 1, 64*1024, 4, 32))
 
 	// ユーザー名に基づいてデータベースからパスワードハッシュを取得する。
 	correctPasswordHash, err := dbManager.GetPasswordHashByUserId(userID)
@@ -60,8 +58,8 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 		return
 	}
 
-	// パスワードハッシュが一致しない場合
-	if passwordHash2 != correctPasswordHash {
+	// パスワードハッシュを定数時間で比較する。
+	if subtle.ConstantTimeCompare([]byte(passwordHash), []byte(correctPasswordHash)) != 1 {
 		logger.ErrPrintln("LoginCommand invalid password")
 		c.Response <- LoginResponse{
 			Success:     false,
@@ -71,7 +69,7 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 		return
 	}
 
-	// 以下、認証が成功した場合の処理。
+	// 以下、パスワード認証が成功した場合の処理。
 
 	// JWTトークンを生成する。有効期間は1時間。
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
