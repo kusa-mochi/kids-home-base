@@ -49,3 +49,10 @@
 - 子どもの予定を確認する。
 - 子どもと一緒に今日・明日の予定を組み立てる。
 - 子どもと一緒に定期的な予定を組み立てる。
+
+## プログラム実行方法（開発用）
+
+```sh
+cd .\docker_kids-home-base
+docker compose -f .\compose.dev.yml --env-file .env.local up
+```
