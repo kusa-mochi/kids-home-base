@@ -1,6 +1,6 @@
 module dev_tools
 
-go 1.26.4
+go 1.26
 
 require golang.org/x/crypto v0.54.0
 
