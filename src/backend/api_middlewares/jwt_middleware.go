@@ -4,34 +4,58 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 // JWTMiddleware は、JWTトークンの検証を行うミドルウェアです。
 
+// JWTの署名検証や有効期限の確認を行う。
+// tokenString: クライアントから送信されたJWTトークン。
+// secretKey: JWTトークンの署名検証に使用する秘密鍵。
+func validateJWT(tokenString string, secretKey string) (bool, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// 署名アルゴリズムの検証
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return token.Valid, nil
+}
+
 func JWTMiddleware(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// JWTトークンの検証処理。
-		// ここでは、JWTトークンが有効であるかどうかを確認し、無効な場合はエラーレスポンスを返す処理を実装します。
-		// 例えば、Authorizationヘッダーからトークンを取得し、検証する処理を追加します。
-		// トークンが有効であれば、次のハンドラーに処理を渡します。
-		// トークンが無効であれば、c.AbortWithStatusJSON() を使用してエラーレスポンスを返します。
-
 		// Authorizationヘッダーからトークンを取得する。
 		authHeader := c.GetHeader("Authorization")
+
+		// Authorizationヘッダーが存在しない場合
 		if authHeader == "" {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Authorization header is missing"})
 			return
 		}
+
+		// "Bearer " プレフィックスを削除してトークン部分だけを取得する。
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		// トークンが空の場合
 		if tokenString == "" {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Authorization token is missing"})
 			return
 		}
-		// ここで、tokenString を検証する処理を追加します。
-		// 例えば、JWTトークンの署名を検証し、有効期限を確認する処理を実装します。
-		// トークンが有効であれば、次のハンドラーに処理を渡します。
-		// トークンが無効であれば、c.AbortWithStatusJSON() を使用してエラーレスポンスを返します。
 
+		// secretKey を用いて JWT(tokenString) を検証する。
+		validateResult, err := validateJWT(tokenString, secretKey)
+
+		// トークンが無効または期限切れの場合
+		if err != nil || !validateResult {
+			c.AbortWithStatusJSON(401, gin.H{"error": "Invalid or expired token"})
+			return
+		}
+
+		// トークンが有効な場合は、次のハンドラーに処理を渡す。
 		c.Next()
 	}
 }
