@@ -20,6 +20,9 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	// まずはテスト用に gin で簡単なGETメソッドAPIとPOSTメソッドAPIを作成します。
 	r := gin.Default()
 
+	// ログ出力ミドルウェアを追加
+	r.Use(api_middlewares.LoggerMiddleware())
+
 	// CORS設定追加。
 	// まずは開発目的で、localhost:3000 からのアクセスを許可する設定を追加します。
 	r.Use(func(c *gin.Context) {
@@ -50,6 +53,7 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 
 	//// JWT認証ミドルウェアを使用するAPIグループ
 	authGroup := r.Group("/auth")
+	authGroup.Use(api_middlewares.LoggerMiddleware())
 	authGroup.Use(api_middlewares.JWTMiddleware(jwtSecretKey))
 	{
 		authGroup.GET("/jwt-test", api_handlers.JwtTestHandler)
