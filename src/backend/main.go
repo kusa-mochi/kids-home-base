@@ -38,15 +38,22 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 
 	r.GET("/ping", func(c *gin.Context) { api_handlers.PingHandler(c, apiRequest) })
 	r.POST("/echo", func(c *gin.Context) { api_handlers.EchoHandler(c, apiRequest) })
-	r.POST("/login", func(c *gin.Context) { api_handlers.LoginHandler(c, apiRequest) })
 	r.GET("/get-today-schedule", func(c *gin.Context) { api_handlers.GetTodayScheduleHandler(c, apiRequest) })
 	r.GET("/get-tomorrow-schedule", func(c *gin.Context) { api_handlers.GetTomorrowScheduleHandler(c, apiRequest) })
+	r.POST("/add-schedule-item", func(c *gin.Context) { api_handlers.AddScheduleItemHandler(c, apiRequest) })
+	r.POST("/update-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateScheduleItemWithIdHandler(c, apiRequest) })
+	r.POST("/delete-schedule-item", func(c *gin.Context) { api_handlers.DeleteScheduleItemHandler(c, apiRequest) })
+	r.POST("/add-recurring-schedule-item", func(c *gin.Context) { api_handlers.AddRecurringScheduleItemHandler(c, apiRequest) })
+	r.POST("/update-recurring-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateRecurringScheduleItemWithIdHandler(c, apiRequest) })
+	r.POST("/delete-recurring-schedule-item", func(c *gin.Context) { api_handlers.DeleteRecurringScheduleItemHandler(c, apiRequest) })
+	r.POST("/login", func(c *gin.Context) { api_handlers.LoginHandler(c, apiRequest) })
 
 	//// JWT認証ミドルウェアを使用するAPIグループ
 	authGroup := r.Group("/auth")
 	authGroup.Use(api_middlewares.JWTMiddleware(jwtSecretKey))
 	{
 		authGroup.GET("/jwt-test", api_handlers.JwtTestHandler)
+		authGroup.POST("/change-password", func(c *gin.Context) { api_handlers.ChangePasswordHandler(c, apiRequest) })
 	}
 
 	//// サーバー起動
