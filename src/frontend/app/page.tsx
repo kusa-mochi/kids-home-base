@@ -86,6 +86,30 @@ export default function Home() {
       });
   }
 
+  function handleClickToGetTodaySchedule() {
+    // :21226/getTodaySchedule APIにGETリクエストを送信する。
+    fetch("http://localhost:21226/get-today-schedule")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
+  function handleClickToGetTomorrowSchedule() {
+    // :21226/getTomorrowSchedule APIにGETリクエストを送信する。
+    fetch("http://localhost:21226/get-tomorrow-schedule")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -118,6 +142,18 @@ export default function Home() {
           onClick={() => handleClickToJwtTest()}
         >
           JWT Test
+        </button>
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToGetTodaySchedule()}
+        >
+          get today schedule
+        </button>
+        <button
+          className={styles.logoButton}
+          onClick={() => handleClickToGetTomorrowSchedule()}
+        >
+          get tomorrow schedule
         </button>
       </main>
     </div>

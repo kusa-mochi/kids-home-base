@@ -39,6 +39,8 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	r.GET("/ping", func(c *gin.Context) { api_handlers.PingHandler(c, apiRequest) })
 	r.POST("/echo", func(c *gin.Context) { api_handlers.EchoHandler(c, apiRequest) })
 	r.POST("/login", func(c *gin.Context) { api_handlers.LoginHandler(c, apiRequest) })
+	r.GET("/get-today-schedule", func(c *gin.Context) { api_handlers.GetTodayScheduleHandler(c, apiRequest) })
+	r.GET("/get-tomorrow-schedule", func(c *gin.Context) { api_handlers.GetTomorrowScheduleHandler(c, apiRequest) })
 
 	//// JWT認証ミドルウェアを使用するAPIグループ
 	authGroup := r.Group("/auth")
