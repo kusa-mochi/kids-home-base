@@ -64,7 +64,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 	// 今日の年・月・日をそれぞれ取得
 	year, month, day := time.Now().Date()
 	// 今日の予定
-	dbManager.AddSchedules([]*datastructures.ScheduleItem{
+	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
 		{Dt: time.Date(year, month, day, 7, 15, 0, 0, time.Local), Task: "オクラに水をやる"},
 		{Dt: time.Date(year, month, day, 7, 50, 0, 0, time.Local), Task: "朝ごはんを食べる"},
 		{Dt: time.Date(year, month, day, 18, 50, 0, 0, time.Local), Task: "シャワーを浴びる"},
@@ -79,7 +79,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 	tomorrow := time.Now().AddDate(0, 0, 1)
 	year, month, day = tomorrow.Date()
 	// 明日の予定
-	dbManager.AddSchedules([]*datastructures.ScheduleItem{
+	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
 		{Dt: time.Date(year, month, day, 7, 15, 0, 0, time.Local), Task: "オクラに水をやる２"},
 		{Dt: time.Date(year, month, day, 7, 50, 0, 0, time.Local), Task: "朝ごはんを食べる２"},
 		{Dt: time.Date(year, month, day, 18, 50, 0, 0, time.Local), Task: "シャワーを浴びる２"},
