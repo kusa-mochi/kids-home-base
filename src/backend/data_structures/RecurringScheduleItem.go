@@ -3,18 +3,18 @@ package datastructures
 import "time"
 
 type RecurringScheduleItem struct {
-	StartTime time.Time
-	DayOfWeek time.Weekday
-	StartDate time.Time
-	EndDate   time.Time
-	Task      string
+	StartTime time.Time    `json:"start_time"`
+	DayOfWeek time.Weekday `json:"day_of_week"`
+	StartDate time.Time    `json:"start_date"`
+	EndDate   time.Time    `json:"end_date"`
+	Task      string       `json:"task"`
 }
 
 type RecurringScheduleItemWithId struct {
-	Id        int
-	StartTime time.Time
-	DayOfWeek time.Weekday
-	StartDate time.Time
-	EndDate   time.Time
-	Task      string
+	Id        int          `json:"id"`
+	StartTime time.Time    `json:"start_time"`
+	DayOfWeek time.Weekday `json:"day_of_week"`
+	StartDate time.Time    `json:"start_date"`
+	EndDate   time.Time    `json:"end_date"`
+	Task      string       `json:"task"`
 }

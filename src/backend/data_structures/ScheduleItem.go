@@ -3,12 +3,12 @@ package datastructures
 import "time"
 
 type ScheduleItem struct {
-	Dt   time.Time
-	Task string
+	Dt   time.Time `json:"dt"`
+	Task string    `json:"task"`
 }
 
 type ScheduleItemWithId struct {
-	Id   int
-	Dt   time.Time
-	Task string
+	Id   int       `json:"id"`
+	Dt   time.Time `json:"dt"`
+	Task string    `json:"task"`
 }

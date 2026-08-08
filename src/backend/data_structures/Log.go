@@ -11,7 +11,7 @@ const (
 )
 
 type Log struct {
-	Timestamp time.Time
-	Level     LogLevel
-	Message   string
+	Timestamp time.Time `json:"timestamp"`
+	Level     LogLevel  `json:"level"`
+	Message   string    `json:"message"`
 }
