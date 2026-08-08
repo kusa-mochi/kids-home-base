@@ -8,6 +8,7 @@ import (
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
 	"log"
+	"time"
 
 	"os"
 
@@ -55,6 +56,39 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	}
 }
 
+func AddTestData(dbManager *dbmanager.DBManager) {
+	logger.DbgPrintln("adding test data to DB...")
+
+	// 今日の年・月・日をそれぞれ取得
+	year, month, day := time.Now().Date()
+	// 今日の予定
+	dbManager.AddSchedules([]*datastructures.ScheduleItem{
+		{Dt: time.Date(year, month, day, 7, 15, 0, 0, time.Local), Task: "オクラに水をやる"},
+		{Dt: time.Date(year, month, day, 7, 50, 0, 0, time.Local), Task: "朝ごはんを食べる"},
+		{Dt: time.Date(year, month, day, 18, 50, 0, 0, time.Local), Task: "シャワーを浴びる"},
+		{Dt: time.Date(year, month, day, 20, 0, 0, 0, time.Local), Task: "夕ごはんを食べる"},
+		{Dt: time.Date(year, month, day, 21, 0, 0, 0, time.Local), Task: "歯を磨く"},
+		{Dt: time.Date(year, month, day, 21, 30, 0, 0, time.Local), Task: "寝る"},
+	})
+
+	logger.DbgPrintln("added today test data")
+
+	// 明日の年・月・日をそれぞれ取得
+	tomorrow := time.Now().AddDate(0, 0, 1)
+	year, month, day = tomorrow.Date()
+	// 明日の予定
+	dbManager.AddSchedules([]*datastructures.ScheduleItem{
+		{Dt: time.Date(year, month, day, 7, 15, 0, 0, time.Local), Task: "オクラに水をやる２"},
+		{Dt: time.Date(year, month, day, 7, 50, 0, 0, time.Local), Task: "朝ごはんを食べる２"},
+		{Dt: time.Date(year, month, day, 18, 50, 0, 0, time.Local), Task: "シャワーを浴びる２"},
+		{Dt: time.Date(year, month, day, 20, 0, 0, 0, time.Local), Task: "夕ごはんを食べる２"},
+		{Dt: time.Date(year, month, day, 21, 0, 0, 0, time.Local), Task: "歯を磨く２"},
+		{Dt: time.Date(year, month, day, 21, 30, 0, 0, time.Local), Task: "寝る２"},
+	})
+
+	logger.DbgPrintln("added tomorrow test data")
+}
+
 func main() {
 	// 環境変数から初期パスワードハッシュとJWT秘密鍵とソルトを受け取る。
 	initialPasswordHash := os.Getenv("INITIAL_PASSWORD_HASH")
@@ -74,6 +108,10 @@ func main() {
 
 	// データベースの初期化と接続
 	dbManager := dbmanager.NewDBManager(conf.InitialPasswordHash)
+
+	// デバッグ用。データベースにテスト用データを追加する。
+	// 運用時はコメントアウトすること。
+	AddTestData(dbManager)
 
 	// ロガーの初期化
 	logger.InitLogger(dbManager)
