@@ -5,12 +5,12 @@ import (
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
+	"kids_home_base/utils"
 	"time"
 
 	"crypto/subtle"
 
 	jwt "github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/argon2"
 )
 
 type LoginResponse struct {
@@ -43,8 +43,8 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 
 	logger.InfPrintln("LoginCommand userID:", userID)
 
-	// パスワードをArgon2idを用いてハッシュ化する。
-	passwordHash := fmt.Sprintf("%x", argon2.IDKey([]byte(password), []byte(conf.Salt), 1, 64*1024, 4, 32))
+	// パスワードをハッシュ化する。
+	passwordHash := utils.GenHash(password, conf.Salt)
 
 	// ユーザー名に基づいてデータベースからパスワードハッシュを取得する。
 	correctPasswordHash, err := dbManager.GetPasswordHashByUserId(userID)
