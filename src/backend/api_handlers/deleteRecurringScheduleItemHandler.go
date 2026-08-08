@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DeleteRecurringScheduleItem(c *gin.Context, apiRequest chan commands.ICommand) {
+func DeleteRecurringScheduleItemHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	recurringScheduleItemIdString := c.Param("id")
 	recurringScheduleItemId, err := strconv.Atoi(recurringScheduleItemIdString)
 	if err != nil {

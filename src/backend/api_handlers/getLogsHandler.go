@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetLogs(c *gin.Context, apiRequest chan commands.ICommand) {
+func GetLogsHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	getLogsCommand := commands.NewGetLogsCommand()
 	apiRequest <- getLogsCommand
 	response := <-getLogsCommand.Response

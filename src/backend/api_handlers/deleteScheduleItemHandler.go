@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DeleteScheduleItem(c *gin.Context, apiRequest chan commands.ICommand) {
+func DeleteScheduleItemHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	scheduleItemIdString := c.Param("id")
 	scheduleItemId, err := strconv.Atoi(scheduleItemIdString)
 	if err != nil {

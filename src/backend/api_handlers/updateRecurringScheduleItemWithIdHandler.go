@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UpdateRecurringScheduleItemWithId(c *gin.Context, apiRequest chan commands.ICommand) {
+func UpdateRecurringScheduleItemWithIdHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	s := &datastructures.RecurringScheduleItemWithId{}
 	if err := c.ShouldBindJSON(s); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})

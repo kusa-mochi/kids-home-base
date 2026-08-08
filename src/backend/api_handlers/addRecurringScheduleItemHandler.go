@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AddRecurringScheduleHandler(c *gin.Context, apiRequest chan commands.ICommand) {
+func AddRecurringScheduleItemHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	recurringScheduleItem := &datastructures.RecurringScheduleItem{}
 	if err := c.ShouldBindJSON(recurringScheduleItem); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request body"})
