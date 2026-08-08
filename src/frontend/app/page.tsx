@@ -115,13 +115,16 @@ export default function Home() {
     const currentDateTime = (document.getElementById("currentDateTime") as HTMLInputElement).value;
     const task = (document.getElementById("task") as HTMLInputElement).value;
 
+    // currentDateTime を RFC3339 形式に変換する。
+    const currentDateTimeRFC3339 = new Date(currentDateTime).toISOString();
+
     fetch("http://localhost:21226/add-schedule-item", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        dt: currentDateTime,
+        dt: currentDateTimeRFC3339,
         task: task,
       }),
     })
@@ -138,6 +141,7 @@ export default function Home() {
     // :21226/updateScheduleItemWithId APIにPOSTリクエストを送信する。
     const scheduleItemId = (document.getElementById("updateScheduleItemId") as HTMLInputElement).value;
     const newTask = (document.getElementById("updateScheduleItemTask") as HTMLInputElement).value;
+    
     fetch("http://localhost:21226/update-schedule-item-with-id", {
       method: "POST",
       headers: {
@@ -160,7 +164,8 @@ export default function Home() {
   function handleClickToDeleteScheduleItem() {
     // :21226/deleteScheduleItemWithId APIにPOSTリクエストを送信する。
     const scheduleItemId = (document.getElementById("deleteScheduleItemId") as HTMLInputElement).value;
-    fetch("http://localhost:21226/delete-schedule-item-with-id", {
+    
+    fetch("http://localhost:21226/delete-schedule-item", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -185,16 +190,22 @@ export default function Home() {
     const startDate = (document.getElementById("recurringScheduleItemStartDate") as HTMLInputElement).value;
     const endDate = (document.getElementById("recurringScheduleItemEndDate") as HTMLInputElement).value;
     const task = (document.getElementById("recurringScheduleItemTask") as HTMLInputElement).value;
+
+    // startTime, startDate, endDate を RFC3339 形式に変換する。
+    const startTimeRFC3339 = new Date(startTime).toISOString();
+    const startDateRFC3339 = new Date(startDate).toISOString();
+    const endDateRFC3339 = new Date(endDate).toISOString();
+    
     fetch("http://localhost:21226/add-recurring-schedule-item", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        start_time: startTime,
+        start_time: startTimeRFC3339,
         day_of_week: dayOfWeek,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: startDateRFC3339,
+        end_date: endDateRFC3339,
         task,
       }),
     })
@@ -215,6 +226,12 @@ export default function Home() {
     const startDate = (document.getElementById("updateRecurringScheduleItemStartDate") as HTMLInputElement).value;
     const endDate = (document.getElementById("updateRecurringScheduleItemEndDate") as HTMLInputElement).value;
     const task = (document.getElementById("updateRecurringScheduleItemTask") as HTMLInputElement).value;
+    
+    // startTime, startDate, endDate を RFC3339 形式に変換する。
+    const startTimeRFC3339 = new Date(startTime).toISOString();
+    const startDateRFC3339 = new Date(startDate).toISOString();
+    const endDateRFC3339 = new Date(endDate).toISOString();
+
     fetch("http://localhost:21226/update-recurring-schedule-item-with-id", {
       method: "POST",
       headers: {
@@ -222,10 +239,10 @@ export default function Home() {
       },
       body: JSON.stringify({
         id: recurringScheduleItemId,
-        start_time: startTime,
+        start_time: startTimeRFC3339,
         day_of_week: dayOfWeek,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: startDateRFC3339,
+        end_date: endDateRFC3339,
         task,
       }),
     })
@@ -241,6 +258,7 @@ export default function Home() {
   function handleClickToDeleteRecurringScheduleItem() {
     // :21226/deleteRecurringScheduleItemWithId APIにPOSTリクエストを送信する。
     const recurringScheduleItemId = (document.getElementById("deleteRecurringScheduleItemId") as HTMLInputElement).value;
+    
     fetch("http://localhost:21226/delete-recurring-schedule-item", {
       method: "POST",
       headers: {
@@ -270,6 +288,7 @@ export default function Home() {
     const userId = (document.getElementById("changePasswordUserId") as HTMLInputElement).value;
     const currentPassword = (document.getElementById("changePasswordCurrentPassword") as HTMLInputElement).value;
     const newPassword = (document.getElementById("changePasswordNewPassword") as HTMLInputElement).value;
+    
     fetch("http://localhost:21226/auth/change-password", {
       method: "POST",
       headers: {
