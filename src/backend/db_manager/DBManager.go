@@ -129,18 +129,45 @@ func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) err
 	return nil
 }
 
-// DBから今日の日付の計画すべてを取得する関数。
-func (m *DBManager) GetTodaySchedule() ([]datastructures.ScheduleItem, error) {
-	rows, err := m.db.Query(`SELECT * FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime')`)
+// DBから直近1ヶ月間のログを取得する関数。
+func (m *DBManager) GetLogs() ([]datastructures.Log, error) {
+	rows, err := m.db.Query(`SELECT created_at, log_level, log_message FROM logs WHERE created_at >= DATE('now', '-1 month', 'localtime') ORDER BY created_at DESC`)
 	if err != nil {
-		log.Println("query error in GetTodaySchedule:", err.Error())
+		log.Println("query error in GetLogs:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	var schedules []datastructures.ScheduleItem
+	var logs []datastructures.Log
 	for rows.Next() {
-		var s datastructures.ScheduleItem
+		var l datastructures.Log
+		err := rows.Scan(&l.Timestamp, &l.Level, &l.Message)
+		if err != nil {
+			return nil, err
+		}
+		logs = append(logs, l)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("rows error in GetLogs:", err.Error())
+		return nil, err
+	}
+
+	return logs, nil
+}
+
+// DBから今日の日付の計画すべてを取得する関数。
+func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime')`)
+	if err != nil {
+		log.Println("query error in GetTodayScheduleWithId:", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var schedules []datastructures.ScheduleItemWithId
+	for rows.Next() {
+		var s datastructures.ScheduleItemWithId
 		err := rows.Scan(&s.Id, &s.Dt, &s.Task)
 		if err != nil {
 			return nil, err
@@ -149,7 +176,7 @@ func (m *DBManager) GetTodaySchedule() ([]datastructures.ScheduleItem, error) {
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Println("rows error in GetTodaySchedule:", err.Error())
+		log.Println("rows error in GetTodayScheduleWithId:", err.Error())
 		return nil, err
 	}
 
@@ -157,17 +184,17 @@ func (m *DBManager) GetTodaySchedule() ([]datastructures.ScheduleItem, error) {
 }
 
 // DBから明日の計画を取得する関数。
-func (m *DBManager) GetTomorrowSchedule() ([]datastructures.ScheduleItem, error) {
-	rows, err := m.db.Query(`SELECT * FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime', '+1 day')`)
+func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime', '+1 day')`)
 	if err != nil {
-		log.Println("query error in GetTomorrowSchedule:", err.Error())
+		log.Println("query error in GetTomorrowScheduleWithId:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	var schedules []datastructures.ScheduleItem
+	var schedules []datastructures.ScheduleItemWithId
 	for rows.Next() {
-		var s datastructures.ScheduleItem
+		var s datastructures.ScheduleItemWithId
 		err := rows.Scan(&s.Id, &s.Dt, &s.Task)
 		if err != nil {
 			return nil, err
@@ -176,7 +203,7 @@ func (m *DBManager) GetTomorrowSchedule() ([]datastructures.ScheduleItem, error)
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Println("rows error in GetTomorrowSchedule:", err.Error())
+		log.Println("rows error in GetTomorrowScheduleWithId:", err.Error())
 		return nil, err
 	}
 
@@ -184,11 +211,37 @@ func (m *DBManager) GetTomorrowSchedule() ([]datastructures.ScheduleItem, error)
 }
 
 // DBに計画要素を追加する関数。
-func (m *DBManager) AddSchedule(s *datastructures.ScheduleItem) error {
+func (m *DBManager) AddScheduleItem(s *datastructures.ScheduleItem) error {
 	_, err := m.db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) VALUES (?, ?)`, s.Dt, s.Task)
 
 	if err != nil {
-		log.Println("exec error in AddSchedule:", err.Error())
+		log.Println("exec error in AddScheduleItem:", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// DBに複数の計画要素を追加する関数。
+func (m *DBManager) AddScheduleItems(schedules [](*datastructures.ScheduleItem)) error {
+	tx, err := m.db.Begin()
+	if err != nil {
+		log.Println("begin transaction error in AddScheduleItems:", err.Error())
+		return err
+	}
+
+	for _, s := range schedules {
+		_, err := tx.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) VALUES (?, ?)`, s.Dt, s.Task)
+		if err != nil {
+			log.Println("exec error in AddScheduleItems:", err.Error())
+			tx.Rollback()
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println("commit error in AddScheduleItems:", err.Error())
 		return err
 	}
 
@@ -196,11 +249,11 @@ func (m *DBManager) AddSchedule(s *datastructures.ScheduleItem) error {
 }
 
 // DBの計画要素を更新する関数。
-func (m *DBManager) UpdateSchedule(s *datastructures.ScheduleItem) error {
+func (m *DBManager) UpdateScheduleItem(s *datastructures.ScheduleItemWithId) error {
 	_, err := m.db.Exec(`UPDATE schedules SET schedule_datetime = ?, schedule_task = ? WHERE id = ?`, s.Dt, s.Task, s.Id)
 
 	if err != nil {
-		log.Println("exec error in UpdateSchedule:", err.Error())
+		log.Println("exec error in UpdateScheduleItem:", err.Error())
 		return err
 	}
 
@@ -208,11 +261,11 @@ func (m *DBManager) UpdateSchedule(s *datastructures.ScheduleItem) error {
 }
 
 // DBの計画要素を削除する関数。
-func (m *DBManager) DeleteSchedule(id int) error {
+func (m *DBManager) DeleteScheduleItem(id int) error {
 	_, err := m.db.Exec(`DELETE FROM schedules WHERE id = ?`, id)
 
 	if err != nil {
-		log.Println("exec error in DeleteSchedule:", err.Error())
+		log.Println("exec error in DeleteScheduleItem:", err.Error())
 		return err
 	}
 
@@ -220,11 +273,11 @@ func (m *DBManager) DeleteSchedule(id int) error {
 }
 
 // 定期的な計画要素を追加する関数。
-func (m *DBManager) AddRecurringSchedule(s *datastructures.RecurringScheduleItem) error {
+func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringScheduleItem) error {
 	_, err := m.db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?)`, s.DayOfWeek, s.StartTime, s.StartDate, s.EndDate, s.Task)
 
 	if err != nil {
-		log.Println("exec error in AddRecurringSchedule:", err.Error())
+		log.Println("exec error in AddRecurringScheduleItem:", err.Error())
 		return err
 	}
 
@@ -232,11 +285,11 @@ func (m *DBManager) AddRecurringSchedule(s *datastructures.RecurringScheduleItem
 }
 
 // 定期的な計画要素を更新する関数。
-func (m *DBManager) UpdateRecurringSchedule(s *datastructures.RecurringScheduleItem) error {
+func (m *DBManager) UpdateRecurringScheduleItem(s *datastructures.RecurringScheduleItemWithId) error {
 	_, err := m.db.Exec(`UPDATE recurring_schedules SET day_of_week = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.DayOfWeek, s.StartTime, s.StartDate, s.EndDate, s.Task, s.Id)
 
 	if err != nil {
-		log.Println("exec error in UpdateRecurringSchedule:", err.Error())
+		log.Println("exec error in UpdateRecurringScheduleItem:", err.Error())
 		return err
 	}
 
@@ -244,11 +297,11 @@ func (m *DBManager) UpdateRecurringSchedule(s *datastructures.RecurringScheduleI
 }
 
 // 定期的な計画要素を削除する関数。
-func (m *DBManager) DeleteRecurringSchedule(id int) error {
+func (m *DBManager) DeleteRecurringScheduleItem(id int) error {
 	_, err := m.db.Exec(`DELETE FROM recurring_schedules WHERE id = ?`, id)
 
 	if err != nil {
-		log.Println("exec error in DeleteRecurringSchedule:", err.Error())
+		log.Println("exec error in DeleteRecurringScheduleItem:", err.Error())
 		return err
 	}
 
@@ -265,4 +318,16 @@ func (m *DBManager) GetPasswordHashByUserId(userId string) (string, error) {
 	}
 
 	return passwordHash, nil
+}
+
+// ユーザーIDに基づいてパスワードハッシュを更新する関数。
+func (m *DBManager) UpdatePasswordHashByUserId(userId string, newPasswordHash string) error {
+	_, err := m.db.Exec(`UPDATE users SET password_hash = ? WHERE user_id_text = ?`, newPasswordHash, userId)
+
+	if err != nil {
+		log.Println("exec error in UpdatePasswordHashByUserId(user_id_text =", userId, "):", err.Error())
+		return err
+	}
+
+	return nil
 }
