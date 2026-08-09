@@ -24,7 +24,7 @@ func NewAddScheduleItemCommand(s *datastructures.ScheduleItem) *AddScheduleItemC
 }
 
 func (c *AddScheduleItemCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructures.Config) {
-	// DBから今日のスケジュールを取得する。
+	// DBにスケジュールを追加する。
 	err := dbManager.AddScheduleItem(c.ScheduleItem)
 
 	// 追加に失敗した場合

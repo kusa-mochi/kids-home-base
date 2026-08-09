@@ -5,13 +5,15 @@ import (
 	datastructures "kids_home_base/data_structures"
 	"log"
 	"os"
+	"time"
 )
 
 // DBManager は、DB接続、クエリ実行、トランザクション管理などの機能を提供する構造体です。
 // この構造体外部には、クエリの具体的な内容や、DBの種類に依存する処理は隠蔽されます。
 
 type DBManager struct {
-	db *sql.DB
+	db  *sql.DB
+	loc *time.Location // SQLiteのタイムゾーンを保持するためのフィールド
 }
 
 func NewDBManager(initialPasswordHash string) *DBManager {
@@ -31,6 +33,12 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	db, err := sql.Open("sqlite3", dbFileName)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager: " + err.Error())
+	}
+
+	// SQLiteのタイムゾーンを日本時間に設定する。
+	loc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		log.Fatal("time zone setting error in NewDBManager: " + err.Error())
 	}
 
 	// テーブルの作成
@@ -97,29 +105,32 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	}
 
 	// ログの初期データ（例として1件のログを挿入しています。）
-	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) SELECT 1, 'INF', 'ログテスト', CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM logs);`)
+	// 日時は日本時間（+9時間）を明示して記録する。
+	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) SELECT 1, 'INF', 'ログテスト', CURRENT_TIMESTAMP('now', '+9 hours') WHERE NOT EXISTS (SELECT 1 FROM logs);`)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
 
 	// 計画の初期データ（例として1件の計画を挿入しています。）
-	_, err = db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) SELECT '2026-08-02 16:00:00', 'テストタスク' WHERE NOT EXISTS (SELECT 1 FROM schedules);`)
+	// 日時は日本時間（+9時間）を明示して記録する。
+	_, err = db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) SELECT '2026-08-02 16:00:00+09:00', 'テストタスク' WHERE NOT EXISTS (SELECT 1 FROM schedules);`)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
 
 	// 定期的な計画の初期データ（例として1件の定期的な計画を挿入しています。）
-	_, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 'Monday', '16:00:00', '2026-08-02', '2026-11-02', '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`)
+	// 日時は日本時間（+9時間）を明示して記録する。
+	_, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 'Monday', '16:00:00+09:00', '2026-08-02', '2026-11-02', '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
 
-	return &DBManager{db: db}
+	return &DBManager{db: db, loc: loc}
 }
 
 // ログをデータベースに追加する関数。
 func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) error {
-	_, err := m.db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`, userId, logLevel, messageToAdd)
+	_, err := m.db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP('now', '+9 hours'))`, userId, logLevel, messageToAdd)
 
 	if err != nil {
 		log.Println("exec error in AddLog:", err.Error())
@@ -130,8 +141,9 @@ func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) err
 }
 
 // DBから直近1ヶ月間のログを取得する関数。
+// 日時は日本時間（+9時間）を明示して取得する。
 func (m *DBManager) GetLogs() ([]datastructures.Log, error) {
-	rows, err := m.db.Query(`SELECT created_at, log_level, log_message FROM logs WHERE created_at >= DATE('now', '-1 month', 'localtime') ORDER BY created_at DESC`)
+	rows, err := m.db.Query(`SELECT created_at, log_level, log_message FROM logs WHERE created_at >= DATE('now', '-1 month', '+9 hours') ORDER BY created_at DESC`)
 	if err != nil {
 		log.Println("query error in GetLogs:", err.Error())
 		return nil, err
@@ -158,7 +170,7 @@ func (m *DBManager) GetLogs() ([]datastructures.Log, error) {
 
 // DBから今日の日付の計画すべてを取得する関数。
 func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
-	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime')`)
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime) = DATE('now', '+9 hours')`)
 	if err != nil {
 		log.Println("query error in GetTodayScheduleWithId:", err.Error())
 		return nil, err
@@ -185,7 +197,7 @@ func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithI
 
 // DBから明日の計画を取得する関数。
 func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
-	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime) = DATE('now', 'localtime', '+1 day')`)
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime) = DATE('now', '+9 hours', '+1 day')`)
 	if err != nil {
 		log.Println("query error in GetTomorrowScheduleWithId:", err.Error())
 		return nil, err
@@ -211,6 +223,7 @@ func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWi
 }
 
 // DBに計画要素を追加する関数。
+// 日時は日本時間（+9時間）を明示して記録する。
 func (m *DBManager) AddScheduleItem(s *datastructures.ScheduleItem) error {
 	_, err := m.db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) VALUES (?, ?)`, s.Dt, s.Task)
 

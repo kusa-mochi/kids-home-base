@@ -2,20 +2,21 @@ package api_handlers
 
 import (
 	"kids_home_base/commands"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func DeleteRecurringScheduleItemHandler(c *gin.Context, apiRequest chan commands.ICommand) {
-	recurringScheduleItemIdString := c.Param("id")
-	recurringScheduleItemId, err := strconv.Atoi(recurringScheduleItemIdString)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid recurring schedule item ID"})
+	// JSONボディから削除する定期スケジュール要素のIDを取得する。
+	var requestBody struct {
+		RecurringScheduleItemId int `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	deleteRecurringScheduleItemCommand := commands.NewDeleteRecurringScheduleItemCommand(recurringScheduleItemId)
+	deleteRecurringScheduleItemCommand := commands.NewDeleteRecurringScheduleItemCommand(requestBody.RecurringScheduleItemId)
 	apiRequest <- deleteRecurringScheduleItemCommand
 	response := <-deleteRecurringScheduleItemCommand.Response
 	c.JSON(200, response)
