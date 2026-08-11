@@ -71,32 +71,38 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 
 func AddTestData(dbManager *dbmanager.DBManager) {
 	logger.DbgPrintln("adding test data to DB...")
+	tokyoLoc, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		logger.ErrPrintln("failed to load Asia/Tokyo location:", err.Error())
+		return
+	}
 
 	// 今日の年・月・日をそれぞれ取得
-	year, month, day := time.Now().Date()
+	nowInTokyo := time.Now().In(tokyoLoc)
+	year, month, day := nowInTokyo.Date()
 	// 今日の予定
 	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
-		{Dt: time.Date(year, month, day, 7, 15, 0, 0, time.Local), Task: "オクラに水をやる"},
-		{Dt: time.Date(year, month, day, 7, 50, 0, 0, time.Local), Task: "朝ごはんを食べる"},
-		{Dt: time.Date(year, month, day, 18, 50, 0, 0, time.Local), Task: "シャワーを浴びる"},
-		{Dt: time.Date(year, month, day, 20, 0, 0, 0, time.Local), Task: "夕ごはんを食べる"},
-		{Dt: time.Date(year, month, day, 21, 0, 0, 0, time.Local), Task: "歯を磨く"},
-		{Dt: time.Date(year, month, day, 21, 30, 0, 0, time.Local), Task: "寝る"},
+		{Dt: time.Date(year, month, day, 7, 15, 0, 0, tokyoLoc), Task: "オクラに水をやる"},
+		{Dt: time.Date(year, month, day, 7, 50, 0, 0, tokyoLoc), Task: "朝ごはんを食べる"},
+		{Dt: time.Date(year, month, day, 18, 50, 0, 0, tokyoLoc), Task: "シャワーを浴びる"},
+		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる"},
+		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く"},
+		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る"},
 	})
 
 	logger.DbgPrintln("added today test data")
 
 	// 明日の年・月・日をそれぞれ取得
-	tomorrow := time.Now().AddDate(0, 0, 1)
+	tomorrow := nowInTokyo.AddDate(0, 0, 1)
 	year, month, day = tomorrow.Date()
 	// 明日の予定
 	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
-		{Dt: time.Date(year, month, day, 7, 15, 0, 0, time.Local), Task: "オクラに水をやる２"},
-		{Dt: time.Date(year, month, day, 7, 50, 0, 0, time.Local), Task: "朝ごはんを食べる２"},
-		{Dt: time.Date(year, month, day, 18, 50, 0, 0, time.Local), Task: "シャワーを浴びる２"},
-		{Dt: time.Date(year, month, day, 20, 0, 0, 0, time.Local), Task: "夕ごはんを食べる２"},
-		{Dt: time.Date(year, month, day, 21, 0, 0, 0, time.Local), Task: "歯を磨く２"},
-		{Dt: time.Date(year, month, day, 21, 30, 0, 0, time.Local), Task: "寝る２"},
+		{Dt: time.Date(year, month, day, 7, 15, 0, 0, tokyoLoc), Task: "オクラに水をやる２"},
+		{Dt: time.Date(year, month, day, 7, 50, 0, 0, tokyoLoc), Task: "朝ごはんを食べる２"},
+		{Dt: time.Date(year, month, day, 18, 50, 0, 0, tokyoLoc), Task: "シャワーを浴びる２"},
+		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる２"},
+		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く２"},
+		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る２"},
 	})
 
 	logger.DbgPrintln("added tomorrow test data")

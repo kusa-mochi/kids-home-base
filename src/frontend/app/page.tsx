@@ -1,21 +1,53 @@
 "use client";
-import Image from "next/image";
+
+import { useState } from "react";
 import styles from "./page.module.css";
+import {
+  tokyoLocalDateInputToUTCISO,
+  tokyoLocalDateTimeInputToUTCISO,
+  utcIsoToTokyoDisplay,
+} from "./timezone";
+
+type Schedule = {
+  id: number;
+  dt: string;
+  task: string;
+};
+
+type ScheduleResponse = {
+  success: boolean;
+  message: string;
+  schedules: Schedule[];
+};
+
+function getInputValue(id: string): string {
+  const input = document.getElementById(id) as HTMLInputElement | null;
+  return input?.value ?? "";
+}
 
 export default function Home() {
+  const [statusText, setStatusText] = useState("Ready");
+  const [todaySchedules, setTodaySchedules] = useState<Schedule[]>([]);
+  const [tomorrowSchedules, setTomorrowSchedules] = useState<Schedule[]>([]);
+
+  function setSuccess(action: string, data: unknown) {
+    setStatusText(`${action}: success`);
+    console.log("Success:", data);
+  }
+
+  function setFailure(action: string, error: unknown) {
+    setStatusText(`${action}: failed`);
+    console.error("Error:", error);
+  }
+
   function handleClickToGet() {
-    // :21226/ping APIにGETリクエストを送信する。
     fetch("http://localhost:21226/ping")
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Ping", data))
+      .catch((error) => setFailure("Ping", error));
   }
+
   function handleClickToPost() {
-    // :21226/echo APIにPOSTリクエストを送信する。
     fetch("http://localhost:21226/echo", {
       method: "POST",
       headers: {
@@ -24,29 +56,14 @@ export default function Home() {
       body: JSON.stringify({ message: "Hello from Next.js!" }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Echo", data))
+      .catch((error) => setFailure("Echo", error));
   }
 
   function handleClickToLogin() {
-    const userIdElement = document.getElementById(
-      "user_id",
-    ) as HTMLInputElement | null;
-    const passwordElement = document.getElementById(
-      "password",
-    ) as HTMLInputElement | null;
-    if (!userIdElement || !passwordElement) {
-      console.error("User ID or Password input element not found.");
-      return;
-    }
-    const userId = userIdElement.value;
-    const password = passwordElement.value;
+    const userId = getInputValue("user_id");
+    const password = getInputValue("password");
 
-    // :21226/login APIにPOSTリクエストを送信する。
     fetch("http://localhost:21226/login", {
       method: "POST",
       headers: {
@@ -56,24 +73,21 @@ export default function Home() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Success:", data);
-        // レスポンスからトークンを取得してlocalStorageに保存する
+        setSuccess("Login", data);
         if (data.access_token) {
           localStorage.setItem("token", data.access_token);
         }
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .catch((error) => setFailure("Login", error));
   }
+
   function handleClickToJwtTest() {
     const token = localStorage.getItem("token");
     if (!token) {
-      console.error("No token found in localStorage.");
+      setStatusText("JWT Test: no token");
       return;
     }
 
-    // :21226/auth/jwt-test APIにGETリクエストを送信する。
     fetch("http://localhost:21226/auth/jwt-test", {
       method: "GET",
       headers: {
@@ -82,47 +96,35 @@ export default function Home() {
       },
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("JWT Test", data))
+      .catch((error) => setFailure("JWT Test", error));
   }
 
   function handleClickToGetTodaySchedule() {
-    // :21226/getTodaySchedule APIにGETリクエストを送信する。
     fetch("http://localhost:21226/get-today-schedule")
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
+      .then((data: ScheduleResponse) => {
+        setTodaySchedules(data.schedules ?? []);
+        setSuccess("Get Today", data);
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .catch((error) => setFailure("Get Today", error));
   }
 
   function handleClickToGetTomorrowSchedule() {
-    // :21226/getTomorrowSchedule APIにGETリクエストを送信する。
     fetch("http://localhost:21226/get-tomorrow-schedule")
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
+      .then((data: ScheduleResponse) => {
+        setTomorrowSchedules(data.schedules ?? []);
+        setSuccess("Get Tomorrow", data);
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .catch((error) => setFailure("Get Tomorrow", error));
   }
 
   function handleClickToAddScheduleItem() {
-    // :21226/addScheduleItem APIにPOSTリクエストを送信する。
-    const currentDateTime = (
-      document.getElementById("currentDateTime") as HTMLInputElement
-    ).value;
-    const task = (document.getElementById("task") as HTMLInputElement).value;
+    const startTime = getInputValue("scheduleItemStartTime");
+    const task = getInputValue("task");
 
-    // currentDateTime を RFC3339 形式に変換する。
-    const currentDateTimeRFC3339 = new Date(currentDateTime).toISOString();
+    const dtUTC = tokyoLocalDateTimeInputToUTCISO(startTime);
 
     fetch("http://localhost:21226/add-schedule-item", {
       method: "POST",
@@ -130,35 +132,21 @@ export default function Home() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        dt: currentDateTimeRFC3339,
-        task: task,
+        dt: dtUTC,
+        task,
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Add Schedule", data))
+      .catch((error) => setFailure("Add Schedule", error));
   }
 
   function handleClickToUpdateScheduleItem() {
-    // :21226/updateScheduleItemWithId APIにPOSTリクエストを送信する。
-    const scheduleItemId = parseInt(
-      (document.getElementById("updateScheduleItemId") as HTMLInputElement)
-        .value,
-      10,
-    );
-    // ユーザーが入力した日時を日本時間をとして解釈し、UTCに変換する。
-    const scheduleItemStartTime = (
-      document.getElementById("updateScheduleItemStartTime") as HTMLInputElement
-    ).value;
-    const scheduleItemStartTimeUTC = new Date(scheduleItemStartTime).toISOString();
-    
-    const newTask = (
-      document.getElementById("updateScheduleItemTask") as HTMLInputElement
-    ).value;
+    const scheduleItemId = parseInt(getInputValue("updateScheduleItemId"), 10);
+    const scheduleItemStartTime = getInputValue("updateScheduleItemStartTime");
+    const scheduleItemStartTimeUTC =
+      tokyoLocalDateTimeInputToUTCISO(scheduleItemStartTime);
+    const newTask = getInputValue("updateScheduleItemTask");
 
     fetch("http://localhost:21226/update-schedule-item-with-id", {
       method: "POST",
@@ -172,22 +160,12 @@ export default function Home() {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Update Schedule", data))
+      .catch((error) => setFailure("Update Schedule", error));
   }
 
   function handleClickToDeleteScheduleItem() {
-    // :21226/deleteScheduleItemWithId APIにPOSTリクエストを送信する。
-    const scheduleItemId = parseInt(
-      (document.getElementById("deleteScheduleItemId") as HTMLInputElement)
-        .value,
-      10,
-    );
-    console.log("Deleting schedule item ID:", scheduleItemId);
+    const scheduleItemId = parseInt(getInputValue("deleteScheduleItemId"), 10);
 
     fetch("http://localhost:21226/delete-schedule-item", {
       method: "POST",
@@ -199,44 +177,20 @@ export default function Home() {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Delete Schedule", data))
+      .catch((error) => setFailure("Delete Schedule", error));
   }
 
   function handleClickToAddRecurringScheduleItem() {
-    // :21226/addRecurringScheduleItem APIにPOSTリクエストを送信する。
-    const startTime = (
-      document.getElementById(
-        "recurringScheduleItemStartTime",
-      ) as HTMLInputElement
-    ).value;
-    const dayOfWeek = (
-      document.getElementById(
-        "recurringScheduleItemDayOfWeek",
-      ) as HTMLInputElement
-    ).value;
-    const startDate = (
-      document.getElementById(
-        "recurringScheduleItemStartDate",
-      ) as HTMLInputElement
-    ).value;
-    const endDate = (
-      document.getElementById(
-        "recurringScheduleItemEndDate",
-      ) as HTMLInputElement
-    ).value;
-    const task = (
-      document.getElementById("recurringScheduleItemTask") as HTMLInputElement
-    ).value;
+    const startTime = getInputValue("recurringScheduleItemStartTime");
+    const dayOfWeek = parseInt(getInputValue("recurringScheduleItemDayOfWeek"), 10);
+    const startDate = getInputValue("recurringScheduleItemStartDate");
+    const endDate = getInputValue("recurringScheduleItemEndDate");
+    const task = getInputValue("recurringScheduleItemTask");
 
-    // startTime, startDate, endDate を RFC3339 形式に変換する。
-    const startTimeRFC3339 = new Date(startTime).toISOString();
-    const startDateRFC3339 = new Date(startDate).toISOString();
-    const endDateRFC3339 = new Date(endDate).toISOString();
+    const startTimeRFC3339 = tokyoLocalDateTimeInputToUTCISO(startTime);
+    const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
+    const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
     fetch("http://localhost:21226/add-recurring-schedule-item", {
       method: "POST",
@@ -252,52 +206,27 @@ export default function Home() {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Add Recurring", data))
+      .catch((error) => setFailure("Add Recurring", error));
   }
 
   function handleClickToUpdateRecurringScheduleItemWithId() {
-    // :21226/updateRecurringScheduleItemWithId APIにPOSTリクエストを送信する。
-    const recurringScheduleItemIdString = (
-      document.getElementById(
-        "updateRecurringScheduleItemId",
-      ) as HTMLInputElement
-    ).value;
-    const recurringScheduleItemId = parseInt(recurringScheduleItemIdString, 10);
-    const startTime = (
-      document.getElementById(
-        "updateRecurringScheduleItemStartTime",
-      ) as HTMLInputElement
-    ).value;
-    const dayOfWeek = (
-      document.getElementById(
-        "updateRecurringScheduleItemDayOfWeek",
-      ) as HTMLInputElement
-    ).value;
-    const startDate = (
-      document.getElementById(
-        "updateRecurringScheduleItemStartDate",
-      ) as HTMLInputElement
-    ).value;
-    const endDate = (
-      document.getElementById(
-        "updateRecurringScheduleItemEndDate",
-      ) as HTMLInputElement
-    ).value;
-    const task = (
-      document.getElementById(
-        "updateRecurringScheduleItemTask",
-      ) as HTMLInputElement
-    ).value;
+    const recurringScheduleItemId = parseInt(
+      getInputValue("updateRecurringScheduleItemId"),
+      10,
+    );
+    const startTime = getInputValue("updateRecurringScheduleItemStartTime");
+    const dayOfWeek = parseInt(
+      getInputValue("updateRecurringScheduleItemDayOfWeek"),
+      10,
+    );
+    const startDate = getInputValue("updateRecurringScheduleItemStartDate");
+    const endDate = getInputValue("updateRecurringScheduleItemEndDate");
+    const task = getInputValue("updateRecurringScheduleItemTask");
 
-    // startTime, startDate, endDate を RFC3339 形式に変換する。
-    const startTimeRFC3339 = new Date(startTime).toISOString();
-    const startDateRFC3339 = new Date(startDate).toISOString();
-    const endDateRFC3339 = new Date(endDate).toISOString();
+    const startTimeRFC3339 = tokyoLocalDateTimeInputToUTCISO(startTime);
+    const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
+    const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
     fetch("http://localhost:21226/update-recurring-schedule-item-with-id", {
       method: "POST",
@@ -314,21 +243,15 @@ export default function Home() {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Update Recurring", data))
+      .catch((error) => setFailure("Update Recurring", error));
   }
 
   function handleClickToDeleteRecurringScheduleItem() {
-    // :21226/deleteRecurringScheduleItemWithId APIにPOSTリクエストを送信する。
-    const recurringScheduleItemId = (
-      document.getElementById(
-        "deleteRecurringScheduleItemId",
-      ) as HTMLInputElement
-    ).value;
+    const recurringScheduleItemId = parseInt(
+      getInputValue("deleteRecurringScheduleItemId"),
+      10,
+    );
 
     fetch("http://localhost:21226/delete-recurring-schedule-item", {
       method: "POST",
@@ -340,33 +263,20 @@ export default function Home() {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Delete Recurring", data))
+      .catch((error) => setFailure("Delete Recurring", error));
   }
 
   function handleClickToChangePassword() {
     const token = localStorage.getItem("token");
     if (!token) {
-      console.error("No token found in localStorage.");
+      setStatusText("Change Password: no token");
       return;
     }
 
-    // :21226/changePassword APIにPOSTリクエストを送信する。
-    const userId = (
-      document.getElementById("changePasswordUserId") as HTMLInputElement
-    ).value;
-    const currentPassword = (
-      document.getElementById(
-        "changePasswordCurrentPassword",
-      ) as HTMLInputElement
-    ).value;
-    const newPassword = (
-      document.getElementById("changePasswordNewPassword") as HTMLInputElement
-    ).value;
+    const userId = getInputValue("changePasswordUserId");
+    const currentPassword = getInputValue("changePasswordCurrentPassword");
+    const newPassword = getInputValue("changePasswordNewPassword");
 
     fetch("http://localhost:21226/auth/change-password", {
       method: "POST",
@@ -381,175 +291,129 @@ export default function Home() {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      .then((data) => setSuccess("Change Password", data))
+      .catch((error) => setFailure("Change Password", error));
   }
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div>
-          <div onClick={() => handleClickToGet()}>
-            <Image
-              className={styles.logo}
-              src="/next.svg"
-              alt="Next.js logo"
-              width={100}
-              height={20}
-              priority
-            />
-          </div>
-          <div>
-            <button
-              className={styles.logoButton}
-              onClick={() => handleClickToPost()}
-            >
-              POST test
+        <h1>Kids Home Base</h1>
+        <p className={styles.status}>Status: {statusText}</p>
+
+        <section className={styles.section}>
+          <h2>Basic</h2>
+          <div className={styles.row}>
+            <button className={styles.actionButton} onClick={handleClickToGet}>
+              Ping
+            </button>
+            <button className={styles.actionButton} onClick={handleClickToPost}>
+              Echo
             </button>
           </div>
-        </div>
+        </section>
 
-        <div>
-          <div>
+        <section className={styles.section}>
+          <h2>Auth</h2>
+          <div className={styles.row}>
             <input id="user_id" type="text" placeholder="User ID" />
             <input id="password" type="password" placeholder="Password" />
           </div>
-          <div>
-            <button
-              className={styles.logoButton}
-              onClick={() => handleClickToLogin()}
-            >
-              LOGIN test
+          <div className={styles.row}>
+            <button className={styles.actionButton} onClick={handleClickToLogin}>
+              Login
+            </button>
+            <button className={styles.actionButton} onClick={handleClickToJwtTest}>
+              JWT Test
             </button>
           </div>
-        </div>
+        </section>
 
-        <div>
-          <button
-            className={styles.logoButton}
-            onClick={() => handleClickToJwtTest()}
-          >
-            JWT Test
-          </button>
-        </div>
-
-        <div>
-          <button
-            className={styles.logoButton}
-            onClick={() => handleClickToGetTodaySchedule()}
-          >
-            get today schedule
-          </button>
-        </div>
-
-        <div>
-          <button
-            className={styles.logoButton}
-            onClick={() => handleClickToGetTomorrowSchedule()}
-          >
-            get tomorrow schedule
-          </button>
-        </div>
-
-        <div>
-          <div>
+        <section className={styles.section}>
+          <h2>Schedule</h2>
+          <div className={styles.row}>
+            <button
+              className={styles.actionButton}
+              onClick={handleClickToGetTodaySchedule}
+            >
+              Get Today
+            </button>
+            <button
+              className={styles.actionButton}
+              onClick={handleClickToGetTomorrowSchedule}
+            >
+              Get Tomorrow
+            </button>
+          </div>
+          <div className={styles.row}>
             <input id="scheduleItemStartTime" type="datetime-local" />
             <input id="task" type="text" placeholder="Task" />
-          </div>
-          <div>
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToAddScheduleItem()}
+              className={styles.actionButton}
+              onClick={handleClickToAddScheduleItem}
             >
-              Add Schedule Item
+              Add
             </button>
           </div>
-        </div>
-
-        <div>
-          <div>
+          <div className={styles.row}>
             <input
               id="updateScheduleItemId"
               type="number"
               min="0"
-              placeholder="Schedule Item ID to Update"
+              placeholder="ID"
             />
-            <input
-              id="updateScheduleItemStartTime"
-              type="datetime-local"
-            />
-            <input            
-              id="updateScheduleItemTask"
-              type="text"
-              placeholder="New Task for Update"
-            />
-          </div>
-          <div>
+            <input id="updateScheduleItemStartTime" type="datetime-local" />
+            <input id="updateScheduleItemTask" type="text" placeholder="Task" />
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToUpdateScheduleItem()}
+              className={styles.actionButton}
+              onClick={handleClickToUpdateScheduleItem}
             >
-              Update Schedule Item
+              Update
             </button>
           </div>
-        </div>
-
-        <div>
-          <div>
+          <div className={styles.row}>
             <input
               id="deleteScheduleItemId"
               type="number"
               min="0"
-              placeholder="Schedule Item ID to Delete"
+              placeholder="ID"
             />
-          </div>
-          <div>
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToDeleteScheduleItem()}
+              className={styles.actionButton}
+              onClick={handleClickToDeleteScheduleItem}
             >
-              Delete Schedule Item
+              Delete
             </button>
           </div>
-        </div>
+        </section>
 
-        <div>
-          <div>
+        <section className={styles.section}>
+          <h2>Recurring Schedule</h2>
+          <div className={styles.row}>
             <input id="recurringScheduleItemStartTime" type="datetime-local" />
             <input
               id="recurringScheduleItemDayOfWeek"
-              type="text"
-              placeholder="Day of Week (0-6)"
+              type="number"
+              min="0"
+              max="6"
+              placeholder="Day 0-6"
             />
             <input id="recurringScheduleItemStartDate" type="date" />
             <input id="recurringScheduleItemEndDate" type="date" />
-            <input
-              id="recurringScheduleItemTask"
-              type="text"
-              placeholder="Task for Recurring Item"
-            />
-          </div>
-          <div>
+            <input id="recurringScheduleItemTask" type="text" placeholder="Task" />
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToAddRecurringScheduleItem()}
+              className={styles.actionButton}
+              onClick={handleClickToAddRecurringScheduleItem}
             >
-              Add Recurring Schedule Item
+              Add
             </button>
           </div>
-        </div>
-
-        <div>
-          <div>
+          <div className={styles.row}>
             <input
               id="updateRecurringScheduleItemId"
               type="number"
               min="0"
-              placeholder="Recurring Schedule Item ID to Update"
+              placeholder="ID"
             />
             <input
               id="updateRecurringScheduleItemStartTime"
@@ -557,52 +421,44 @@ export default function Home() {
             />
             <input
               id="updateRecurringScheduleItemDayOfWeek"
-              type="text"
-              placeholder="Day of Week (0-6)"
+              type="number"
+              min="0"
+              max="6"
+              placeholder="Day 0-6"
             />
             <input id="updateRecurringScheduleItemStartDate" type="date" />
             <input id="updateRecurringScheduleItemEndDate" type="date" />
-            <input
-              id="updateRecurringScheduleItemTask"
-              type="text"
-              placeholder="Task for Recurring Item"
-            />
-          </div>
-          <div>
+            <input id="updateRecurringScheduleItemTask" type="text" placeholder="Task" />
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToUpdateRecurringScheduleItemWithId()}
+              className={styles.actionButton}
+              onClick={handleClickToUpdateRecurringScheduleItemWithId}
             >
-              Update Recurring Schedule Item with its ID
+              Update
             </button>
           </div>
-        </div>
-
-        <div>
-          <div>
+          <div className={styles.row}>
             <input
               id="deleteRecurringScheduleItemId"
               type="number"
               min="0"
-              placeholder="Recurring Schedule Item ID to Delete"
+              placeholder="ID"
             />
-          </div>
-          <div>
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToDeleteRecurringScheduleItem()}
+              className={styles.actionButton}
+              onClick={handleClickToDeleteRecurringScheduleItem}
             >
-              Delete Recurring Schedule Item
+              Delete
             </button>
           </div>
-        </div>
+        </section>
 
-        <div>
-          <div>
+        <section className={styles.section}>
+          <h2>Password</h2>
+          <div className={styles.row}>
             <input
               id="changePasswordUserId"
               type="text"
-              placeholder="User ID for Password Change"
+              placeholder="User ID"
             />
             <input
               id="changePasswordCurrentPassword"
@@ -614,16 +470,36 @@ export default function Home() {
               type="password"
               placeholder="New Password"
             />
-          </div>
-          <div>
             <button
-              className={styles.logoButton}
-              onClick={() => handleClickToChangePassword()}
+              className={styles.actionButton}
+              onClick={handleClickToChangePassword}
             >
               Change Password
             </button>
           </div>
-        </div>
+        </section>
+
+        <section className={styles.section}>
+          <h2>Today (Asia/Tokyo)</h2>
+          <ul className={styles.list}>
+            {todaySchedules.map((s) => (
+              <li key={`today-${s.id}`}>
+                [{s.id}] {utcIsoToTokyoDisplay(s.dt)} - {s.task}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className={styles.section}>
+          <h2>Tomorrow (Asia/Tokyo)</h2>
+          <ul className={styles.list}>
+            {tomorrowSchedules.map((s) => (
+              <li key={`tomorrow-${s.id}`}>
+                [{s.id}] {utcIsoToTokyoDisplay(s.dt)} - {s.task}
+              </li>
+            ))}
+          </ul>
+        </section>
       </main>
     </div>
   );

@@ -1,151 +1,110 @@
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
+  --background: #f7f4ea;
+  --foreground: #fffaf2;
+  --text-primary: #2f2418;
+  --text-secondary: #6a5a44;
+  --button-bg: #0f766e;
+  --button-hover: #115e59;
+  --line: #e6dbc9;
 
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  background: radial-gradient(circle at top right, #e6f8f6 0%, var(--background) 52%);
+  color: var(--text-primary);
 }
 
 .main {
   display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  width: min(1100px, 100%);
+  margin: 40px 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(47, 36, 24, 0.08);
   background-color: var(--foreground);
-  padding: 120px 60px;
-}
-
-.intro {
-  display: flex;
+  padding: 32px;
+  gap: 18px;
+  box-sizing: border-box;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+.main h1 {
+  margin: 0;
+  font-size: 32px;
 }
 
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
+.status {
+  margin: 0;
   color: var(--text-secondary);
 }
 
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
+.section {
+  width: 100%;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
 }
 
-.ctas {
+.section h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+}
+
+.row {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.row input {
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 10px;
   font-size: 14px;
 }
 
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
-}
-
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
-}
-
-a.secondary {
-  border-color: var(--button-secondary-border);
-}
-
-.logoButton {
-  background: transparent;
+.actionButton {
+  height: 38px;
+  padding: 0 14px;
   border: 0;
-  padding: 0;
+  border-radius: 10px;
+  background: var(--button-bg);
+  color: #fff;
   cursor: pointer;
-  width: 200px;
-  height: 100px;
+  font-size: 14px;
 }
 
-/* Enable hover only on non-touch devices */
+.list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.list li {
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+}
+
 @media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
+  .actionButton:hover {
+    background: var(--button-hover);
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
   .main {
-    padding: 48px 24px;
+    margin: 0;
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 18px;
   }
 
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  .main h1 {
+    font-size: 28px;
   }
 }
