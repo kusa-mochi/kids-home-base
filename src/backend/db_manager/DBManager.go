@@ -194,12 +194,12 @@ func (m *DBManager) GetLogs() ([]datastructures.Log, error) {
 	return logs, nil
 }
 
-// DBから今日の日付の計画すべてを取得する関数。
+// DBから今日の日付の計画すべてを日時昇順で取得する関数。
 func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
 	now := time.Now()
 	modifier := m.sqliteLocalDateModifier(now)
 	todayLocal := m.localDateString(now, 0)
-	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) = ?`, modifier, todayLocal)
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) = ? ORDER BY schedule_datetime ASC`, modifier, todayLocal)
 	if err != nil {
 		log.Println("query error in GetTodayScheduleWithId:", err.Error())
 		return nil, err
@@ -225,12 +225,12 @@ func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithI
 	return schedules, nil
 }
 
-// DBから明日の計画を取得する関数。
+// DBから明日の日付の計画すべてを日時昇順で取得する関数。
 func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
 	now := time.Now()
 	modifier := m.sqliteLocalDateModifier(now)
 	tomorrowLocal := m.localDateString(now, 1)
-	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) = ?`, modifier, tomorrowLocal)
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) = ? ORDER BY schedule_datetime ASC`, modifier, tomorrowLocal)
 	if err != nil {
 		log.Println("query error in GetTomorrowScheduleWithId:", err.Error())
 		return nil, err
