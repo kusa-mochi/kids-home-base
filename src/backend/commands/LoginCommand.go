@@ -43,6 +43,16 @@ func (c *LoginCommand) Execute(dbManager *dbmanager.DBManager, conf *datastructu
 
 	logger.InfPrintln("LoginCommand userID:", userID)
 
+	if userID == "" || password == "" {
+		logger.ErrPrintln("LoginCommand missing username or password")
+		c.Response <- LoginResponse{
+			Success:     false,
+			Message:     "Invalid User ID or Password",
+			AccessToken: "",
+		}
+		return
+	}
+
 	// パスワードをハッシュ化する。
 	passwordHash := utils.GenHash(password, conf.Salt)
 
