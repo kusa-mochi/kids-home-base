@@ -8,7 +8,7 @@ import (
 
 func GenHash(password string, salt string) string {
 	// 引数チェック
-	if password == "" || salt == "" {
+	if salt == "" {
 		return ""
 	}
 
