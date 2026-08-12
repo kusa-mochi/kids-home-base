@@ -27,7 +27,7 @@ export function tokyoLocalDateTimeInputToUTCISO(value: string): string {
 
 export function tokyoLocalDateInputToUTCISO(value: string): string {
   const [y, m, d] = parseDateParts(value);
-  const utcMs = Date.UTC(y, m - 1, d, -TOKYO_OFFSET_MINUTES, 0, 0, 0);
+  const utcMs = Date.UTC(y, m - 1, d, 0, -TOKYO_OFFSET_MINUTES, 0, 0);
   return new Date(utcMs).toISOString();
 }
 
