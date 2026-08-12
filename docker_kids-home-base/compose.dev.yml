@@ -16,6 +16,7 @@ services:
       - INITIAL_PASSWORD_HASH=${INITIAL_PASSWORD_HASH}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SALT=${SALT}
+      - ADD_TEST_DATA=${ADD_TEST_DATA}
     command:
       - /bin/sh
       - -c
