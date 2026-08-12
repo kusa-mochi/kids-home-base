@@ -11,9 +11,9 @@ type GetTodayScheduleCommand struct {
 }
 
 type GetTodayScheduleResponse struct {
-	Success   bool                                // 成功したかどうか
-	Message   string                              // メッセージ
-	Schedules []datastructures.ScheduleItemWithId // 今日のスケジュール
+	Success   bool                                `json:"success"`   // 成功したかどうか
+	Message   string                              `json:"message"`   // メッセージ
+	Schedules []datastructures.ScheduleItemWithId `json:"schedules"` // 今日のスケジュール
 }
 
 func NewGetTodayScheduleCommand() *GetTodayScheduleCommand {
