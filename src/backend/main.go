@@ -53,7 +53,6 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 
 	//// JWT認証ミドルウェアを使用するAPIグループ
 	authGroup := r.Group("/auth")
-	authGroup.Use(api_middlewares.LoggerMiddleware())
 	authGroup.Use(api_middlewares.JWTMiddleware(jwtSecretKey))
 	{
 		authGroup.GET("/jwt-test", api_handlers.JwtTestHandler)
