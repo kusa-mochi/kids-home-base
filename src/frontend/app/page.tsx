@@ -12,6 +12,7 @@ import { TomorrowSchedule } from "./pages/TomorrowSchedule";
 import { EditSchedule } from "./pages/EditSchedule";
 import { Settings } from "./pages/Settings";
 import { useCurrentPage } from "./contexts/PageContext";
+import { SideMenu } from "./pages/SideMenu";
 
 type Schedule = {
   id: number;
@@ -327,6 +328,9 @@ export default function Home() {
       )}
       {currentPage.pageId === "Settings" && (
         <Settings />
+      )}
+      {currentPage.pageId !== "Home" && (
+        <SideMenu />
       )}
     </div>
   );
