@@ -12,8 +12,8 @@ type AddScheduleItemCommand struct {
 }
 
 type AddScheduleItemResponse struct {
-	Success bool   // 成功したかどうか
-	Message string // メッセージ
+	Success bool   `json:"success"` // 成功したかどうか
+	Message string `json:"message"` // メッセージ
 }
 
 func NewAddScheduleItemCommand(s *datastructures.ScheduleItem) *AddScheduleItemCommand {

@@ -16,8 +16,8 @@ type ChangePasswordCommand struct {
 }
 
 type ChangePasswordResponse struct {
-	Success bool   // 成功したかどうか
-	Message string // メッセージ
+	Success bool   `json:"success"` // 成功したかどうか
+	Message string `json:"message"` // メッセージ
 }
 
 func NewChangePasswordCommand(userID string, currentPassword string, newPassword string) *ChangePasswordCommand {
