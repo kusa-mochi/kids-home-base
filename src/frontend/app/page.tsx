@@ -123,8 +123,14 @@ export default function Home() {
   function handleClickToAddScheduleItem() {
     const startTime = getInputValue("scheduleItemStartTime");
     const task = getInputValue("task");
+    let dtUTC: string;
 
-    const dtUTC = tokyoLocalDateTimeInputToUTCISO(startTime);
+    try {
+      dtUTC = tokyoLocalDateTimeInputToUTCISO(startTime);
+    } catch (error) {
+      setFailure("Add Schedule (invalid startTime)", error);
+      return;
+    }
 
     fetch("http://localhost:21226/add-schedule-item", {
       method: "POST",
