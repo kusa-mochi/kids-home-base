@@ -130,7 +130,9 @@ func main() {
 
 	// デバッグ用。データベースにテスト用データを追加する。
 	// 運用時はコメントアウトすること。
-	AddTestData(dbManager)
+	if os.Getenv("ADD_TEST_DATA") == "1" {
+		AddTestData(dbManager)
+	}
 
 	// ロガーの初期化
 	logger.InitLogger(dbManager)
