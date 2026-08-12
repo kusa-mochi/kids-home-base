@@ -150,8 +150,9 @@ export default function Home() {
   function handleClickToUpdateScheduleItem() {
     const scheduleItemId = parseInt(getInputValue("updateScheduleItemId"), 10);
     const scheduleItemStartTime = getInputValue("updateScheduleItemStartTime");
-    const scheduleItemStartTimeUTC =
-      tokyoLocalDateTimeInputToUTCISO(scheduleItemStartTime);
+    const scheduleItemStartTimeUTC = tokyoLocalDateTimeInputToUTCISO(
+      scheduleItemStartTime,
+    );
     const newTask = getInputValue("updateScheduleItemTask");
 
     fetch("http://localhost:21226/update-schedule-item-with-id", {
@@ -189,7 +190,10 @@ export default function Home() {
 
   function handleClickToAddRecurringScheduleItem() {
     const startTime = getInputValue("recurringScheduleItemStartTime");
-    const dayOfWeek = parseInt(getInputValue("recurringScheduleItemDayOfWeek"), 10);
+    const dayOfWeek = parseInt(
+      getInputValue("recurringScheduleItemDayOfWeek"),
+      10,
+    );
     const startDate = getInputValue("recurringScheduleItemStartDate");
     const endDate = getInputValue("recurringScheduleItemEndDate");
     const task = getInputValue("recurringScheduleItemTask");
@@ -322,8 +326,18 @@ export default function Home() {
         <section css={sectionStyle}>
           <h2 css={sectionH2Style}>Auth</h2>
           <div css={rowStyle}>
-            <input id="user_id" css={rowInputStyle} type="text" placeholder="User ID" />
-            <input id="password" css={rowInputStyle} type="password" placeholder="Password" />
+            <input
+              id="user_id"
+              css={rowInputStyle}
+              type="text"
+              placeholder="User ID"
+            />
+            <input
+              id="password"
+              css={rowInputStyle}
+              type="password"
+              placeholder="Password"
+            />
           </div>
           <div css={rowStyle}>
             <button css={actionButtonStyle} onClick={handleClickToLogin}>
@@ -352,8 +366,17 @@ export default function Home() {
             </button>
           </div>
           <div css={rowStyle}>
-            <input id="scheduleItemStartTime" css={rowInputStyle} type="datetime-local" />
-            <input id="task" css={rowInputStyle} type="text" placeholder="Task" />
+            <input
+              id="scheduleItemStartTime"
+              css={rowInputStyle}
+              type="datetime-local"
+            />
+            <input
+              id="task"
+              css={rowInputStyle}
+              type="text"
+              placeholder="Task"
+            />
             <button
               css={actionButtonStyle}
               onClick={handleClickToAddScheduleItem}
@@ -369,8 +392,17 @@ export default function Home() {
               min="0"
               placeholder="ID"
             />
-            <input id="updateScheduleItemStartTime" css={rowInputStyle} type="datetime-local" />
-            <input id="updateScheduleItemTask" css={rowInputStyle} type="text" placeholder="Task" />
+            <input
+              id="updateScheduleItemStartTime"
+              css={rowInputStyle}
+              type="datetime-local"
+            />
+            <input
+              id="updateScheduleItemTask"
+              css={rowInputStyle}
+              type="text"
+              placeholder="Task"
+            />
             <button
               css={actionButtonStyle}
               onClick={handleClickToUpdateScheduleItem}
@@ -398,7 +430,11 @@ export default function Home() {
         <section css={sectionStyle}>
           <h2 css={sectionH2Style}>Recurring Schedule</h2>
           <div css={rowStyle}>
-            <input id="recurringScheduleItemStartTime" css={rowInputStyle} type="datetime-local" />
+            <input
+              id="recurringScheduleItemStartTime"
+              css={rowInputStyle}
+              type="datetime-local"
+            />
             <input
               id="recurringScheduleItemDayOfWeek"
               css={rowInputStyle}
@@ -407,9 +443,22 @@ export default function Home() {
               max="6"
               placeholder="Day 0-6"
             />
-            <input id="recurringScheduleItemStartDate" css={rowInputStyle} type="date" />
-            <input id="recurringScheduleItemEndDate" css={rowInputStyle} type="date" />
-            <input id="recurringScheduleItemTask" css={rowInputStyle} type="text" placeholder="Task" />
+            <input
+              id="recurringScheduleItemStartDate"
+              css={rowInputStyle}
+              type="date"
+            />
+            <input
+              id="recurringScheduleItemEndDate"
+              css={rowInputStyle}
+              type="date"
+            />
+            <input
+              id="recurringScheduleItemTask"
+              css={rowInputStyle}
+              type="text"
+              placeholder="Task"
+            />
             <button
               css={actionButtonStyle}
               onClick={handleClickToAddRecurringScheduleItem}
@@ -438,9 +487,22 @@ export default function Home() {
               max="6"
               placeholder="Day 0-6"
             />
-            <input id="updateRecurringScheduleItemStartDate" css={rowInputStyle} type="date" />
-            <input id="updateRecurringScheduleItemEndDate" css={rowInputStyle} type="date" />
-            <input id="updateRecurringScheduleItemTask" css={rowInputStyle} type="text" placeholder="Task" />
+            <input
+              id="updateRecurringScheduleItemStartDate"
+              css={rowInputStyle}
+              type="date"
+            />
+            <input
+              id="updateRecurringScheduleItemEndDate"
+              css={rowInputStyle}
+              type="date"
+            />
+            <input
+              id="updateRecurringScheduleItemTask"
+              css={rowInputStyle}
+              type="text"
+              placeholder="Task"
+            />
             <button
               css={actionButtonStyle}
               onClick={handleClickToUpdateRecurringScheduleItemWithId}
@@ -529,7 +591,7 @@ const pageButtonBg = "#0f766e";
 const pageButtonHover = "#115e59";
 const pageLine = "#e6dbc9";
 
-const pageStyle = css ({
+const pageStyle = css({
   display: "flex",
   flex: 1,
   flexDirection: "column",
@@ -537,10 +599,10 @@ const pageStyle = css ({
   justifyContent: "flex-start",
   fontFamily: "var(--font-geist-sans)",
   background: `radial-gradient(circle at top right, #e6f8f6 0%, ${pageBackground} 52%)`,
-  color: `${pageTextPrimary}`
+  color: `${pageTextPrimary}`,
 });
 
-const mainStyle = css ({
+const mainStyle = css({
   display: "flex",
   width: "min(1100px, 100%)",
   margin: "40px 0",
@@ -562,7 +624,7 @@ const mainStyle = css ({
   },
 });
 
-const mainH1Style = css ({
+const mainH1Style = css({
   margin: 0,
   fontSize: "32px",
   "@media (max-width: 720px)": {
@@ -570,30 +632,30 @@ const mainH1Style = css ({
   },
 });
 
-const statusStyle = css ({
+const statusStyle = css({
   margin: 0,
   color: `${pageTextSecondary}`,
 });
 
-const sectionStyle = css ({
+const sectionStyle = css({
   width: "100%",
   borderTop: `1px solid ${pageLine}`,
   paddingTop: "16px",
 });
 
-const sectionH2Style = css ({
+const sectionH2Style = css({
   margin: "0 0 12px",
   fontSize: "19px",
 });
 
-const rowStyle = css ({
+const rowStyle = css({
   display: "flex",
   flexWrap: "wrap",
   gap: "10px",
   marginBottom: "10px",
 });
 
-const rowInputStyle = css ({
+const rowInputStyle = css({
   height: "38px",
   border: `1px solid ${pageLine}`,
   borderRadius: "10px",
@@ -601,7 +663,7 @@ const rowInputStyle = css ({
   fontSize: "14px",
 });
 
-const actionButtonStyle = css ({
+const actionButtonStyle = css({
   height: "38px",
   padding: "0 14px",
   border: 0,
@@ -615,12 +677,12 @@ const actionButtonStyle = css ({
   fontSize: "14px",
 });
 
-const listStyle = css ({
+const listStyle = css({
   margin: 0,
   paddingLeft: "20px",
 });
 
-const listItemStyle = css ({
+const listItemStyle = css({
   marginBottom: "6px",
   color: `${pageTextSecondary}`,
 });
