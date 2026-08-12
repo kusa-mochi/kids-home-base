@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import {
   tokyoLocalDateInputToUTCISO,
@@ -7,6 +6,12 @@ import {
   utcIsoToTokyoDisplay,
 } from "./timezone";
 import { css } from "@emotion/react";
+import { HomePage } from "./pages/HomePage";
+import { TodaySchedule } from "./pages/TodaySchedule";
+import { TomorrowSchedule } from "./pages/TomorrowSchedule";
+import { EditSchedule } from "./pages/EditSchedule";
+import { Settings } from "./pages/Settings";
+import { useCurrentPage } from "./contexts/PageContext";
 
 type Schedule = {
   id: number;
@@ -29,6 +34,7 @@ export default function Home() {
   const [statusText, setStatusText] = useState("Ready");
   const [todaySchedules, setTodaySchedules] = useState<Schedule[]>([]);
   const [tomorrowSchedules, setTomorrowSchedules] = useState<Schedule[]>([]);
+  const { currentPage, setCurrentPage } = useCurrentPage();
 
   function setSuccess(action: string, data: unknown) {
     setStatusText(`${action}: success`);
@@ -307,278 +313,21 @@ export default function Home() {
 
   return (
     <div css={pageStyle}>
-      <main css={mainStyle}>
-        <h1 css={mainH1Style}>Kids Home Base</h1>
-        <p css={statusStyle}>Status: {statusText}</p>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Basic</h2>
-          <div css={rowStyle}>
-            <button css={actionButtonStyle} onClick={handleClickToGet}>
-              Ping
-            </button>
-            <button css={actionButtonStyle} onClick={handleClickToPost}>
-              Echo
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Auth</h2>
-          <div css={rowStyle}>
-            <input
-              id="user_id"
-              css={rowInputStyle}
-              type="text"
-              placeholder="User ID"
-            />
-            <input
-              id="password"
-              css={rowInputStyle}
-              type="password"
-              placeholder="Password"
-            />
-          </div>
-          <div css={rowStyle}>
-            <button css={actionButtonStyle} onClick={handleClickToLogin}>
-              Login
-            </button>
-            <button css={actionButtonStyle} onClick={handleClickToJwtTest}>
-              JWT Test
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Schedule</h2>
-          <div css={rowStyle}>
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToGetTodaySchedule}
-            >
-              Get Today
-            </button>
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToGetTomorrowSchedule}
-            >
-              Get Tomorrow
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="scheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="task"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToAddScheduleItem}
-            >
-              Add
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="updateScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <input
-              id="updateScheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="updateScheduleItemTask"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToUpdateScheduleItem}
-            >
-              Update
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="deleteScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToDeleteScheduleItem}
-            >
-              Delete
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Recurring Schedule</h2>
-          <div css={rowStyle}>
-            <input
-              id="recurringScheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="recurringScheduleItemDayOfWeek"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              max="6"
-              placeholder="Day 0-6"
-            />
-            <input
-              id="recurringScheduleItemStartDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="recurringScheduleItemEndDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="recurringScheduleItemTask"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToAddRecurringScheduleItem}
-            >
-              Add
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="updateRecurringScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <input
-              id="updateRecurringScheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="updateRecurringScheduleItemDayOfWeek"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              max="6"
-              placeholder="Day 0-6"
-            />
-            <input
-              id="updateRecurringScheduleItemStartDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="updateRecurringScheduleItemEndDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="updateRecurringScheduleItemTask"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToUpdateRecurringScheduleItemWithId}
-            >
-              Update
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="deleteRecurringScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToDeleteRecurringScheduleItem}
-            >
-              Delete
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Password</h2>
-          <div css={rowStyle}>
-            <input
-              id="changePasswordUserId"
-              css={rowInputStyle}
-              type="text"
-              placeholder="User ID"
-            />
-            <input
-              id="changePasswordCurrentPassword"
-              css={rowInputStyle}
-              type="password"
-              placeholder="Current Password"
-            />
-            <input
-              id="changePasswordNewPassword"
-              css={rowInputStyle}
-              type="password"
-              placeholder="New Password"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToChangePassword}
-            >
-              Change Password
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Today (Asia/Tokyo)</h2>
-          <ul css={listStyle}>
-            {todaySchedules.map((s) => (
-              <li key={`today-${s.id}`} css={listItemStyle}>
-                [{s.id}] {utcIsoToTokyoDisplay(s.dt)} - {s.task}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Tomorrow (Asia/Tokyo)</h2>
-          <ul css={listStyle}>
-            {tomorrowSchedules.map((s) => (
-              <li key={`tomorrow-${s.id}`} css={listItemStyle}>
-                [{s.id}] {utcIsoToTokyoDisplay(s.dt)} - {s.task}
-              </li>
-            ))}
-          </ul>
-        </section>
-      </main>
+      {currentPage.pageId === "Home" && (
+        <HomePage />
+      )}
+      {currentPage.pageId === "TodaySchedule" && (
+        <TodaySchedule />
+      )}
+      {currentPage.pageId === "TomorrowSchedule" && (
+        <TomorrowSchedule />
+      )}
+      {currentPage.pageId === "EditSchedule" && (
+        <EditSchedule />
+      )}
+      {currentPage.pageId === "Settings" && (
+        <Settings />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { CurrentPageProvider } from "./contexts/PageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,12 +15,12 @@ const geistMono = Geist_Mono({
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <CurrentPageProvider>{children}</CurrentPageProvider>
+      </body>
     </html>
   );
 }
