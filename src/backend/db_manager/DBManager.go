@@ -107,7 +107,7 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS recurring_schedules (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		day_of_week TEXT NOT NULL,
+		day_of_week INTEGER NOT NULL,
 		schedule_time TIME NOT NULL,
 		start_date DATE NOT NULL,
 		end_date DATE NOT NULL,
@@ -145,7 +145,7 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	seedRecurringStartTimeUTC := time.Date(2026, 8, 2, 16, 0, 0, 0, loc).UTC()
 	seedRecurringStartDateUTC := time.Date(2026, 8, 2, 0, 0, 0, 0, loc).UTC()
 	seedRecurringEndDateUTC := time.Date(2026, 11, 2, 0, 0, 0, 0, loc).UTC()
-	_, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 'Monday', ?, ?, ?, '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`, seedRecurringStartTimeUTC, seedRecurringStartDateUTC, seedRecurringEndDateUTC)
+	_, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 1, ?, ?, ?, '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`, seedRecurringStartTimeUTC, seedRecurringStartDateUTC, seedRecurringEndDateUTC)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
