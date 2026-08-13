@@ -87,6 +87,11 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる"},
 		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く"},
 		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る"},
+		{Dt: time.Date(year, month, day, 22, 0, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク"},
+		{Dt: time.Date(year, month, day, 22, 30, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク2"},
+		{Dt: time.Date(year, month, day, 23, 0, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク3"},
+		{Dt: time.Date(year, month, day, 23, 30, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク4"},
+		{Dt: time.Date(year, month, day, 23, 59, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク5"},
 	})
 
 	logger.DbgPrintln("added today test data")
