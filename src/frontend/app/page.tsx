@@ -13,18 +13,9 @@ import { EditSchedule } from "./pages/EditSchedule";
 import { Settings } from "./pages/Settings";
 import { useCurrentPage } from "./contexts/PageContext";
 import { SideMenu } from "./pages/SideMenu";
-
-type Schedule = {
-  id: number;
-  dt: string;
-  task: string;
-};
-
-type ScheduleResponse = {
-  success: boolean;
-  message: string;
-  schedules: Schedule[];
-};
+import { useTodaySchedule } from "./contexts/TodayScheduleContext";
+import { useTomorrowSchedule } from "./contexts/TomorrowScheduleContext";
+import { ScheduleItem, ScheduleResponse } from "./dataStructures/Schedule";
 
 function getInputValue(id: string): string {
   const input = document.getElementById(id) as HTMLInputElement | null;
@@ -33,8 +24,8 @@ function getInputValue(id: string): string {
 
 export default function Home() {
   const [statusText, setStatusText] = useState("Ready");
-  const [todaySchedules, setTodaySchedules] = useState<Schedule[]>([]);
-  const [tomorrowSchedules, setTomorrowSchedules] = useState<Schedule[]>([]);
+  const { todaySchedule, setTodaySchedule } = useTodaySchedule();
+  const { tomorrowSchedule, setTomorrowSchedule } = useTomorrowSchedule();
   const { currentPage, setCurrentPage } = useCurrentPage();
 
   function setSuccess(action: string, data: unknown) {
@@ -111,7 +102,7 @@ export default function Home() {
     fetch("http://localhost:21226/get-today-schedule")
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
-        setTodaySchedules(data.schedules ?? []);
+        setTodaySchedule({ items: data.schedules ?? [] });
         setSuccess("Get Today", data);
       })
       .catch((error) => setFailure("Get Today", error));
@@ -121,7 +112,7 @@ export default function Home() {
     fetch("http://localhost:21226/get-tomorrow-schedule")
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
-        setTomorrowSchedules(data.schedules ?? []);
+        setTomorrowSchedule({ items: data.schedules ?? [] });
         setSuccess("Get Tomorrow", data);
       })
       .catch((error) => setFailure("Get Tomorrow", error));

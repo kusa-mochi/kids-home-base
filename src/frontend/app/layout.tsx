@@ -2,6 +2,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CurrentPageProvider } from "./contexts/PageContext";
+import { TodayScheduleProvider } from "./contexts/TodayScheduleContext";
+import { TomorrowScheduleProvider } from "./contexts/TomorrowScheduleContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,7 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <CurrentPageProvider>{children}</CurrentPageProvider>
+        <TomorrowScheduleProvider>
+          <TodayScheduleProvider>
+            <CurrentPageProvider>{children}</CurrentPageProvider>
+          </TodayScheduleProvider>
+        </TomorrowScheduleProvider>
       </body>
     </html>
   );
