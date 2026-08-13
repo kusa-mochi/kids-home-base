@@ -1,4 +1,5 @@
-import { FC } from "react";
+"use client";
+import { FC, useEffect, useState } from "react";
 import { useCurrentPage } from "../contexts/PageContext";
 
 export const HomePage: FC = () => {
