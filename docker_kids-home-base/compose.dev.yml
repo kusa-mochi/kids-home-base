@@ -39,6 +39,8 @@ services:
       - ../src/frontend:/home/builder/app
     ports:
       - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
     command:
       - /bin/sh
       - -c
