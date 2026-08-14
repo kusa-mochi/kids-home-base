@@ -3,6 +3,7 @@ import { FC, useEffect, useState } from "react";
 import { useCurrentPage } from "../contexts/PageContext";
 import { useTodaySchedule } from "../contexts/TodayScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
+import { now, utcIsoToTokyoDisplay } from "../timezone";
 
 export const HomePage: FC = () => {
   const { currentPage, setCurrentPage } = useCurrentPage();
@@ -23,19 +24,21 @@ export const HomePage: FC = () => {
         // 現在日時（東京時間）に基づいて、現在のタスクを決定する。
         // バックエンドから取得したスケジュールの dt は UTC 形式の標準時間であるため、比較の際には timezone.ts の関数を使ってローカル時間（日本時間）に変換する。
         // このフロントエンドでも、現在日時の取得には timezone.ts の関数を使って、UTC から日本時間に変換する。
-        const now = new Date();
-        const nowTokyo = now.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+        const currentTime = now();
         for (const item of data.schedules) {
-          const itemTokyo = new Date(item.dt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+          const itemTime = new Date(item.dt);
           // 現在のタスクは、現在日時よりも前のタスクの中で最も新しいものとする。
           // 次のタスクは、現在日時よりも後のタスクの中で最も古いものとする。
-          // ここでは、現在のタスクと次のタスクを決定するために、現在日時とスケジュールの dt を比較するため、
-          // itemTokyo と nowTokyo をそれぞれ Date オブジェクトに変換して比較する。
-          if (new Date(itemTokyo) <= new Date(nowTokyo)) {
+          console.log("Comparing item date:", itemTime, "with current time:", currentTime);
+          if (itemTime <= currentTime) {
+            console.log("Setting current task:", item.task);
             setCurrentTask(item.task);
           } else {
+            console.log("Setting next task:", item.task);
+            const tokyoDisplay = utcIsoToTokyoDisplay(item.dt);
+            const [, timePart] = tokyoDisplay.split(" ");
+            const [hour, minute] = timePart.split(":");
             setNextTask(item.task);
-            const [hour, minute] = itemTokyo.split(" ")[1].split(":");
             setNextTaskTimeHour(hour);
             setNextTaskTimeMinute(minute);
             break; // 最初の次のタスクが見つかったらループを抜ける
