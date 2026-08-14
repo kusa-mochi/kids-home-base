@@ -15,7 +15,6 @@ export const HomePage: FC = () => {
 
   useEffect(() => {
     // バックエンドの /get-today-schedule API から今日のスケジュールを取得する。
-    console.log("fetching url:", `${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`);
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
