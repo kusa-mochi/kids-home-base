@@ -7,6 +7,7 @@ import (
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
+	"kids_home_base/utils"
 	"log"
 	"time"
 
@@ -77,7 +78,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 	}
 
 	// 今日の年・月・日をそれぞれ取得
-	nowInTokyo := time.Now().In(tokyoLoc)
+	nowInTokyo := utils.Now().In(tokyoLoc)
 	year, month, day := nowInTokyo.Date()
 	// 今日の予定
 	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
