@@ -48,3 +48,10 @@ export function utcIsoToTokyoDisplay(value: string): string {
   }
   return dateTimeFormatter.format(date);
 }
+
+export function now(): Date {
+  if (process.env.NEXT_PUBLIC_DEBUG_NOW) {
+    return new Date(process.env.NEXT_PUBLIC_DEBUG_NOW);
+  }
+  return new Date();
+}

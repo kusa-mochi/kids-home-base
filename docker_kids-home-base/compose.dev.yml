@@ -17,6 +17,7 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SALT=${SALT}
       - ADD_TEST_DATA=${ADD_TEST_DATA}
+      - DEBUG_NOW=${DEBUG_NOW}
     command:
       - /bin/sh
       - -c
@@ -41,6 +42,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_DEBUG_NOW=${NEXT_PUBLIC_DEBUG_NOW}
     command:
       - /bin/sh
       - -c
