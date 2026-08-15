@@ -54,5 +54,5 @@
 
 ```sh
 cd .\docker_kids-home-base
-docker compose -f .\compose.dev.yml --env-file .env.local up
+docker compose -f .\compose.dev.yml --env-file .env.local up --abort-on-container-exit
 ```
