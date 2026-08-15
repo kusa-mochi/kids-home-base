@@ -117,6 +117,19 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る２"},
 	})
 
+	// 明後日の年・月・日をそれぞれ取得
+	tomorrow2 := nowInTokyo.AddDate(0, 0, 2)
+	year, month, day = tomorrow2.Date()
+	// 明後日の予定
+	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
+		{Dt: time.Date(year, month, day, 7, 15, 0, 0, tokyoLoc), Task: "オクラに水をやる３"},
+		{Dt: time.Date(year, month, day, 7, 50, 0, 0, tokyoLoc), Task: "朝ごはんを食べる３"},
+		{Dt: time.Date(year, month, day, 18, 50, 0, 0, tokyoLoc), Task: "シャワーを浴びる３"},
+		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる３"},
+		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く３"},
+		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る３"},
+	})
+
 	logger.DbgPrintln("added tomorrow test data")
 }
 
