@@ -70,6 +70,12 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 }
 
 func AddTestData(dbManager *dbmanager.DBManager) {
+	// 一旦DBのスケジュールデータをリセットする。
+	logger.DbgPrintln("resetting test schedule data...")
+	dbManager.ResetScheduleData()
+
+	// 以下、デバッグ用にテストデータを追加する。
+
 	logger.DbgPrintln("adding test data to DB...")
 	tokyoLoc, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {

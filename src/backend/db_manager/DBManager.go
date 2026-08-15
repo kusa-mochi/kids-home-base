@@ -379,3 +379,11 @@ func (m *DBManager) UpdatePasswordHashByUserId(userId string, newPasswordHash st
 
 	return nil
 }
+
+// デバッグ用：DBのスケジュールデータをリセットする関数。
+func (m *DBManager) ResetScheduleData() {
+	_, err := m.db.Exec(`DELETE FROM schedules`)
+	if err != nil {
+		log.Println("exec error in ResetScheduleData:", err.Error())
+	}
+}
