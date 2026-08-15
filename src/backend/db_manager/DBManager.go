@@ -257,6 +257,37 @@ func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWi
 	return schedules, nil
 }
 
+// この先すべての計画を日時昇順で取得する関数。
+func (m *DBManager) GetUpcomingSchedulesWithId() ([]datastructures.ScheduleItemWithId, error) {
+	now := utils.Now()
+	modifier := m.sqliteLocalDateModifier(now)
+	todayLocal := m.localDateString(now, 0)
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) >= ? ORDER BY schedule_datetime ASC`, modifier, todayLocal)
+	if err != nil {
+		log.Println("query error in GetUpcomingSchedulesWithId:", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var schedules []datastructures.ScheduleItemWithId
+	for rows.Next() {
+		var s datastructures.ScheduleItemWithId
+		err := rows.Scan(&s.Id, &s.Dt, &s.Task)
+		if err != nil {
+			return nil, err
+		}
+		s.Dt = m.normalizeUTC(s.Dt)
+		schedules = append(schedules, s)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("rows error in GetUpcomingSchedulesWithId:", err.Error())
+		return nil, err
+	}
+
+	return schedules, nil
+}
+
 // DBに計画要素を追加する関数。
 // 日時はUTCで記録する。
 func (m *DBManager) AddScheduleItem(s *datastructures.ScheduleItem) error {

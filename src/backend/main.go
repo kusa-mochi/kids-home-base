@@ -44,6 +44,7 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	r.POST("/echo", func(c *gin.Context) { api_handlers.EchoHandler(c, apiRequest) })
 	r.GET("/get-today-schedule", func(c *gin.Context) { api_handlers.GetTodayScheduleHandler(c, apiRequest) })
 	r.GET("/get-tomorrow-schedule", func(c *gin.Context) { api_handlers.GetTomorrowScheduleHandler(c, apiRequest) })
+	r.GET("/get-upcoming-schedule", func(c *gin.Context) { api_handlers.GetUpcomingScheduleHandler(c, apiRequest) })
 	r.POST("/add-schedule-item", func(c *gin.Context) { api_handlers.AddScheduleItemHandler(c, apiRequest) })
 	r.POST("/update-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateScheduleItemWithIdHandler(c, apiRequest) })
 	r.POST("/delete-schedule-item", func(c *gin.Context) { api_handlers.DeleteScheduleItemHandler(c, apiRequest) })

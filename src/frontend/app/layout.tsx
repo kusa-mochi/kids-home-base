@@ -4,6 +4,7 @@ import "./globals.css";
 import { CurrentPageProvider } from "./contexts/PageContext";
 import { TodayScheduleProvider } from "./contexts/TodayScheduleContext";
 import { TomorrowScheduleProvider } from "./contexts/TomorrowScheduleContext";
+import { UpcomingScheduleProvider } from "./contexts/UpcomingScheduleContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <TomorrowScheduleProvider>
-          <TodayScheduleProvider>
-            <CurrentPageProvider>{children}</CurrentPageProvider>
-          </TodayScheduleProvider>
-        </TomorrowScheduleProvider>
+        <UpcomingScheduleProvider>
+          <TomorrowScheduleProvider>
+            <TodayScheduleProvider>
+              <CurrentPageProvider>{children}</CurrentPageProvider>
+            </TodayScheduleProvider>
+          </TomorrowScheduleProvider>
+        </UpcomingScheduleProvider>
       </body>
     </html>
   );
