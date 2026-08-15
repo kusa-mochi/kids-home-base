@@ -258,11 +258,14 @@ func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWi
 }
 
 // この先すべての計画を日時昇順で取得する関数。
+// DBの日時はUTCで記録されているため、UTCの現在時刻以降で絞り込む。
 func (m *DBManager) GetUpcomingSchedulesWithId() ([]datastructures.ScheduleItemWithId, error) {
 	now := utils.Now()
-	modifier := m.sqliteLocalDateModifier(now)
-	todayLocal := m.localDateString(now, 0)
-	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) >= ? ORDER BY schedule_datetime ASC`, modifier, todayLocal)
+	nowUTC := m.normalizeUTC(now)
+
+	// 今日の過去時刻を含めず、現在時刻以降の予定だけを取得する。
+	// juliandayを使うことで、SQLite内の日時文字列を日時として比較する。
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE julianday(schedule_datetime) >= julianday(?) ORDER BY schedule_datetime ASC`, nowUTC)
 	if err != nil {
 		log.Println("query error in GetUpcomingSchedulesWithId:", err.Error())
 		return nil, err
