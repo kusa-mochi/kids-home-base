@@ -153,17 +153,20 @@ export default function Home() {
     );
     const newTask = getInputValue("updateScheduleItemTask");
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: scheduleItemId,
+          dt: scheduleItemStartTimeUTC,
+          task: newTask,
+        }),
       },
-      body: JSON.stringify({
-        id: scheduleItemId,
-        dt: scheduleItemStartTimeUTC,
-        task: newTask,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Update Schedule", data))
       .catch((error) => setFailure("Update Schedule", error));
@@ -200,19 +203,22 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/add-recurring-schedule-item`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/add-recurring-schedule-item`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start_time: startTimeRFC3339,
+          day_of_week: dayOfWeek,
+          start_date: startDateRFC3339,
+          end_date: endDateRFC3339,
+          task,
+        }),
       },
-      body: JSON.stringify({
-        start_time: startTimeRFC3339,
-        day_of_week: dayOfWeek,
-        start_date: startDateRFC3339,
-        end_date: endDateRFC3339,
-        task,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Add Recurring", data))
       .catch((error) => setFailure("Add Recurring", error));
@@ -236,20 +242,23 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/update-recurring-schedule-item-with-id`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-recurring-schedule-item-with-id`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: recurringScheduleItemId,
+          start_time: startTimeRFC3339,
+          day_of_week: dayOfWeek,
+          start_date: startDateRFC3339,
+          end_date: endDateRFC3339,
+          task,
+        }),
       },
-      body: JSON.stringify({
-        id: recurringScheduleItemId,
-        start_time: startTimeRFC3339,
-        day_of_week: dayOfWeek,
-        start_date: startDateRFC3339,
-        end_date: endDateRFC3339,
-        task,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Update Recurring", data))
       .catch((error) => setFailure("Update Recurring", error));
@@ -261,15 +270,18 @@ export default function Home() {
       10,
     );
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-recurring-schedule-item`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-recurring-schedule-item`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: recurringScheduleItemId,
+        }),
       },
-      body: JSON.stringify({
-        id: recurringScheduleItemId,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Delete Recurring", data))
       .catch((error) => setFailure("Delete Recurring", error));
