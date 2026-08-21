@@ -305,24 +305,20 @@ export default function Home() {
 
   return (
     <div css={pageStyle}>
-      {currentPage.pageId === "Home" && (
-        <HomePage />
-      )}
-      {currentPage.pageId === "TodaySchedule" && (
-        <TodaySchedule />
-      )}
-      {currentPage.pageId === "TomorrowSchedule" && (
-        <TomorrowSchedule />
-      )}
-      {currentPage.pageId === "EditSchedule" && (
-        <EditSchedule />
-      )}
-      {currentPage.pageId === "Settings" && (
-        <Settings />
-      )}
       {currentPage.pageId !== "Home" && (
-        <SideMenu />
+        <div css={detailPageStyle}>
+          <div css={leftPaneStyle}>
+            <SideMenu />
+          </div>
+          <div css={rightPaneStyle}>
+            {currentPage.pageId === "TodaySchedule" && <TodaySchedule />}
+            {currentPage.pageId === "TomorrowSchedule" && <TomorrowSchedule />}
+            {currentPage.pageId === "EditSchedule" && <EditSchedule />}
+            {currentPage.pageId === "Settings" && <Settings />}
+          </div>
+        </div>
       )}
+      {currentPage.pageId === "Home" && <HomePage />}
     </div>
   );
 }
@@ -336,97 +332,39 @@ const pageButtonHover = "#115e59";
 const pageLine = "#e6dbc9";
 
 const pageStyle = css({
-  display: "flex",
-  flex: 1,
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "flex-start",
+  position: "relative",
+  width: "100%",
+  height: "100%",
+  margin: 0,
+  padding: 0,
+  boxSizing: "border-box",
   fontFamily: "var(--font-geist-sans)",
-  background: `radial-gradient(circle at top right, #e6f8f6 0%, ${pageBackground} 52%)`,
+  backgroundColor: `${pageBackground}`,
   color: `${pageTextPrimary}`,
 });
 
-const mainStyle = css({
-  display: "flex",
-  width: "min(1100px, 100%)",
-  margin: "40px 0",
-  border: `1px solid ${pageLine}`,
-  borderRadius: "18px",
-  boxShadow: "0 24px 60px rgba(47, 36, 24, 0.08)",
-  backgroundColor: pageForeground,
-  padding: "32px",
-  gap: "18px",
-  boxSizing: "border-box",
-  flexDirection: "column",
-  "@media (max-width: 720px)": {
-    margin: 0,
-    minHeight: "100vh",
-    border: 0,
-    borderRadius: 0,
-    boxShadow: "none",
-    padding: "18px",
-  },
-});
-
-const mainH1Style = css({
-  margin: 0,
-  fontSize: "32px",
-  "@media (max-width: 720px)": {
-    fontSize: "28px",
-  },
-});
-
-const statusStyle = css({
-  margin: 0,
-  color: `${pageTextSecondary}`,
-});
-
-const sectionStyle = css({
+const detailPageStyle = css({
+  position: "absolute",
+  top: 0,
+  left: 0,
   width: "100%",
-  borderTop: `1px solid ${pageLine}`,
-  paddingTop: "16px",
-});
+  height: "100%",
 
-const sectionH2Style = css({
-  margin: "0 0 12px",
-  fontSize: "19px",
-});
-
-const rowStyle = css({
+  // 左ペイン、右ペインの順で子要素を並べる。
   display: "flex",
-  flexWrap: "wrap",
-  gap: "10px",
-  marginBottom: "10px",
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  alignItems: "stretch",
+  flexWrap: "nowrap",
 });
 
-const rowInputStyle = css({
-  height: "38px",
-  border: `1px solid ${pageLine}`,
-  borderRadius: "10px",
-  padding: "0 10px",
-  fontSize: "14px",
+const leftPaneStyle = css({
+  width: 514,
+  height: "100%",
+  borderRight: `1px solid ${pageLine}`,
 });
 
-const actionButtonStyle = css({
-  height: "38px",
-  padding: "0 14px",
-  border: 0,
-  borderRadius: "10px",
-  background: `${pageButtonBg}`,
-  "&:hover": {
-    background: `${pageButtonHover}`,
-  },
-  color: "#fff",
-  cursor: "pointer",
-  fontSize: "14px",
-});
-
-const listStyle = css({
-  margin: 0,
-  paddingLeft: "20px",
-});
-
-const listItemStyle = css({
-  marginBottom: "6px",
-  color: `${pageTextSecondary}`,
+const rightPaneStyle = css({
+  width: "calc(100% - 514px)",
+  height: "100%",
 });
