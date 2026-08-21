@@ -43,10 +43,7 @@ export const SideMenu: FC = () => {
 };
 
 const sideMenuStyle = css`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 514px;
+  width: 100%;
   height: 100%;
   background-color: black;
   color: white;
