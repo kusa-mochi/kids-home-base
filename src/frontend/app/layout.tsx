@@ -22,7 +22,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
+      <body style={{ width: '100%', height: '100%' }}>
         <LoginProvider>
           <UpcomingScheduleProvider>
             <TomorrowScheduleProvider>
