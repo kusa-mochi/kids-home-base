@@ -335,13 +335,13 @@ export default function Home() {
   );
 }
 
-const pageBackground = "#f7f4ea";
-const pageForeground = "#fffaf2";
-const pageTextPrimary = "#2f2418";
-const pageTextSecondary = "#6a5a44";
+const pageBackground = "black";
+const pageForeground = "#e0e0e0";
+const pageTextPrimary = "#e0e0e0";
+const pageTextSecondary = "#a0a0a0";
 const pageButtonBg = "#0f766e";
 const pageButtonHover = "#115e59";
-const pageLine = "#e6dbc9";
+const pageLine = "#e0e0e0";
 
 const pageStyle = css({
   position: "relative",
