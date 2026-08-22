@@ -65,7 +65,7 @@ const menuItemStyle = (isCurrentPage: boolean) => css`
   width: 100%;
   height: 168px;
   background-color: ${isCurrentPage
-    ? "rgba(255, 255, 255, 0.1)"
+    ? "rgba(255, 255, 255, 0.2)"
     : "transparent"};
 `;
 
