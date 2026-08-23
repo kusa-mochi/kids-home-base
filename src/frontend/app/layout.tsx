@@ -17,21 +17,36 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+type Provider = React.ComponentType<{ children: React.ReactNode }>;
+
+type ComposeProvidersProps = {
+  providers: Provider[];
+  children: React.ReactNode;
+}
+
+function ComposeProviders(ps: ComposeProvidersProps) {
+  return ps.providers.reduceRight((acc, ProviderComponent) => {
+    return <ProviderComponent>{acc}</ProviderComponent>;
+  }, ps.children);
+}
+
+const providers: Provider[] = [
+  LoginProvider,
+  UpcomingScheduleProvider,
+  TomorrowScheduleProvider,
+  TodayScheduleProvider,
+  CurrentPageProvider,
+];
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body style={{ width: '100%', height: '100%' }}>
-        <LoginProvider>
-          <UpcomingScheduleProvider>
-            <TomorrowScheduleProvider>
-              <TodayScheduleProvider>
-                <CurrentPageProvider>{children}</CurrentPageProvider>
-              </TodayScheduleProvider>
-            </TomorrowScheduleProvider>
-          </UpcomingScheduleProvider>
-        </LoginProvider>
+        <ComposeProviders providers={providers}>
+          {children}
+        </ComposeProviders>
       </body>
     </html>
   );
