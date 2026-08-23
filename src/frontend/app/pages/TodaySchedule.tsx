@@ -3,6 +3,7 @@ import { FC, useEffect } from "react";
 import { useTodaySchedule } from "../contexts/TodayScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
+import { now } from "../timezone";
 
 export const TodaySchedule: FC = () => {
   const { todaySchedule, setTodaySchedule } = useTodaySchedule();
@@ -20,6 +21,7 @@ export const TodaySchedule: FC = () => {
 
   return (
     <div css={componentStyle}>
+      <div css={dateStyle}>{now().getMonth() + 1}月{now().getDate()}日</div>
       <table css={tableStyle}>
         <tbody>
           {todaySchedule.items.map((item, index) => {
@@ -43,6 +45,11 @@ const componentStyle = css`
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+`;
+
+const dateStyle = css`
+  font-size: 56px;
+  margin: 16px;
 `;
 
 const tableStyle = css`
