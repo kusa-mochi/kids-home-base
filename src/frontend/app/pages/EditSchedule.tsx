@@ -1,11 +1,12 @@
 "use client";
-import { FC, useEffect } from "react";
+import { FC, Fragment, useEffect } from "react";
 import { useUpcomingSchedule } from "../contexts/UpcomingScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
+
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
-  
+
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-upcoming-schedule`)
       .then((response) => response.json())
@@ -19,16 +20,35 @@ export const EditSchedule: FC = () => {
 
   return (
     <div css={componentStyle}>
-      {upcomingSchedule.items.map((item, index) => {
-        const itemDate = new Date(item.dt);
-        const itemTime = itemDate.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
-        return (
-          <div key={index} css={tableRowStyle}>
-            <span>{itemTime}</span>
-            <span>{item.task}</span>
-          </div>
-        );
-      })}
+      {(() => {
+        let lastDateKey = "";
+        return upcomingSchedule.items.map((item, index) => {
+          const itemDate = new Date(item.dt);
+          const itemDateKey = itemDate.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          const itemTime = itemDate.toLocaleTimeString("ja-JP", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          const showDateHeader = itemDateKey !== lastDateKey;
+          if (showDateHeader) {
+            lastDateKey = itemDateKey;
+          }
+
+          return (
+            <Fragment key={item.id ?? index}>
+              {showDateHeader && <div css={dateHeaderStyle}>{itemDateKey}</div>}
+              <div css={tableRowStyle}>
+                <span>{itemTime}</span>
+                <span>{item.task}</span>
+              </div>
+            </Fragment>
+          );
+        });
+      })()}
     </div>
   );
 };
@@ -38,6 +58,11 @@ const componentStyle = css`
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+`;
+
+const dateHeaderStyle = css`
+  font-size: 56px;
+  margin: 16px;
 `;
 
 const tableStyle = css`
