@@ -1,8 +1,8 @@
 "use client";
 
-import { css } from "@emotion/react/macro";
+import { css } from "@emotion/react";
 import { FC } from "react";
-import { TrashIcon } from "../assets/iconComponents/trash";
+import { TrashIcon } from "../assets/iconComponents/TrashIcon";
 
 export const EditScheduleModalContent: FC = () => {
   return (
