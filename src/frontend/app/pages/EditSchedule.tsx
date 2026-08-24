@@ -1,11 +1,15 @@
 "use client";
-import { FC, Fragment, useEffect } from "react";
+
+import { FC, Fragment, useEffect, useState, MouseEvent } from "react";
 import { useUpcomingSchedule } from "../contexts/UpcomingScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
+import { EditScheduleModalContent } from "../components/EditScheduleModalContent";
 
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
+  
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-upcoming-schedule`)
@@ -17,6 +21,15 @@ export const EditSchedule: FC = () => {
         console.error("Error fetching upcoming schedule:", error);
       });
   }, []);
+
+  function handleEditSchedule(e: MouseEvent<HTMLDivElement>) {
+    setModalVisible(true);
+  }
+
+  function handleCloseModal(e: MouseEvent<HTMLDivElement>) {
+    setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
 
   return (
     <div css={componentStyle}>
@@ -41,7 +54,7 @@ export const EditSchedule: FC = () => {
           return (
             <Fragment key={item.id ?? index}>
               {showDateHeader && <div css={dateHeaderStyle}>{itemDateKey}</div>}
-              <div css={tableRowStyle}>
+              <div css={tableRowStyle} onClick={handleEditSchedule}>
                 <span>{itemTime}</span>
                 <span>{item.task}</span>
               </div>
@@ -49,11 +62,19 @@ export const EditSchedule: FC = () => {
           );
         });
       })()}
+      {modalVisible && (
+        <div css={modalBackdropStyle} onClick={handleCloseModal}>
+          <div css={modalContentStyle}>
+            <EditScheduleModalContent />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 const componentStyle = css`
+  position: relative;
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -73,4 +94,22 @@ const tableStyle = css`
 
 const tableRowStyle = css`
   height: 48px;
+`;
+
+const modalBackdropStyle = css`
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+`;
+
+const modalContentStyle = css`
+  position: relative;
+  width: 1240px;
+  height: 700px;
 `;
