@@ -28,4 +28,9 @@ const trashIconStyle = css`
   position: absolute;
   top: 16px;
   right: 16px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 `;
