@@ -44,6 +44,7 @@ services:
     environment:
       - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
       - NEXT_PUBLIC_DEBUG_NOW=${NEXT_PUBLIC_DEBUG_NOW}
+      - NEXT_PUBLIC_WEATHER_FORECAST_URL=${NEXT_PUBLIC_WEATHER_FORECAST_URL}
     command:
       - /bin/sh
       - -c
