@@ -5,7 +5,7 @@ import { useTodaySchedule } from "../contexts/TodayScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { now, utcIsoToTokyoDisplay } from "../timezone";
 import { css } from "@emotion/react";
-import { WeatherIconMap } from "../dataStructures/weatherIconMap";
+import { WeatherIconMap } from "../dataStructures/WeatherIconMap";
 
 export const HomePage: FC = () => {
   const { currentPage, setCurrentPage } = useCurrentPage();
@@ -39,10 +39,19 @@ export const HomePage: FC = () => {
         const timeDefined = jsonData[0]?.timeSeries[0]?.timeDefines?.[0];
         const weatherIconCode =
           jsonData[0]?.timeSeries[0]?.areas[0]?.weatherCodes?.[0];
+        const minTemperatureValue =
+          jsonData[0]?.timeSeries[2]?.areas[0]?.temps?.[0];
         const maxTemperatureValue =
           jsonData[0]?.timeSeries[2]?.areas[0]?.temps?.[1];
-        if (!timeDefined || !weatherIconCode || !maxTemperatureValue) {
-          console.error("Failed to extract weather information from JSON data.");
+        if (
+          !timeDefined ||
+          !weatherIconCode ||
+          !minTemperatureValue ||
+          !maxTemperatureValue
+        ) {
+          console.error(
+            "Failed to extract weather information from JSON data.",
+          );
           return;
         }
 
@@ -62,6 +71,7 @@ export const HomePage: FC = () => {
           setWeatherIconFilename(weatherIconCode);
         }
 
+        setMinTemperature(minTemperatureValue);
         setMaxTemperature(maxTemperatureValue);
       });
   }
@@ -127,12 +137,16 @@ export const HomePage: FC = () => {
         </div>
       </div>
       <div css={weatherStyle}>
-        <div>
+        <div css={weatherIconContainerStyle}>
           <img
             src={`https://www.jma.go.jp/bosai/forecast/img/${weatherIconFilename}.svg`}
+            css={weatherIconStyle}
           />
         </div>
-        <div>さいこうきおん&nbsp;{maxTemperature}℃</div>
+        <div>
+          さいていきおん&nbsp;{minTemperature}℃ さいこうきおん&nbsp;
+          {maxTemperature}℃
+        </div>
       </div>
     </div>
   );
@@ -164,11 +178,21 @@ const weatherStyle = css`
   position: absolute;
   top: 0;
   right: 0;
-  font-size: 14px;
+  font-size: 28px;
 
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   flex-wrap: nowrap;
+`;
+
+const weatherIconContainerStyle = css`
+  height: 56px;
+`;
+
+const weatherIconStyle = css`
+  width: 56px;
+  height: 56px;
+  margin: 0 4px 0 0;
 `;
