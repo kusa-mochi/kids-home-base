@@ -27,8 +27,6 @@ export const Settings: FC = () => {
       return response.json();
     })
     .then((data) => {
-      console.log("Login successful:", data);
-
       // アクセストークンを取得する。
       const accessToken = data.access_token;
       setLoginData({ userId, accessToken });
