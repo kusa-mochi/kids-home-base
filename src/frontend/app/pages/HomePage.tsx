@@ -87,7 +87,7 @@ export const HomePage: FC = () => {
         // バックエンドから取得したスケジュールの dt は UTC 形式の標準時間であるため、比較の際には timezone.ts の関数を使ってローカル時間（日本時間）に変換する。
         // このフロントエンドでも、現在日時の取得には timezone.ts の関数を使って、UTC から日本時間に変換する。
         const currentTime = now();
-        for (const item of data.schedules) {
+        for (const item of data.schedules ?? []) {
           const itemTime = new Date(item.dt);
           // 現在のタスクは、現在日時よりも前のタスクの中で最も新しいものとする。
           // 次のタスクは、現在日時よりも後のタスクの中で最も古いものとする。
