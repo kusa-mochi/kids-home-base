@@ -10,8 +10,6 @@ export const Settings: FC = () => {
     const passwordInput = document.getElementById("password") as HTMLInputElement;
     const userId = userIdInput.value;
     const password = passwordInput.value;
-    console.log("User ID:", userId);
-    console.log("Password:", password);
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, {
       method: "POST",
       headers: {
