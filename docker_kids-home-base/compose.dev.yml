@@ -17,6 +17,7 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SALT=${SALT}
       - ADD_TEST_DATA=${ADD_TEST_DATA}
+      - RESET_SCHEDULE_DATA=${RESET_SCHEDULE_DATA}
       - DEBUG_NOW=${DEBUG_NOW}
     command:
       - /bin/sh

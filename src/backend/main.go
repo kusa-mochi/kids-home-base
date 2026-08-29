@@ -70,10 +70,15 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	}
 }
 
-func AddTestData(dbManager *dbmanager.DBManager) {
-	// 一旦DBのスケジュールデータをリセットする。
-	logger.DbgPrintln("resetting test schedule data...")
-	dbManager.ResetScheduleData()
+func AddTestData(dbManager *dbmanager.DBManager) error {
+	if os.Getenv("RESET_SCHEDULE_DATA") == "1" {
+		logger.DbgPrintln("resetting test schedule data...")
+		if err := dbManager.ResetScheduleData(); err != nil {
+			return err
+		}
+	} else {
+		logger.DbgPrintln("ADD_TEST_DATA is enabled, but RESET_SCHEDULE_DATA is not set. Existing schedule data will be kept.")
+	}
 
 	// 以下、デバッグ用にテストデータを追加する。
 
@@ -81,7 +86,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 	tokyoLoc, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		logger.ErrPrintln("failed to load Asia/Tokyo location:", err.Error())
-		return
+		return err
 	}
 
 	// 今日の年・月・日をそれぞれ取得
@@ -131,6 +136,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 	})
 
 	logger.DbgPrintln("added tomorrow test data")
+	return nil
 }
 
 func main() {
@@ -156,7 +162,9 @@ func main() {
 	// デバッグ用。データベースにテスト用データを追加する。
 	// 運用時はコメントアウトすること。
 	if os.Getenv("ADD_TEST_DATA") == "1" {
-		AddTestData(dbManager)
+		if err := AddTestData(dbManager); err != nil {
+			log.Fatal("failed to add test data:", err)
+		}
 	}
 
 	// ロガーの初期化
