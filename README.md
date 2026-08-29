@@ -52,7 +52,17 @@
 
 ## プログラム実行方法（開発用）
 
+`docker_kids-home-base` ディレクトリ直下で、 PowerShell で次のコマンドを実行する。
+
 ```sh
 cd .\docker_kids-home-base
-docker compose -f .\compose.dev.yml --env-file .env.local up --abort-on-container-exit
+.\dev.up.ps1
+```
+
+## プログラム停止方法（開発用）
+
+`docker_kids-home-base` ディレクトリ直下で、 PowerShell で次のコマンドを実行する。
+
+```sh
+.\dev.down.ps1
 ```
