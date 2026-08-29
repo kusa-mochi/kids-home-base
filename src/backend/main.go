@@ -77,7 +77,7 @@ func AddTestData(dbManager *dbmanager.DBManager) error {
 			return err
 		}
 	} else {
-		logger.DbgPrintln("ADD_TEST_DATA is enabled, but RESET_SCHEDULE_DATA is not set. Existing schedule data will be kept.")
+		logger.DbgPrintln("RESET_SCHEDULE_DATA is not set to 1. Existing schedule data will be kept.")
 	}
 
 	// 以下、デバッグ用にテストデータを追加する。
