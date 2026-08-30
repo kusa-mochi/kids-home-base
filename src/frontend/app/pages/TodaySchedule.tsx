@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useTodaySchedule } from "../contexts/TodayScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
@@ -7,6 +7,10 @@ import { now } from "../timezone";
 
 export const TodaySchedule: FC = () => {
   const { todaySchedule, setTodaySchedule } = useTodaySchedule();
+
+  const nowDateTime = now();
+  const [todayMonth, setTodayMonth] = useState<number>(nowDateTime.getMonth() + 1);
+  const [todayDay, setTodayDay] = useState<number>(nowDateTime.getDate());
   
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
@@ -21,7 +25,7 @@ export const TodaySchedule: FC = () => {
 
   return (
     <div css={componentStyle}>
-      <div css={dateStyle}>{now().getMonth() + 1}月{now().getDate()}日</div>
+      <div css={dateStyle}>{todayMonth}月{todayDay}日</div>
       <table css={tableStyle}>
         <tbody>
           {todaySchedule.items.map((item, index) => {

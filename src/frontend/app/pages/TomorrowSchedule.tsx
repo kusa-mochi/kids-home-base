@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useTomorrowSchedule } from "../contexts/TomorrowScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
@@ -7,6 +7,12 @@ import { now } from "../timezone";
 
 export const TomorrowSchedule: FC = () => {
   const { tomorrowSchedule, setTomorrowSchedule } = useTomorrowSchedule();
+
+  const nowDateTime = now();
+  const tomorrowDate = new Date(nowDateTime);
+  tomorrowDate.setDate(nowDateTime.getDate() + 1);
+  const [tomorrowMonth, setTomorrowMonth] = useState<number>(tomorrowDate.getMonth() + 1);
+  const [tomorrowDay, setTomorrowDay] = useState<number>(tomorrowDate.getDate());
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-tomorrow-schedule`)
@@ -21,7 +27,7 @@ export const TomorrowSchedule: FC = () => {
 
   return (
     <div css={componentStyle}>
-      <div css={dateStyle}>{now().getMonth() + 1}月{now().getDate() + 1}日</div>
+      <div css={dateStyle}>{tomorrowMonth}月{tomorrowDay}日</div>
       <table css={tableStyle}>
         <tbody>
           {tomorrowSchedule.items.map((item, index) => {
