@@ -51,7 +51,7 @@ const sideMenuStyle = css`
 `;
 
 const closeButtonStyle = css`
-  font-size: 72px;
+  font-size: 64px;
   text-align: right;
   margin-right: 32px;
 `;
@@ -61,9 +61,9 @@ const menuItemStyle = (isCurrentPage: boolean) => css`
   justify-content: center;
   align-items: center;
   padding: 16px;
-  font-size: 56px;
+  font-size: 48px;
   width: 100%;
-  height: 168px;
+  height: 136px;
   background-color: ${isCurrentPage
     ? "rgba(255, 255, 255, 0.2)"
     : "transparent"};

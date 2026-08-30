@@ -93,7 +93,8 @@ const tableStyle = css`
 `;
 
 const tableRowStyle = css`
-  height: 48px;
+  font-size: 48px;
+  height: 56px;
 `;
 
 const modalBackdropStyle = css`

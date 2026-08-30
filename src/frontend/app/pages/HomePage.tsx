@@ -135,7 +135,7 @@ export const HomePage: FC = () => {
     <div onClick={gotoTodaySchedule} css={containerStyle}>
       <div css={nowStyle}>いまは</div>
       <div>
-        <div css={taskStyle}>{currentTask}</div> <span>をする時間だよ。</span>
+        <div css={taskStyle}>{currentTask} <span css={taskSpanStyle}>をする時間だよ。</span></div>
       </div>
       <div>
         <div css={nextTaskStyle}>
@@ -151,8 +151,8 @@ export const HomePage: FC = () => {
           />
         </div>
         <div>
-          さいていきおん&nbsp;{minTemperature}℃ さいこうきおん&nbsp;
-          {maxTemperature}℃
+          <div>さいていきおん&nbsp;{minTemperature}℃</div>
+          <div>さいこうきおん&nbsp;{maxTemperature}℃</div>
         </div>
       </div>
     </div>
@@ -160,6 +160,10 @@ export const HomePage: FC = () => {
 };
 
 const containerStyle = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -167,21 +171,27 @@ const containerStyle = css`
 `;
 
 const nowStyle = css`
-  font-size: 18px;
+  font-size: 32px;
   margin-bottom: 8px;
 `;
 
 const taskStyle = css`
-  font-size: 24px;
+  font-size: 72px;
   font-weight: bold;
   margin-bottom: 8px;
 `;
 
+const taskSpanStyle = css`
+  font-size: 32px;
+`;
+
 const nextTaskStyle = css`
-  font-size: 16px;
+  font-size: 24px;
 `;
 
 const weatherStyle = css`
+  margin: -8px 8px 0 0;
+
   position: absolute;
   top: 0;
   right: 0;

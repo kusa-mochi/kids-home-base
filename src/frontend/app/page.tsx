@@ -343,40 +343,40 @@ const pageButtonBg = "#0f766e";
 const pageButtonHover = "#115e59";
 const pageLine = "#e0e0e0";
 
-const pageStyle = css({
-  position: "relative",
-  width: "100%",
-  height: "100%",
-  margin: 0,
-  padding: 0,
-  boxSizing: "border-box",
-  fontFamily: "var(--font-geist-sans)",
-  backgroundColor: `${pageBackground}`,
-  color: `${pageTextPrimary}`,
-});
+const pageStyle = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-geist-sans);
+  background-color: ${pageBackground};
+  color: ${pageTextPrimary};
+`;
 
-const detailPageStyle = css({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
+const detailPageStyle = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 
   // 左ペイン、右ペインの順で子要素を並べる。
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "flex-start",
-  alignItems: "stretch",
-  flexWrap: "nowrap",
-});
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-wrap: nowrap;
+`;
 
-const leftPaneStyle = css({
-  width: 514,
-  height: "100%",
-  borderRight: `1px solid ${pageLine}`,
-});
+const leftPaneStyle = css`
+  width: 384px;
+  height: 100%;
+  border-right: 1px solid ${pageLine};
+`;
 
-const rightPaneStyle = css({
-  width: "calc(100% - 514px)",
-  height: "100%",
-});
+const rightPaneStyle = css`
+  width: calc(100% - 384px);
+  height: 100%;
+`;

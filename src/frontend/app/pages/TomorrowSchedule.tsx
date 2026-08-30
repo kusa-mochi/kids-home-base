@@ -29,8 +29,8 @@ export const TomorrowSchedule: FC = () => {
             const itemTime = itemDate.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
             return (
               <tr key={index} css={tableRowStyle}>
-                <td>{itemTime}</td>
-                <td>{item.task}</td>
+                <td css={itemTimeStyle} valign="top">{itemTime}</td>
+                <td valign="top">{item.task}</td>
               </tr>
             );
           })}
@@ -55,9 +55,13 @@ const dateStyle = css`
 const tableStyle = css`
   width: 100%;
   margin-left: 16px;
-  font-size: 56px;
+  font-size: 48px;
 `;
 
 const tableRowStyle = css`
   height: 48px;
+`;
+
+const itemTimeStyle = css`
+  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
 `;
