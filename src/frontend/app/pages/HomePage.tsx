@@ -39,10 +39,17 @@ export const HomePage: FC = () => {
         const timeDefined = jsonData[0]?.timeSeries[0]?.timeDefines?.[0];
         const weatherIconCode =
           jsonData[0]?.timeSeries[0]?.areas[0]?.weatherCodes?.[0];
-        const minTemperatureValue =
-          jsonData[0]?.timeSeries[2]?.areas[0]?.temps?.[0];
-        const maxTemperatureValue =
-          jsonData[0]?.timeSeries[2]?.areas[0]?.temps?.[1];
+
+        // 最低気温と最高気温を取得する。
+        // jsonData[0].timeSeries[2].areas[0].tempsで取得できる配列の中の最低値が最低気温、最高値が最高気温となる。
+        const temps = jsonData[0]?.timeSeries[2]?.areas[0]?.temps;
+        if (!temps || temps.length < 1) {
+          console.error("Failed to extract temperature information from JSON data.");
+          return;
+        }
+        const minTemperatureValue = Math.min(...temps.map((temp: string) => parseInt(temp, 10)));
+        const maxTemperatureValue = Math.max(...temps.map((temp: string) => parseInt(temp, 10)));
+
         if (
           !timeDefined ||
           !weatherIconCode ||
