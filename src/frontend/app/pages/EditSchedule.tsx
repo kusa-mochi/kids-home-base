@@ -5,11 +5,21 @@ import { useUpcomingSchedule } from "../contexts/UpcomingScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { EditScheduleModalContent } from "../components/EditScheduleModalContent";
+import { tokyoLocalDateToUTCISOString, utcIsoToTokyoDate } from "../timezone";
 
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
-  
+
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingScheduleId, setEditingScheduleId] = useState<number | null>(
+    null,
+  );
+  const [editingScheduleIndex, setEditingScheduleIndex] = useState<number | null>(
+    null,
+  );
+  const [editingScheduleDatetime, setEditingScheduleDatetime] = useState<Date | null>(
+    null,
+  );
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-upcoming-schedule`)
@@ -22,11 +32,57 @@ export const EditSchedule: FC = () => {
       });
   }, []);
 
-  function handleEditSchedule(e: MouseEvent<HTMLDivElement>) {
+  function handleEditSchedule(
+    e: MouseEvent<HTMLDivElement>,
+    scheduleId: number | null,
+    scheduleIndex: number,
+  ) {
+    setEditingScheduleId(scheduleId);
+    setEditingScheduleIndex(scheduleIndex);
+    setEditingScheduleDatetime(utcIsoToTokyoDate(upcomingSchedule.items[scheduleIndex].dt));
     setModalVisible(true);
   }
 
   function handleCloseModal(e: MouseEvent<HTMLDivElement>) {
+    setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleSave(
+    e: MouseEvent<HTMLButtonElement>,
+    datetime: Date,
+    task: string,
+  ) {
+    const utcDatetime = tokyoLocalDateToUTCISOString(datetime);
+
+    // /update-schedule-item-with-id API に datetime と task を送信する。
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: editingScheduleId,
+          dt: utcDatetime,
+          task,
+        }),
+      },
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Update response:", data);
+      })
+      .catch((error) => {
+        console.error("Error updating schedule item:", error);
+      });
+
+    setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleCancel(e: MouseEvent<HTMLButtonElement>) {
     setModalVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
@@ -52,9 +108,12 @@ export const EditSchedule: FC = () => {
           }
 
           return (
-            <Fragment key={item.id ?? index}>
+            <Fragment key={item.id}>
               {showDateHeader && <div css={dateHeaderStyle}>{itemDateKey}</div>}
-              <div css={tableRowStyle} onClick={handleEditSchedule}>
+              <div
+                css={tableRowStyle}
+                onClick={(e) => handleEditSchedule(e, item.id ?? null, index)}
+              >
                 <span>{itemTime}</span>
                 <span>{item.task}</span>
               </div>
@@ -64,8 +123,13 @@ export const EditSchedule: FC = () => {
       })()}
       {modalVisible && (
         <div css={modalBackdropStyle} onClick={handleCloseModal}>
-          <div css={modalContentStyle}>
-            <EditScheduleModalContent />
+          <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <EditScheduleModalContent
+              initialDatetime={editingScheduleDatetime ?? new Date(2000, 0, 1)}
+              initialTask={upcomingSchedule.items[editingScheduleIndex ?? 0].task}
+              handleSave={handleSave}
+              handleCancel={handleCancel}
+            />
           </div>
         </div>
       )}
@@ -111,6 +175,6 @@ const modalBackdropStyle = css`
 
 const modalContentStyle = css`
   position: relative;
-  width: 1240px;
-  height: 700px;
+  width: fit-content;
+  height: fit-content;
 `;
