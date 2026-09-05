@@ -17,10 +17,12 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - SALT=${SALT}
       - ADD_TEST_DATA=${ADD_TEST_DATA}
+      - DEBUG_NOW=${DEBUG_NOW}
     command:
       - /bin/sh
       - -c
       - |
+        set -e
         # ビルドターゲット（x64）に対応したバックエンドのビルド・実行を行う。
         go mod download
         go mod verify
@@ -39,10 +41,15 @@ services:
       - ../src/frontend:/home/builder/app
     ports:
       - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_DEBUG_NOW=${NEXT_PUBLIC_DEBUG_NOW}
+      - NEXT_PUBLIC_WEATHER_FORECAST_URL=${NEXT_PUBLIC_WEATHER_FORECAST_URL}
     command:
       - /bin/sh
       - -c
       - |
+        set -e
         # フロントエンドをデバッグ実行する。
         npm install
         npm run dev

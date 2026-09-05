@@ -13,6 +13,10 @@ func UpdateScheduleItemWithIdHandler(c *gin.Context, apiRequest chan commands.IC
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+	if s.Dt.IsZero() {
+		c.JSON(400, gin.H{"error": "dt (UTC datetime) is required"})
+		return
+	}
 
 	updateScheduleItemCommand := commands.NewUpdateScheduleItemCommand(s)
 	apiRequest <- updateScheduleItemCommand

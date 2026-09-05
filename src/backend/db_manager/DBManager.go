@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	datastructures "kids_home_base/data_structures"
+	"kids_home_base/utils"
 	"log"
 	"os"
 	"time"
@@ -129,22 +130,22 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	}
 
 	// ログの初期データ（UTCで記録）
-	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) SELECT 1, 'INF', 'ログテスト', ? WHERE NOT EXISTS (SELECT 1 FROM logs);`, time.Now().UTC())
+	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) SELECT 1, 'INF', 'ログテスト', ? WHERE NOT EXISTS (SELECT 1 FROM logs);`, utils.Now().UTC())
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
 
 	// 計画の初期データ（UTCで記録）
-	seedScheduleUTC := time.Date(2026, 8, 2, 16, 0, 0, 0, loc).UTC()
+	seedScheduleUTC := utils.Now().UTC()
 	_, err = db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) SELECT ?, 'テストタスク' WHERE NOT EXISTS (SELECT 1 FROM schedules);`, seedScheduleUTC)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
 
 	// 定期的な計画の初期データ（UTCで記録）
-	seedRecurringStartTimeUTC := time.Date(2026, 8, 2, 16, 0, 0, 0, loc).UTC()
-	seedRecurringStartDateUTC := time.Date(2026, 8, 2, 0, 0, 0, 0, loc).UTC()
-	seedRecurringEndDateUTC := time.Date(2026, 11, 2, 0, 0, 0, 0, loc).UTC()
+	seedRecurringStartTimeUTC := utils.Now().UTC()
+	seedRecurringStartDateUTC := utils.Now().UTC()
+	seedRecurringEndDateUTC := utils.Now().AddDate(0, 3, 0).UTC()
 	_, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 1, ?, ?, ?, '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`, seedRecurringStartTimeUTC, seedRecurringStartDateUTC, seedRecurringEndDateUTC)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
@@ -155,7 +156,7 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 
 // ログをデータベースに追加する関数。
 func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) error {
-	_, err := m.db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) VALUES (?, ?, ?, ?)`, userId, logLevel, messageToAdd, time.Now().UTC())
+	_, err := m.db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) VALUES (?, ?, ?, ?)`, userId, logLevel, messageToAdd, utils.Now().UTC())
 
 	if err != nil {
 		log.Println("exec error in AddLog:", err.Error())
@@ -168,8 +169,8 @@ func (m *DBManager) AddLog(userId int, logLevel string, messageToAdd string) err
 // DBから直近1ヶ月間のログを取得する関数。
 // UTC保存データをローカル日付境界（Asia/Tokyo）で絞り込む。
 func (m *DBManager) GetLogs() ([]datastructures.Log, error) {
-	modifier := m.sqliteLocalDateModifier(time.Now())
-	rows, err := m.db.Query(`SELECT created_at, log_level, log_message FROM logs WHERE DATE(created_at, ?) >= DATE(?, '-1 month') ORDER BY created_at DESC`, modifier, m.localDateString(time.Now(), 0))
+	modifier := m.sqliteLocalDateModifier(utils.Now())
+	rows, err := m.db.Query(`SELECT created_at, log_level, log_message FROM logs WHERE DATE(created_at, ?) >= DATE(?, '-1 month') ORDER BY created_at DESC`, modifier, m.localDateString(utils.Now(), 0))
 	if err != nil {
 		log.Println("query error in GetLogs:", err.Error())
 		return nil, err
@@ -196,7 +197,7 @@ func (m *DBManager) GetLogs() ([]datastructures.Log, error) {
 
 // DBから今日の日付の計画すべてを日時昇順で取得する関数。
 func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
-	now := time.Now()
+	now := utils.Now()
 	modifier := m.sqliteLocalDateModifier(now)
 	todayLocal := m.localDateString(now, 0)
 	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) = ? ORDER BY schedule_datetime ASC`, modifier, todayLocal)
@@ -227,7 +228,7 @@ func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithI
 
 // DBから明日の日付の計画すべてを日時昇順で取得する関数。
 func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWithId, error) {
-	now := time.Now()
+	now := utils.Now()
 	modifier := m.sqliteLocalDateModifier(now)
 	tomorrowLocal := m.localDateString(now, 1)
 	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE DATE(schedule_datetime, ?) = ? ORDER BY schedule_datetime ASC`, modifier, tomorrowLocal)
@@ -250,6 +251,40 @@ func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWi
 
 	if err = rows.Err(); err != nil {
 		log.Println("rows error in GetTomorrowScheduleWithId:", err.Error())
+		return nil, err
+	}
+
+	return schedules, nil
+}
+
+// この先すべての計画を日時昇順で取得する関数。
+// DBの日時はUTCで記録されているため、UTCの現在時刻以降で絞り込む。
+func (m *DBManager) GetUpcomingSchedulesWithId() ([]datastructures.ScheduleItemWithId, error) {
+	now := utils.Now()
+	nowUTC := m.normalizeUTC(now)
+
+	// 今日の過去時刻を含めず、現在時刻以降の予定だけを取得する。
+	// juliandayを使うことで、SQLite内の日時文字列を日時として比較する。
+	rows, err := m.db.Query(`SELECT id, schedule_datetime, schedule_task FROM schedules WHERE julianday(schedule_datetime) >= julianday(?) ORDER BY schedule_datetime ASC`, nowUTC)
+	if err != nil {
+		log.Println("query error in GetUpcomingSchedulesWithId:", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var schedules []datastructures.ScheduleItemWithId
+	for rows.Next() {
+		var s datastructures.ScheduleItemWithId
+		err := rows.Scan(&s.Id, &s.Dt, &s.Task)
+		if err != nil {
+			return nil, err
+		}
+		s.Dt = m.normalizeUTC(s.Dt)
+		schedules = append(schedules, s)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Println("rows error in GetUpcomingSchedulesWithId:", err.Error())
 		return nil, err
 	}
 
@@ -376,5 +411,16 @@ func (m *DBManager) UpdatePasswordHashByUserId(userId string, newPasswordHash st
 		return err
 	}
 
+	return nil
+}
+
+// デバッグ用：DBのスケジュールデータをリセットする関数。
+func (m *DBManager) ResetScheduleData() error {
+	_, err := m.db.Exec(`DELETE FROM schedules`)
+	if err != nil {
+		log.Println("exec error in ResetScheduleData:", err.Error())
+		// エラーが発生した場合は返す
+		return err
+	}
 	return nil
 }
