@@ -51,8 +51,8 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
         />
       </div>
       <div>
-        <button onClick={handleStartSave}>ほぞん</button>
-        <button onClick={handleCancel}>キャンセル</button>
+        <button css={saveButtonStyle} onClick={handleStartSave}>ほぞん</button>
+        <button css={cancelButtonStyle} onClick={handleCancel}>キャンセル</button>
       </div>
     </div>
   );
@@ -62,7 +62,7 @@ const componentStyle = css`
   position: relative;
   border: 1px solid white;
   background-color: black;
-  padding: 16px;
+  padding: 24px;
   width: fit-content;
   height: fit-content;
 `;
@@ -84,8 +84,25 @@ const trashIconStyle = css`
 
 const datetimeStyle = css`
   color-scheme: dark;
+
+  font-size: 48px;
+  margin-bottom: 16px;
 `;
 
 const taskInputStyle = css`
   color-scheme: dark;
+
+  font-size: 48px;
+  margin-bottom: 16px;
+  width: 300px;
+`;
+
+const saveButtonStyle = css`
+  font-size: 48px;
+  margin-right: 16px;
+`;
+
+const cancelButtonStyle = css`
+  font-size: 48px;
+  margin: 0;
 `;
