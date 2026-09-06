@@ -1,5 +1,5 @@
 # フロントエンド（Node.js v24.18.0）をビルドするためのDockerfile
-FROM alpine:3.23.5
+FROM alpine:20260805
 
 # パッケージリストの更新
 RUN apk update && \

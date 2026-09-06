@@ -1,5 +1,5 @@
 # バックエンド（Go 1.25.10）をビルドするためのDockerfile
-FROM alpine:3.23.5
+FROM alpine:20260805
 
 # パッケージリストの更新
 RUN apk update && \
