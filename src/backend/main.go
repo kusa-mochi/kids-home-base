@@ -7,6 +7,7 @@ import (
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
+	"kids_home_base/utils"
 	"log"
 	"time"
 
@@ -43,6 +44,7 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	r.POST("/echo", func(c *gin.Context) { api_handlers.EchoHandler(c, apiRequest) })
 	r.GET("/get-today-schedule", func(c *gin.Context) { api_handlers.GetTodayScheduleHandler(c, apiRequest) })
 	r.GET("/get-tomorrow-schedule", func(c *gin.Context) { api_handlers.GetTomorrowScheduleHandler(c, apiRequest) })
+	r.GET("/get-upcoming-schedule", func(c *gin.Context) { api_handlers.GetUpcomingScheduleHandler(c, apiRequest) })
 	r.POST("/add-schedule-item", func(c *gin.Context) { api_handlers.AddScheduleItemHandler(c, apiRequest) })
 	r.POST("/update-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateScheduleItemWithIdHandler(c, apiRequest) })
 	r.POST("/delete-schedule-item", func(c *gin.Context) { api_handlers.DeleteScheduleItemHandler(c, apiRequest) })
@@ -69,6 +71,15 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 }
 
 func AddTestData(dbManager *dbmanager.DBManager) {
+	// 一旦DBのスケジュールデータをリセットする。
+	logger.DbgPrintln("resetting test schedule data...")
+	if err := dbManager.ResetScheduleData(); err != nil {
+		logger.ErrPrintln("failed to reset schedule data:", err.Error())
+		return
+	}
+
+	// 以下、デバッグ用にテストデータを追加する。
+
 	logger.DbgPrintln("adding test data to DB...")
 	tokyoLoc, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
@@ -77,7 +88,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 	}
 
 	// 今日の年・月・日をそれぞれ取得
-	nowInTokyo := time.Now().In(tokyoLoc)
+	nowInTokyo := utils.Now().In(tokyoLoc)
 	year, month, day := nowInTokyo.Date()
 	// 今日の予定
 	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
@@ -87,6 +98,11 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる"},
 		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く"},
 		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る"},
+		{Dt: time.Date(year, month, day, 22, 0, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク"},
+		{Dt: time.Date(year, month, day, 22, 30, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク2"},
+		{Dt: time.Date(year, month, day, 23, 0, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク3"},
+		{Dt: time.Date(year, month, day, 23, 30, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク4"},
+		{Dt: time.Date(year, month, day, 23, 59, 0, 0, tokyoLoc), Task: "デバッグ用の追加タスク5"},
 	})
 
 	logger.DbgPrintln("added today test data")
@@ -102,6 +118,19 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる２"},
 		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く２"},
 		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る２"},
+	})
+
+	// 明後日の年・月・日をそれぞれ取得
+	tomorrow2 := nowInTokyo.AddDate(0, 0, 2)
+	year, month, day = tomorrow2.Date()
+	// 明後日の予定
+	dbManager.AddScheduleItems([]*datastructures.ScheduleItem{
+		{Dt: time.Date(year, month, day, 7, 15, 0, 0, tokyoLoc), Task: "オクラに水をやる３"},
+		{Dt: time.Date(year, month, day, 7, 50, 0, 0, tokyoLoc), Task: "朝ごはんを食べる３"},
+		{Dt: time.Date(year, month, day, 18, 50, 0, 0, tokyoLoc), Task: "シャワーを浴びる３"},
+		{Dt: time.Date(year, month, day, 20, 0, 0, 0, tokyoLoc), Task: "夕ごはんを食べる３"},
+		{Dt: time.Date(year, month, day, 21, 0, 0, 0, tokyoLoc), Task: "歯を磨く３"},
+		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る３"},
 	})
 
 	logger.DbgPrintln("added tomorrow test data")

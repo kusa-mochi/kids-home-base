@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import {
   tokyoLocalDateInputToUTCISO,
@@ -7,18 +6,16 @@ import {
   utcIsoToTokyoDisplay,
 } from "./timezone";
 import { css } from "@emotion/react";
-
-type Schedule = {
-  id: number;
-  dt: string;
-  task: string;
-};
-
-type ScheduleResponse = {
-  success: boolean;
-  message: string;
-  schedules: Schedule[];
-};
+import { HomePage } from "./pages/HomePage";
+import { TodaySchedule } from "./pages/TodaySchedule";
+import { TomorrowSchedule } from "./pages/TomorrowSchedule";
+import { EditSchedule } from "./pages/EditSchedule";
+import { Settings } from "./pages/Settings";
+import { useCurrentPage } from "./contexts/PageContext";
+import { SideMenu } from "./pages/SideMenu";
+import { useTodaySchedule } from "./contexts/TodayScheduleContext";
+import { useTomorrowSchedule } from "./contexts/TomorrowScheduleContext";
+import { ScheduleItem, ScheduleResponse } from "./dataStructures/Schedule";
 
 function getInputValue(id: string): string {
   const input = document.getElementById(id) as HTMLInputElement | null;
@@ -27,8 +24,9 @@ function getInputValue(id: string): string {
 
 export default function Home() {
   const [statusText, setStatusText] = useState("Ready");
-  const [todaySchedules, setTodaySchedules] = useState<Schedule[]>([]);
-  const [tomorrowSchedules, setTomorrowSchedules] = useState<Schedule[]>([]);
+  const { todaySchedule, setTodaySchedule } = useTodaySchedule();
+  const { tomorrowSchedule, setTomorrowSchedule } = useTomorrowSchedule();
+  const { currentPage, setCurrentPage } = useCurrentPage();
 
   function setSuccess(action: string, data: unknown) {
     setStatusText(`${action}: success`);
@@ -41,14 +39,14 @@ export default function Home() {
   }
 
   function handleClickToGet() {
-    fetch("http://localhost:21226/ping")
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ping`)
       .then((response) => response.json())
       .then((data) => setSuccess("Ping", data))
       .catch((error) => setFailure("Ping", error));
   }
 
   function handleClickToPost() {
-    fetch("http://localhost:21226/echo", {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/echo`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,7 +62,7 @@ export default function Home() {
     const userId = getInputValue("user_id");
     const password = getInputValue("password");
 
-    fetch("http://localhost:21226/login", {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +86,7 @@ export default function Home() {
       return;
     }
 
-    fetch("http://localhost:21226/auth/jwt-test", {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/jwt-test`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -101,20 +99,20 @@ export default function Home() {
   }
 
   function handleClickToGetTodaySchedule() {
-    fetch("http://localhost:21226/get-today-schedule")
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
-        setTodaySchedules(data.schedules ?? []);
+        setTodaySchedule({ items: data.schedules ?? [] });
         setSuccess("Get Today", data);
       })
       .catch((error) => setFailure("Get Today", error));
   }
 
   function handleClickToGetTomorrowSchedule() {
-    fetch("http://localhost:21226/get-tomorrow-schedule")
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-tomorrow-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
-        setTomorrowSchedules(data.schedules ?? []);
+        setTomorrowSchedule({ items: data.schedules ?? [] });
         setSuccess("Get Tomorrow", data);
       })
       .catch((error) => setFailure("Get Tomorrow", error));
@@ -132,7 +130,7 @@ export default function Home() {
       return;
     }
 
-    fetch("http://localhost:21226/add-schedule-item", {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/add-schedule-item`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -155,17 +153,20 @@ export default function Home() {
     );
     const newTask = getInputValue("updateScheduleItemTask");
 
-    fetch("http://localhost:21226/update-schedule-item-with-id", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: scheduleItemId,
+          dt: scheduleItemStartTimeUTC,
+          task: newTask,
+        }),
       },
-      body: JSON.stringify({
-        id: scheduleItemId,
-        dt: scheduleItemStartTimeUTC,
-        task: newTask,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Update Schedule", data))
       .catch((error) => setFailure("Update Schedule", error));
@@ -174,7 +175,7 @@ export default function Home() {
   function handleClickToDeleteScheduleItem() {
     const scheduleItemId = parseInt(getInputValue("deleteScheduleItemId"), 10);
 
-    fetch("http://localhost:21226/delete-schedule-item", {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-schedule-item`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -202,19 +203,22 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch("http://localhost:21226/add-recurring-schedule-item", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/add-recurring-schedule-item`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start_time: startTimeRFC3339,
+          day_of_week: dayOfWeek,
+          start_date: startDateRFC3339,
+          end_date: endDateRFC3339,
+          task,
+        }),
       },
-      body: JSON.stringify({
-        start_time: startTimeRFC3339,
-        day_of_week: dayOfWeek,
-        start_date: startDateRFC3339,
-        end_date: endDateRFC3339,
-        task,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Add Recurring", data))
       .catch((error) => setFailure("Add Recurring", error));
@@ -238,20 +242,23 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch("http://localhost:21226/update-recurring-schedule-item-with-id", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-recurring-schedule-item-with-id`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: recurringScheduleItemId,
+          start_time: startTimeRFC3339,
+          day_of_week: dayOfWeek,
+          start_date: startDateRFC3339,
+          end_date: endDateRFC3339,
+          task,
+        }),
       },
-      body: JSON.stringify({
-        id: recurringScheduleItemId,
-        start_time: startTimeRFC3339,
-        day_of_week: dayOfWeek,
-        start_date: startDateRFC3339,
-        end_date: endDateRFC3339,
-        task,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Update Recurring", data))
       .catch((error) => setFailure("Update Recurring", error));
@@ -263,15 +270,18 @@ export default function Home() {
       10,
     );
 
-    fetch("http://localhost:21226/delete-recurring-schedule-item", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-recurring-schedule-item`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: recurringScheduleItemId,
+        }),
       },
-      body: JSON.stringify({
-        id: recurringScheduleItemId,
-      }),
-    })
+    )
       .then((response) => response.json())
       .then((data) => setSuccess("Delete Recurring", data))
       .catch((error) => setFailure("Delete Recurring", error));
@@ -288,7 +298,7 @@ export default function Home() {
     const currentPassword = getInputValue("changePasswordCurrentPassword");
     const newPassword = getInputValue("changePasswordNewPassword");
 
-    fetch("http://localhost:21226/auth/change-password", {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/change-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -307,382 +317,66 @@ export default function Home() {
 
   return (
     <div css={pageStyle}>
-      <main css={mainStyle}>
-        <h1 css={mainH1Style}>Kids Home Base</h1>
-        <p css={statusStyle}>Status: {statusText}</p>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Basic</h2>
-          <div css={rowStyle}>
-            <button css={actionButtonStyle} onClick={handleClickToGet}>
-              Ping
-            </button>
-            <button css={actionButtonStyle} onClick={handleClickToPost}>
-              Echo
-            </button>
+      {currentPage.pageId !== "Home" && (
+        <div css={detailPageStyle}>
+          <div css={leftPaneStyle}>
+            <SideMenu />
           </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Auth</h2>
-          <div css={rowStyle}>
-            <input
-              id="user_id"
-              css={rowInputStyle}
-              type="text"
-              placeholder="User ID"
-            />
-            <input
-              id="password"
-              css={rowInputStyle}
-              type="password"
-              placeholder="Password"
-            />
+          <div css={rightPaneStyle}>
+            {currentPage.pageId === "TodaySchedule" && <TodaySchedule />}
+            {currentPage.pageId === "TomorrowSchedule" && <TomorrowSchedule />}
+            {currentPage.pageId === "EditSchedule" && <EditSchedule />}
+            {currentPage.pageId === "Settings" && <Settings />}
           </div>
-          <div css={rowStyle}>
-            <button css={actionButtonStyle} onClick={handleClickToLogin}>
-              Login
-            </button>
-            <button css={actionButtonStyle} onClick={handleClickToJwtTest}>
-              JWT Test
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Schedule</h2>
-          <div css={rowStyle}>
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToGetTodaySchedule}
-            >
-              Get Today
-            </button>
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToGetTomorrowSchedule}
-            >
-              Get Tomorrow
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="scheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="task"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToAddScheduleItem}
-            >
-              Add
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="updateScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <input
-              id="updateScheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="updateScheduleItemTask"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToUpdateScheduleItem}
-            >
-              Update
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="deleteScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToDeleteScheduleItem}
-            >
-              Delete
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Recurring Schedule</h2>
-          <div css={rowStyle}>
-            <input
-              id="recurringScheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="recurringScheduleItemDayOfWeek"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              max="6"
-              placeholder="Day 0-6"
-            />
-            <input
-              id="recurringScheduleItemStartDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="recurringScheduleItemEndDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="recurringScheduleItemTask"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToAddRecurringScheduleItem}
-            >
-              Add
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="updateRecurringScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <input
-              id="updateRecurringScheduleItemStartTime"
-              css={rowInputStyle}
-              type="datetime-local"
-            />
-            <input
-              id="updateRecurringScheduleItemDayOfWeek"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              max="6"
-              placeholder="Day 0-6"
-            />
-            <input
-              id="updateRecurringScheduleItemStartDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="updateRecurringScheduleItemEndDate"
-              css={rowInputStyle}
-              type="date"
-            />
-            <input
-              id="updateRecurringScheduleItemTask"
-              css={rowInputStyle}
-              type="text"
-              placeholder="Task"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToUpdateRecurringScheduleItemWithId}
-            >
-              Update
-            </button>
-          </div>
-          <div css={rowStyle}>
-            <input
-              id="deleteRecurringScheduleItemId"
-              css={rowInputStyle}
-              type="number"
-              min="0"
-              placeholder="ID"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToDeleteRecurringScheduleItem}
-            >
-              Delete
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Password</h2>
-          <div css={rowStyle}>
-            <input
-              id="changePasswordUserId"
-              css={rowInputStyle}
-              type="text"
-              placeholder="User ID"
-            />
-            <input
-              id="changePasswordCurrentPassword"
-              css={rowInputStyle}
-              type="password"
-              placeholder="Current Password"
-            />
-            <input
-              id="changePasswordNewPassword"
-              css={rowInputStyle}
-              type="password"
-              placeholder="New Password"
-            />
-            <button
-              css={actionButtonStyle}
-              onClick={handleClickToChangePassword}
-            >
-              Change Password
-            </button>
-          </div>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Today (Asia/Tokyo)</h2>
-          <ul css={listStyle}>
-            {todaySchedules.map((s) => (
-              <li key={`today-${s.id}`} css={listItemStyle}>
-                [{s.id}] {utcIsoToTokyoDisplay(s.dt)} - {s.task}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section css={sectionStyle}>
-          <h2 css={sectionH2Style}>Tomorrow (Asia/Tokyo)</h2>
-          <ul css={listStyle}>
-            {tomorrowSchedules.map((s) => (
-              <li key={`tomorrow-${s.id}`} css={listItemStyle}>
-                [{s.id}] {utcIsoToTokyoDisplay(s.dt)} - {s.task}
-              </li>
-            ))}
-          </ul>
-        </section>
-      </main>
+        </div>
+      )}
+      {currentPage.pageId === "Home" && <HomePage />}
     </div>
   );
 }
 
-const pageBackground = "#f7f4ea";
-const pageForeground = "#fffaf2";
-const pageTextPrimary = "#2f2418";
-const pageTextSecondary = "#6a5a44";
+const pageBackground = "black";
+const pageForeground = "#e0e0e0";
+const pageTextPrimary = "#e0e0e0";
+const pageTextSecondary = "#a0a0a0";
 const pageButtonBg = "#0f766e";
 const pageButtonHover = "#115e59";
-const pageLine = "#e6dbc9";
+const pageLine = "#e0e0e0";
 
-const pageStyle = css({
-  display: "flex",
-  flex: 1,
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "flex-start",
-  fontFamily: "var(--font-geist-sans)",
-  background: `radial-gradient(circle at top right, #e6f8f6 0%, ${pageBackground} 52%)`,
-  color: `${pageTextPrimary}`,
-});
+const pageStyle = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-geist-sans);
+  background-color: ${pageBackground};
+  color: ${pageTextPrimary};
+`;
 
-const mainStyle = css({
-  display: "flex",
-  width: "min(1100px, 100%)",
-  margin: "40px 0",
-  border: `1px solid ${pageLine}`,
-  borderRadius: "18px",
-  boxShadow: "0 24px 60px rgba(47, 36, 24, 0.08)",
-  backgroundColor: pageForeground,
-  padding: "32px",
-  gap: "18px",
-  boxSizing: "border-box",
-  flexDirection: "column",
-  "@media (max-width: 720px)": {
-    margin: 0,
-    minHeight: "100vh",
-    border: 0,
-    borderRadius: 0,
-    boxShadow: "none",
-    padding: "18px",
-  },
-});
+const detailPageStyle = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 
-const mainH1Style = css({
-  margin: 0,
-  fontSize: "32px",
-  "@media (max-width: 720px)": {
-    fontSize: "28px",
-  },
-});
+  // 左ペイン、右ペインの順で子要素を並べる。
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-wrap: nowrap;
+`;
 
-const statusStyle = css({
-  margin: 0,
-  color: `${pageTextSecondary}`,
-});
+const leftPaneStyle = css`
+  width: 384px;
+  height: 100%;
+  border-right: 1px solid ${pageLine};
+`;
 
-const sectionStyle = css({
-  width: "100%",
-  borderTop: `1px solid ${pageLine}`,
-  paddingTop: "16px",
-});
-
-const sectionH2Style = css({
-  margin: "0 0 12px",
-  fontSize: "19px",
-});
-
-const rowStyle = css({
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "10px",
-  marginBottom: "10px",
-});
-
-const rowInputStyle = css({
-  height: "38px",
-  border: `1px solid ${pageLine}`,
-  borderRadius: "10px",
-  padding: "0 10px",
-  fontSize: "14px",
-});
-
-const actionButtonStyle = css({
-  height: "38px",
-  padding: "0 14px",
-  border: 0,
-  borderRadius: "10px",
-  background: `${pageButtonBg}`,
-  "&:hover": {
-    background: `${pageButtonHover}`,
-  },
-  color: "#fff",
-  cursor: "pointer",
-  fontSize: "14px",
-});
-
-const listStyle = css({
-  margin: 0,
-  paddingLeft: "20px",
-});
-
-const listItemStyle = css({
-  marginBottom: "6px",
-  color: `${pageTextSecondary}`,
-});
+const rightPaneStyle = css`
+  width: calc(100% - 384px);
+  height: 100%;
+`;
