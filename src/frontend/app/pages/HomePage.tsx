@@ -148,6 +148,7 @@ export const HomePage: FC = () => {
           <img
             src={`https://www.jma.go.jp/bosai/forecast/img/${weatherIconFilename}.svg`}
             css={weatherIconStyle}
+            alt="weather icon"
           />
         </div>
         <div>
