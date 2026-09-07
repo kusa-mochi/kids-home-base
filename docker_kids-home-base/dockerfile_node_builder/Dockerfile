@@ -1,5 +1,11 @@
 # フロントエンド（Node.js v24.18.0）をビルドするためのDockerfile
-FROM alpine:20260805
+ARG BASE_IMAGE_ALPINE_VERSION=20260805
+ARG NODE_VERSION=24.17.0-r0
+ARG NPM_VERSION=11.11.0-r0
+FROM alpine:${BASE_IMAGE_ALPINE_VERSION}
+
+ARG NODE_VERSION
+ARG NPM_VERSION
 
 # パッケージリストの更新
 RUN apk update && \
@@ -10,8 +16,8 @@ RUN apk update && \
     wget \
     ca-certificates \
     build-base \
-    nodejs=24.17.0-r0 \
-    npm=11.11.0-r0
+    nodejs=${NODE_VERSION} \
+    npm=${NPM_VERSION}
 
 # ビルド用ユーザーを作成
 RUN adduser -D builder

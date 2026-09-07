@@ -1,5 +1,9 @@
-# バックエンド（Go 1.25.10）をビルドするためのDockerfile
-FROM alpine:20260805
+# バックエンド（Go）をビルドするためのDockerfile
+ARG BASE_IMAGE_ALPINE_VERSION=20260805
+ARG GO_VERSION=1.25.10-r0
+FROM alpine:${BASE_IMAGE_ALPINE_VERSION}
+
+ARG GO_VERSION
 
 # パッケージリストの更新
 RUN apk update && \
@@ -10,7 +14,7 @@ RUN apk update && \
     wget \
     ca-certificates \
     build-base \
-    go=1.25.10-r0
+    go=${GO_VERSION}
 
 # Goの環境変数を設定
 ENV GOPATH=/home/builder/go
