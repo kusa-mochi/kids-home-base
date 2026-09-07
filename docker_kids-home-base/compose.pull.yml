@@ -3,3 +3,15 @@
 
 services:
   # Docker HubからDockerイメージをプルして、運用環境でコンテナを起動する。
+  kids-home-base-runner:
+    image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    restart: always
+    environment:
+      BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+      GO_VERSION: ${GO_VERSION}
+      NODE_VERSION: ${NODE_VERSION}
+    ports:
+      - "23000:23000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
