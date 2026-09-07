@@ -1,13 +1,17 @@
-# 開発環境で、DockerイメージのビルドとDocker Hubへのプッシュを行うためのDocker Compose ymlファイル
+# 運用環境をターゲットとするフロントエンドとバックエンドのプログラムのビルドをそれぞれ行うためのDocker Compose ymlファイル
 # ビルドターゲット：Raspberry Pi 4B (arm64v8)
-# ビルドイメージにはバックエンドのビルド出力と、フロントエンドのビルド出力を含め、compose.pull.ymlで定義されたイメージをプルすることができる。
+# このymlファイルを用いてプログラムをビルドした後、compose.push.ymlによりイメージのビルドとプッシュを行う想定。
 
 services:
   # バックエンドのビルド
   build-backend:
-    image: whoatemyapplepie/kids-home-base-backend:latest
+    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}
+    platform: linux/arm64
     build:
       context: ./dockerfile_go_builder
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        GO_VERSION: ${GO_VERSION}
     user: builder
     volumes:
       - ../src/backend:/home/builder/app
@@ -23,9 +27,14 @@ services:
 
   # フロントエンドのビルド
   build-frontend:
-    image: whoatemyapplepie/kids-home-base-frontend:latest
+    image: whoatemyapplepie/kids-home-base-frontend:${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
+    platform: linux/arm64
     build:
       context: ./dockerfile_node_builder
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        NPM_VERSION: ${NPM_VERSION}
     user: builder
     volumes:
       - ../src/frontend:/home/builder/app
@@ -36,6 +45,3 @@ services:
         # フロントエンドのビルドを実行する。
         npm install
         npm run build
-
-  # ビルド出力を用いてDockerイメージをビルドする。
-  # Docker Hubにプッシュする。
