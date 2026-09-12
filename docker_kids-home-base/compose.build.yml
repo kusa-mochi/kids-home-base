@@ -5,6 +5,7 @@
 services:
   # バックエンドのビルド
   build-backend:
+    platform: linux/arm64
     image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}
     build:
       context: ./dockerfile_go_builder
@@ -22,7 +23,7 @@ services:
         go mod download
         go mod verify
         mkdir -p /home/builder/app/bin
-        GOOS=linux GOARCH=arm64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
+        CGO_ENABLED=1 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
 
   # フロントエンドのビルド
   build-frontend:
