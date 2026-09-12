@@ -1,3 +1,5 @@
 src/backend/kids_home_base.db
+src/frontend/dist
 .env.local
+.env.build
 sample.json
