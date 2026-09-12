@@ -34,6 +34,9 @@ services:
         BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
         NODE_VERSION: ${NODE_VERSION}
         NPM_VERSION: ${NPM_VERSION}
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_WEATHER_FORECAST_URL=${NEXT_PUBLIC_WEATHER_FORECAST_URL}
     user: builder
     volumes:
       - ../src/frontend:/home/builder/app
