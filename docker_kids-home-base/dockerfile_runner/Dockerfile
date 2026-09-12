@@ -44,6 +44,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # バックエンドを実行するためのユーザーを作成する。
 RUN adduser -D backenduser
+RUN chown -R backenduser:backenduser /var/lib/nginx /var/log/nginx
 USER backenduser
 
 # バックエンド実行、nginx実行
