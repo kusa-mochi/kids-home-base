@@ -10,6 +10,8 @@ services:
       BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
       GO_VERSION: ${GO_VERSION}
       NODE_VERSION: ${NODE_VERSION}
+    volumes:
+      - ./app:/app
     ports:
       - "23000:23000"
     dns:
