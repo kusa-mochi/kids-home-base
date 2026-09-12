@@ -1,7 +1,7 @@
 ---
 name: "Kids Home Base Architecture"
 description: "Use when modifying the Kids Home Base frontend, Go backend API and database, development test data, Docker Compose files, or container environment variables. Documents the current repository architecture and operational constraints."
-applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "sample.json"]
+applyTo: "src/frontend/**, src/backend/**, docker_kids-home-base/**, sample.json"
 ---
 
 # Kids Home Base の設計・開発ガイド
@@ -57,3 +57,9 @@ applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "samp
 - API を変える場合は、handler、Command、DBManager、フロントエンドの呼び出し・型の整合性を確認する。
 - 日時・予定取得を変える場合は、日本時間の日付境界、UTC 保存、`DEBUG_NOW` 使用時の挙動を確認する。
 - Docker・環境変数を変える場合は、開発用起動、arm64 ビルド、秘密値の非公開を確認する。
+
+## 質問への回答
+
+- 質問に対しては、事実と推測を明確に区別して回答する。事実については根拠となる情報源を示す。
+- 1つの質問に対し重複する回答を避ける。必要に応じて、以前の回答への参照を示す。
+- 回答が不明確な場合は、推測で答えずに「不明」と明示する。
