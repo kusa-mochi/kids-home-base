@@ -3,24 +3,6 @@
 # ビルドイメージにはバックエンドのビルド出力と、フロントエンドのビルド出力を含め、運用環境でcompose.pull.ymlを実行することでイメージをプルして利用する想定。
 
 services:
-  # ビルド出力を用いてDockerイメージをビルドする。
-  build-image:
-    image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
-    depends_on:
-      build-backend:
-        condition: service_completed_successfully
-      build-frontend:
-        condition: service_completed_successfully
-    platform: linux/arm64
-    build:
-      context: ..
-      dockerfile: docker_kids-home-base/dockerfile_runner/Dockerfile
-      args:
-        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
-        GO_VERSION: ${GO_VERSION}
-        NODE_VERSION: ${NODE_VERSION}
-        NPM_VERSION: ${NPM_VERSION}
-
   # Docker Hubに Raspberry Pi 4B 向けのイメージをプッシュする。
   push-image:
     image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}

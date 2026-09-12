@@ -6,7 +6,6 @@ services:
   # バックエンドのビルド
   build-backend:
     image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}
-    platform: linux/arm64
     build:
       context: ./dockerfile_go_builder
       args:
@@ -28,7 +27,6 @@ services:
   # フロントエンドのビルド
   build-frontend:
     image: whoatemyapplepie/kids-home-base-frontend:${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
-    platform: linux/arm64
     build:
       context: ./dockerfile_node_builder
       args:
@@ -45,3 +43,28 @@ services:
         # フロントエンドのビルドを実行する。
         npm install
         npm run build
+
+  # ビルド出力を用いてDockerイメージをビルドする。
+  build-image:
+    image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    platform: linux/arm64
+    depends_on:
+      build-backend:
+        condition: service_completed_successfully
+      build-frontend:
+        condition: service_completed_successfully
+    build:
+      context: ..
+      dockerfile: docker_kids-home-base/dockerfile_runner/Dockerfile
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        GO_VERSION: ${GO_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        NPM_VERSION: ${NPM_VERSION}
+    environment:
+      - INITIAL_PASSWORD_HASH=${INITIAL_PASSWORD_HASH}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SALT=${SALT}
+      - ADD_TEST_DATA=${ADD_TEST_DATA}
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+      - NEXT_PUBLIC_WEATHER_FORECAST_URL=${NEXT_PUBLIC_WEATHER_FORECAST_URL}
