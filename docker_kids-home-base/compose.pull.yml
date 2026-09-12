@@ -4,7 +4,7 @@
 services:
   # Docker HubからDockerイメージをプルして、運用環境でコンテナを起動する。
   kids-home-base-runner:
-    image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    image: whoatemyapplepie/kids-home-base:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
     restart: always
     environment:
       BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
