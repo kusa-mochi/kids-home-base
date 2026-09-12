@@ -47,7 +47,7 @@ services:
 
   # ビルド出力を用いてDockerイメージをビルドする。
   build-image:
-    image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    image: whoatemyapplepie/kids-home-base:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
     platform: linux/arm64
     depends_on:
       build-backend:

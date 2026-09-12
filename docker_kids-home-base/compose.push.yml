@@ -5,7 +5,7 @@
 services:
   # Docker Hubに Raspberry Pi 4B 向けのイメージをプッシュする。
   push-image:
-    image: whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    image: whoatemyapplepie/kids-home-base:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
     depends_on:
       build-image:
         condition: service_completed_successfully
@@ -15,6 +15,6 @@ services:
       - -c
       - |
         # Docker Hubにプッシュする。
-        echo "Pushing Docker image for runner to Docker Hub..."
-        docker push whoatemyapplepie/kids-home-base-runner:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
-        echo "Docker image for runner pushed successfully."
+        echo "Pushing Docker image for kids-home-base to Docker Hub..."
+        docker push whoatemyapplepie/kids-home-base:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+        echo "Docker image for kids-home-base pushed successfully."
