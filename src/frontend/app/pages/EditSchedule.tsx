@@ -6,6 +6,7 @@ import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { EditScheduleModalContent } from "../components/EditScheduleModalContent";
 import { tokyoLocalDateToUTCISOString, utcIsoToTokyoDate } from "../timezone";
+import { AddScheduleItemButton } from "../components/AddScheduleItemButton";
 
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
@@ -121,6 +122,7 @@ export const EditSchedule: FC = () => {
           );
         });
       })()}
+      <AddScheduleItemButton />
       {modalVisible && (
         <div css={modalBackdropStyle} onClick={handleCloseModal}>
           <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
