@@ -43,9 +43,9 @@ COPY docker_kids-home-base/dockerfile_runner/entrypoint.sh /usr/local/bin/entryp
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # バックエンドを実行するためのユーザーを作成する。
-RUN adduser -D backenduser
+RUN adduser -u 1000 -D backenduser
 RUN mkdir -p /app && chown -R backenduser:backenduser /app
-RUN chown -R backenduser:backenduser /var/lib/nginx /var/log/nginx
+RUN chown -R backenduser:backenduser /var/lib/nginx /var/log/nginx /app
 WORKDIR /app
 USER backenduser
 
