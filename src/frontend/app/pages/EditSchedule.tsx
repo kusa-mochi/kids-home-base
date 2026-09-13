@@ -5,7 +5,11 @@ import { useUpcomingSchedule } from "../contexts/UpcomingScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { EditScheduleModalContent } from "../components/EditScheduleModalContent";
-import { now, tokyoLocalDateToUTCISOString, utcIsoToTokyoDate } from "../timezone";
+import {
+  now,
+  tokyoLocalDateToUTCISOString,
+  utcIsoToTokyoDate,
+} from "../timezone";
 import { AddScheduleItemButton } from "../components/AddScheduleItemButton";
 
 export const EditSchedule: FC = () => {
@@ -152,8 +156,8 @@ export const EditSchedule: FC = () => {
                 css={tableRowStyle}
                 onClick={(e) => handleEditSchedule(e, item.id ?? null, index)}
               >
-                <span>{itemTime}</span>
-                <span>{item.task}</span>
+                <span css={itemTimeStyle}>{itemTime}</span>
+                <span css={itemTaskStyle}>{item.task}</span>
               </div>
             </Fragment>
           );
@@ -193,13 +197,44 @@ const dateHeaderStyle = css`
 
 const tableStyle = css`
   width: 100%;
-  margin-left: 16px;
+  margin: 0 16px 0 8px;
   font-size: 56px;
 `;
 
 const tableRowStyle = css`
   font-size: 48px;
   height: 56px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const itemTimeStyle = css`
+  height: 72px;
+  margin-right: 16px;
+  font-family:
+    SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const itemTaskStyle = css`
+  height: 72px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
 const modalBackdropStyle = css`
