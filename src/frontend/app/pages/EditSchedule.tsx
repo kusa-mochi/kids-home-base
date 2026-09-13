@@ -5,7 +5,7 @@ import { useUpcomingSchedule } from "../contexts/UpcomingScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { EditScheduleModalContent } from "../components/EditScheduleModalContent";
-import { tokyoLocalDateToUTCISOString, utcIsoToTokyoDate } from "../timezone";
+import { now, tokyoLocalDateToUTCISOString, utcIsoToTokyoDate } from "../timezone";
 import { AddScheduleItemButton } from "../components/AddScheduleItemButton";
 
 export const EditSchedule: FC = () => {
@@ -15,14 +15,17 @@ export const EditSchedule: FC = () => {
   const [editingScheduleId, setEditingScheduleId] = useState<number | null>(
     null,
   );
-  const [editingScheduleIndex, setEditingScheduleIndex] = useState<number | null>(
-    null,
-  );
-  const [editingScheduleDatetime, setEditingScheduleDatetime] = useState<Date | null>(
-    null,
-  );
+  const [editingScheduleIndex, setEditingScheduleIndex] = useState<
+    number | null
+  >(null);
+  const [editingScheduleDatetime, setEditingScheduleDatetime] =
+    useState<Date | null>(null);
 
   useEffect(() => {
+    refreshUpcomingSchedule();
+  }, []);
+
+  function refreshUpcomingSchedule() {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-upcoming-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
@@ -31,7 +34,7 @@ export const EditSchedule: FC = () => {
       .catch((error) => {
         console.error("Error fetching upcoming schedule:", error);
       });
-  }, []);
+  }
 
   function handleEditSchedule(
     e: MouseEvent<HTMLDivElement>,
@@ -40,7 +43,9 @@ export const EditSchedule: FC = () => {
   ) {
     setEditingScheduleId(scheduleId);
     setEditingScheduleIndex(scheduleIndex);
-    setEditingScheduleDatetime(utcIsoToTokyoDate(upcomingSchedule.items[scheduleIndex].dt));
+    setEditingScheduleDatetime(
+      utcIsoToTokyoDate(upcomingSchedule.items[scheduleIndex].dt),
+    );
     setModalVisible(true);
   }
 
@@ -56,28 +61,52 @@ export const EditSchedule: FC = () => {
   ) {
     const utcDatetime = tokyoLocalDateToUTCISOString(datetime);
 
-    // /update-schedule-item-with-id API に datetime と task を送信する。
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
-      {
+    // editingScheduleId が null の場合は新規追加、それ以外は更新
+    if (editingScheduleId === null) {
+      // /add-schedule-item API に datetime と task を送信する。
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/add-schedule-item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: editingScheduleId,
           dt: utcDatetime,
           task,
         }),
-      },
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Update response:", data);
       })
-      .catch((error) => {
-        console.error("Error updating schedule item:", error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Add response:", data);
+          refreshUpcomingSchedule();
+        })
+        .catch((error) => {
+          console.error("Error adding schedule item:", error);
+        });
+    } else {
+      // /update-schedule-item-with-id API に datetime と task を送信する。
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: editingScheduleId,
+            dt: utcDatetime,
+            task,
+          }),
+        },
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Update response:", data);
+          refreshUpcomingSchedule();
+        })
+        .catch((error) => {
+          console.error("Error updating schedule item:", error);
+        });
+    }
 
     setModalVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
@@ -85,6 +114,14 @@ export const EditSchedule: FC = () => {
 
   function handleCancel(e: MouseEvent<HTMLButtonElement>) {
     setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleAddScheduleItem(e: MouseEvent<HTMLButtonElement>) {
+    setEditingScheduleId(null);
+    setEditingScheduleIndex(null);
+    setEditingScheduleDatetime(now());
+    setModalVisible(true);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
@@ -122,13 +159,15 @@ export const EditSchedule: FC = () => {
           );
         });
       })()}
-      <AddScheduleItemButton />
+      <AddScheduleItemButton onClick={handleAddScheduleItem} />
       {modalVisible && (
         <div css={modalBackdropStyle} onClick={handleCloseModal}>
           <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <EditScheduleModalContent
               initialDatetime={editingScheduleDatetime ?? new Date(2000, 0, 1)}
-              initialTask={upcomingSchedule.items[editingScheduleIndex ?? 0].task}
+              initialTask={
+                upcomingSchedule.items[editingScheduleIndex ?? 0].task
+              }
               handleSave={handleSave}
               handleCancel={handleCancel}
             />

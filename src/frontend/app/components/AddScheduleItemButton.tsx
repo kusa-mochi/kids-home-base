@@ -2,9 +2,9 @@
 
 import { css } from "@emotion/react";
 
-export const AddScheduleItemButton = () => {
+export const AddScheduleItemButton = ({ onClick }: { onClick: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
   return (
-    <button css={buttonStyle}>+</button>
+    <button css={buttonStyle} onClick={onClick}>+</button>
   );
 };
 
