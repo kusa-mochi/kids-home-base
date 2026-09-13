@@ -4,7 +4,7 @@
 services:
   # バックエンドのビルド
   build-backend:
-    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-amd64
+    image: whoatemyapplepie/kids-home-base-backend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-amd64
     build:
       context: ./dockerfile_go_builder
       args:
@@ -36,7 +36,7 @@ services:
 
   # フロントエンドのデバッグ実行
   build-frontend:
-    image: whoatemyapplepie/kids-home-base-frontend:${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
+    image: whoatemyapplepie/kids-home-base-frontend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
     build:
       context: ./dockerfile_node_builder
       args:

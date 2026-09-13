@@ -6,7 +6,7 @@ services:
   # バックエンドのビルド
   build-backend:
     platform: linux/arm64
-    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-arm64
+    image: whoatemyapplepie/kids-home-base-backend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-arm64
     build:
       context: ./dockerfile_go_builder
       args:
@@ -27,7 +27,7 @@ services:
 
   # フロントエンドのビルド
   build-frontend:
-    image: whoatemyapplepie/kids-home-base-frontend:${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
+    image: whoatemyapplepie/kids-home-base-frontend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
     build:
       context: ./dockerfile_node_builder
       args:
@@ -50,7 +50,7 @@ services:
 
   # ビルド出力を用いてDockerイメージをビルドする。
   build-image:
-    image: whoatemyapplepie/kids-home-base:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    image: whoatemyapplepie/kids-home-base:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
     platform: linux/arm64
     depends_on:
       build-backend:
