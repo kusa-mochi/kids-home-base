@@ -214,7 +214,9 @@ export const EditSchedule: FC = () => {
             <EditScheduleModalContent
               initialDatetime={editingScheduleDatetime ?? new Date(2000, 0, 1)}
               initialTask={
-                upcomingSchedule.items[editingScheduleIndex ?? 0].task
+                editingScheduleIndex !== null
+                  ? upcomingSchedule.items[editingScheduleIndex].task
+                  : ""
               }
               handleSave={handleSave}
               handleCancel={handleCancel}
