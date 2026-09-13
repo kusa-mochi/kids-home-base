@@ -9,9 +9,9 @@ export const AddScheduleItemButton = ({ onClick }: { onClick: (e: React.MouseEve
 };
 
 const buttonStyle = css`
-  font-size: 48px;
-  width: 56px;
-  height: 56px;
+  font-size: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   border: none;
   background-color: #0070f3;
