@@ -16,6 +16,7 @@ export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [trashConfirmVisible, setTrashConfirmVisible] = useState(false);
   const [editingScheduleId, setEditingScheduleId] = useState<number | null>(
     null,
   );
@@ -51,10 +52,12 @@ export const EditSchedule: FC = () => {
       utcIsoToTokyoDate(upcomingSchedule.items[scheduleIndex].dt),
     );
     setModalVisible(true);
+    setTrashConfirmVisible(false);
   }
 
   function handleCloseModal(e: MouseEvent<HTMLDivElement>) {
     setModalVisible(false);
+    setTrashConfirmVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
@@ -113,10 +116,50 @@ export const EditSchedule: FC = () => {
     }
 
     setModalVisible(false);
+    setTrashConfirmVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
   function handleCancel(e: MouseEvent<HTMLButtonElement>) {
+    setModalVisible(false);
+    setTrashConfirmVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleTrash(e: MouseEvent<HTMLDivElement>) {
+    setModalVisible(false);
+    setTrashConfirmVisible(true);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleConfirmTrash(e: MouseEvent<HTMLButtonElement>) {
+    // Implement the actual trash functionality here
+    if (editingScheduleIndex !== null) {
+      const itemId = upcomingSchedule.items[editingScheduleIndex].id;
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-schedule-item`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: itemId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Delete response:", data);
+          refreshUpcomingSchedule();
+        })
+        .catch((error) => {
+          console.error("Error deleting schedule item:", error);
+        });
+    }
+    
+    setTrashConfirmVisible(false);
+    setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleCancelTrash(e: MouseEvent<HTMLButtonElement>) {
+    setTrashConfirmVisible(false);
     setModalVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
@@ -126,6 +169,7 @@ export const EditSchedule: FC = () => {
     setEditingScheduleIndex(null);
     setEditingScheduleDatetime(now());
     setModalVisible(true);
+    setTrashConfirmVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
@@ -174,7 +218,17 @@ export const EditSchedule: FC = () => {
               }
               handleSave={handleSave}
               handleCancel={handleCancel}
+              handleTrash={handleTrash}
             />
+          </div>
+        </div>
+      )}
+      {trashConfirmVisible && (
+        <div css={modalBackdropStyle} onClick={() => setTrashConfirmVisible(false)}>
+          <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <p>{upcomingSchedule.items[editingScheduleIndex ?? 0].task}を削除してもよろしいですか？</p>
+            <button onClick={handleConfirmTrash}>はい</button>
+            <button onClick={handleCancelTrash}>いいえ</button>
           </div>
         </div>
       )}

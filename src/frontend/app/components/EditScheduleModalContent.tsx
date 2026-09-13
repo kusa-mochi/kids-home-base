@@ -10,9 +10,10 @@ type EditScheduleModalContentProps = {
   initialTask: string;
   handleSave: (e: MouseEvent<HTMLButtonElement>, datetime: Date, task: string) => void;
   handleCancel: (e: MouseEvent<HTMLButtonElement>) => void;
+  handleTrash: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
-export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ initialDatetime, initialTask, handleSave, handleCancel }) => {
+export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ initialDatetime, initialTask, handleSave, handleCancel, handleTrash }) => {
 
   function handleStartSave(e: MouseEvent<HTMLButtonElement>) {
     // 入力値の検証
@@ -29,7 +30,7 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
 
   return (
     <div css={componentStyle}>
-      <div css={trashIconStyle}>
+      <div css={trashIconStyle} onClick={handleTrash}>
         <TrashIcon />
       </div>
       <div>
@@ -68,13 +69,14 @@ const componentStyle = css`
 `;
 
 const trashIconStyle = css`
-  width: 24px;
-  height: 24px;
+  width: 80px;
+  height: 80px;
+  padding: 16px;
   cursor: pointer;
 
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 8px;
+  right: 4px;
 
   display: flex;
   flex-direction: row;
@@ -94,7 +96,7 @@ const taskInputStyle = css`
 
   font-size: 48px;
   margin-bottom: 16px;
-  width: 300px;
+  width: 720px;
 `;
 
 const saveButtonStyle = css`
