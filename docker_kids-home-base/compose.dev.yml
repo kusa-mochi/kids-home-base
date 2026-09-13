@@ -4,7 +4,7 @@
 services:
   # バックエンドのビルド
   build-backend:
-    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}
+    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-amd64
     build:
       context: ./dockerfile_go_builder
       args:

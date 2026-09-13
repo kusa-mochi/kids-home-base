@@ -3,4 +3,4 @@
 # このカレントディレクトリをこのスクリプトのあるディレクトリに変更する。
 Set-Location -Path $PSScriptRoot
 
-docker compose -f .\compose.dev.yml --env-file .env.local up --abort-on-container-exit
+docker compose -f .\compose.dev.yml --env-file .env.dev up --abort-on-container-exit

@@ -6,7 +6,7 @@ services:
   # バックエンドのビルド
   build-backend:
     platform: linux/arm64
-    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}
+    image: whoatemyapplepie/kids-home-base-backend:${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-arm64
     build:
       context: ./dockerfile_go_builder
       args:
