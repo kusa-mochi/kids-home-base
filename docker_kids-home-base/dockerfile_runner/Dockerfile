@@ -27,25 +27,26 @@ RUN apk update && \
 # ビルド用ユーザーとユーザーグループを作成する。
 RUN addgroup -S builder && adduser -S builder -G builder
 
+# バックエンドを実行するためのユーザーを作成する。
+RUN adduser -u 1000 -D backenduser
+RUN mkdir -p /app && chown -R backenduser:backenduser /app
+RUN chown -R backenduser:backenduser /var/lib/nginx /var/log/nginx /app
+
 # ビルド済のバックエンドプログラム(src/backend/bin/kids-home-base-backend)を
 # 所定のディレクトリに配置する。
-COPY --chown=nginx:nginx src/backend/bin/kids-home-base-backend /usr/local/bin/kids-home-base-backend
+COPY --chown=backenduser:backenduser src/backend/bin/kids-home-base-backend /usr/local/bin/kids-home-base-backend
 
 # ビルド済のフロントエンドプログラム(src/frontend/dist)を
 # 所定のディレクトリに配置する。
-COPY --chown=nginx:nginx src/frontend/dist /usr/share/nginx/html
+COPY --chown=backenduser:backenduser src/frontend/dist /usr/share/nginx/html
 
 # nginxの設定ファイルを配置する。
-COPY --chown=nginx:nginx src/frontend/nginx.conf /etc/nginx
+COPY --chown=backenduser:backenduser src/frontend/nginx.conf /etc/nginx
 
 # エントリーポイントスクリプトを配置する。
 COPY docker_kids-home-base/dockerfile_runner/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# バックエンドを実行するためのユーザーを作成する。
-RUN adduser -u 1000 -D backenduser
-RUN mkdir -p /app && chown -R backenduser:backenduser /app
-RUN chown -R backenduser:backenduser /var/lib/nginx /var/log/nginx /app
 WORKDIR /app
 USER backenduser
 
