@@ -59,13 +59,9 @@ Write-Host "=== 1. バックエンドおよびフロントエンドのビルダ�
 docker compose -f .\compose.build.yml --env-file $envFile build build-backend build-frontend
 Assert-Success "1. ビルダーイメージのビルド"
 
-Write-Host "=== 2. バックエンドバイナリ（ARM64）をコンパイル中... ==="
-# docker compose -f .\compose.build.yml --env-file $envFile run --rm build-backend
 Invoke-BuildContainer "build-backend" "2. バックエンドバイナリのコンパイル"
 Assert-Success "2. バックエンドバイナリのコンパイル"
 
-Write-Host "=== 3. フロントエンド（Next.js 静的ファイル）をビルド中... ==="
-# docker compose -f .\compose.build.yml --env-file $envFile run --rm build-frontend
 Invoke-BuildContainer "build-frontend" "3. フロントエンドのビルド"
 Assert-Success "3. フロントエンドのビルド"
 
