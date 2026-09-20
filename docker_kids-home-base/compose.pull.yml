@@ -15,9 +15,12 @@ services:
       SALT: ${SALT}
       ADD_TEST_DATA: ${ADD_TEST_DATA}
     volumes:
-      - ./app:/app
+      - app:/app
     ports:
       - "23000:23000"
     dns:
       - 8.8.8.8
       - 8.8.4.4
+
+volumes:
+  app:
