@@ -46,7 +46,7 @@ services:
       - |
         # フロントエンドのビルドを実行する。
         npm install
-        rm -rf .next
+        rm -rf .next dist
         npm run build
 
   # ビルド出力を用いてDockerイメージをビルドする。

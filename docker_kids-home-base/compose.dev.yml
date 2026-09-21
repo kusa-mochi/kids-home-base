@@ -59,6 +59,7 @@ services:
         set -e
         # フロントエンドをデバッグ実行する。
         npm install
+        rm -rf .next dist
         npm run dev
 
   # ビルド出力を用いてDockerイメージをビルドする。
