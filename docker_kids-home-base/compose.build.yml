@@ -49,8 +49,8 @@ services:
         rm -rf .next dist
         npm run build
         # /home/builder/app に index.html と _not-found.html が生成されていない場合、異常終了する。
-        if [ ! -f /home/builder/app/index.html ] || [ ! -f /home/builder/app/_not-found.html ]; then
-          echo "Error: index.html or _not-found.html not found."
+        if [ ! -f /home/builder/app/dist/index.html ] || [ ! -f /home/builder/app/dist/_not-found.html ]; then
+          echo "Error: index.html or _not-found.html not found in /home/builder/app/dist in the frontend builder container."
           exit 1
         fi
 
