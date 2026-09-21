@@ -36,7 +36,7 @@ applyTo: "src/frontend/**, src/backend/**, docker_kids-home-base/**, sample.json
 
 ## テスト用データと時刻固定
 
-- 開発用の環境変数例は `docker_kids-home-base/.env.example`、ローカル実値は同ディレクトリの `.env.local` に置く。`.env.local` の秘密値は共有しない。
+- 開発用の環境変数例は `docker_kids-home-base/.env.example`、ローカル実値は同ディレクトリの `.env.dev` に置く。`.env.dev` の秘密値は共有しない。
 - `ADD_TEST_DATA=1` でバックエンドを起動すると、`main.go` の `AddTestData` が実行される。
 - `AddTestData` は予定データをリセットし、`utils.Now()` を基準に Asia/Tokyo の当日・翌日・翌々日の単発予定を投入する。既存の予定を消すため、開発・検証環境だけで有効にする。
 - `DEBUG_NOW` に RFC3339 の日時を設定すると、`utils.Now()` がその値を返す。日付またぎや予定取得の再現テストでは `ADD_TEST_DATA=1` と組み合わせる。
@@ -44,7 +44,7 @@ applyTo: "src/frontend/**, src/backend/**, docker_kids-home-base/**, sample.json
 
 ## Docker と開発・運用フロー
 
-- Docker 関連は `docker_kids-home-base/` に集約する。実行前にこのディレクトリで `.env.local` を用意する。
+- Docker 関連は `docker_kids-home-base/` に集約する。実行前にこのディレクトリで `.env.dev` を用意する。
 - 開発環境は `dev.up.ps1` を使用する。`compose.dev.yml` で Go と Next.js のビルダーコンテナを起動し、`src/backend` と `src/frontend` をマウントしてそれぞれ `:21226` と `:3000` を公開する。
 - 開発コンテナは `ADD_TEST_DATA`、`DEBUG_NOW`、`NEXT_PUBLIC_BACKEND_URL`、`NEXT_PUBLIC_DEBUG_NOW`、`NEXT_PUBLIC_WEATHER_FORECAST_URL` を Compose 経由で受け取る。環境変数を増減するときは、Compose 定義・`.env.example`・アプリ側の参照を同期する。
 - 停止は `dev.down.ps1`、再起動は `dev.restart.ps1` を使用する。スクリプトは自身の配置ディレクトリへ移動してから Compose を実行する。
