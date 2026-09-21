@@ -4,7 +4,7 @@ import { css } from "@emotion/react";
 
 export const AddScheduleItemButton = ({ onClick }: { onClick: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
   return (
-    <button css={buttonStyle} onClick={onClick}>+</button>
+    <button type="button" css={buttonStyle} onClick={onClick} aria-label="予定を追加する">+</button>
   );
 };
 
