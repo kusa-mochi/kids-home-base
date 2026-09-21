@@ -126,7 +126,7 @@ export const EditSchedule: FC = () => {
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
-  function handleTrash(e: MouseEvent<HTMLDivElement>) {
+  function handleTrash(e: MouseEvent<HTMLButtonElement>) {
     setModalVisible(false);
     setTrashConfirmVisible(true);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop

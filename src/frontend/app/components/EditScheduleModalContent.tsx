@@ -14,7 +14,7 @@ type EditScheduleModalContentProps = {
     task: string,
   ) => void;
   handleCancel: (e: MouseEvent<HTMLButtonElement>) => void;
-  handleTrash: (e: MouseEvent<HTMLDivElement>) => void;
+  handleTrash: (e: MouseEvent<HTMLButtonElement>) => void;
   canTrash: boolean;
 };
 
@@ -54,9 +54,9 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
           css={datetimeStyle}
         />
         {canTrash && (
-          <span css={trashIconStyle} onClick={handleTrash}>
+          <button css={trashIconStyle} onClick={handleTrash}>
             <TrashIcon />
-          </span>
+          </button>
         )}
       </div>
       <div>
@@ -101,7 +101,8 @@ const trashIconStyle = css`
   height: 48px;
   padding: 0;
   margin: -16px 0 0 0;
-  cursor: pointer;
+  background-color: black;
+  border: none;
 
   // display: flex;
   // flex-direction: row;
