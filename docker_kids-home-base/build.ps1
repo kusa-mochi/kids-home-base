@@ -69,4 +69,4 @@ Write-Host "=== 4. 運用用Dockerイメージ（ARM64）をビルド中... ==="
 docker compose -f .\compose.build.yml --env-file $envFile build --no-cache build-image
 Assert-Success "4. 運用用Dockerイメージのビルド"
 
-Write-Host "=== ビルド完了: compose.push.yml でDocker Hubへプッシュ可能です。 ==="
+Write-Host "=== ビルド完了: .\push.ps1 でDocker Hubへプッシュ可能です。 ==="
