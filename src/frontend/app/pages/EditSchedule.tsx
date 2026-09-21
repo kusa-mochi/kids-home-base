@@ -221,6 +221,7 @@ export const EditSchedule: FC = () => {
               handleSave={handleSave}
               handleCancel={handleCancel}
               handleTrash={handleTrash}
+              canTrash={editingScheduleIndex !== null}
             />
           </div>
         </div>

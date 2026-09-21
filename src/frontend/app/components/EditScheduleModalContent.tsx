@@ -15,6 +15,7 @@ type EditScheduleModalContentProps = {
   ) => void;
   handleCancel: (e: MouseEvent<HTMLButtonElement>) => void;
   handleTrash: (e: MouseEvent<HTMLDivElement>) => void;
+  canTrash: boolean;
 };
 
 export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
@@ -23,6 +24,7 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
   handleSave,
   handleCancel,
   handleTrash,
+  canTrash,
 }) => {
   function handleStartSave(e: MouseEvent<HTMLButtonElement>) {
     // 入力値の検証
@@ -51,9 +53,11 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
           defaultValue={toDatetimeLocalValue(initialDatetime)}
           css={datetimeStyle}
         />
-        <span css={trashIconStyle} onClick={handleTrash}>
-          <TrashIcon />
-        </span>
+        {canTrash && (
+          <span css={trashIconStyle} onClick={handleTrash}>
+            <TrashIcon />
+          </span>
+        )}
       </div>
       <div>
         <input
