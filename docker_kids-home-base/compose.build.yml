@@ -48,6 +48,11 @@ services:
         npm install
         rm -rf .next dist
         npm run build
+        # /home/builder/app に index.html と _not-found.html が生成されていない場合、異常終了する。
+        if [ ! -f /home/builder/app/index.html ] || [ ! -f /home/builder/app/_not-found.html ]; then
+          echo "Error: index.html or _not-found.html not found."
+          exit 1
+        fi
 
   # ビルド出力を用いてDockerイメージをビルドする。
   build-image:
