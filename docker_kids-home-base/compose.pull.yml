@@ -17,7 +17,7 @@ services:
     volumes:
       - app:/app
     ports:
-      - "23000:23000"
+      - "${BACKEND_HOST}:${BACKEND_PORT}:${BACKEND_PORT}"
     dns:
       - 8.8.8.8
       - 8.8.4.4
