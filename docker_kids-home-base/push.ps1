@@ -9,5 +9,10 @@ if (-not (Test-Path $envFile)) {
 
 Write-Host "=== Docker Hubへイメージをプッシュ中... ==="
 docker compose -f .\compose.build.yml --env-file $envFile push build-image
+$result = $LASTEXITCODE
+if ($result -ne 0) {
+    Write-Error "Docker Hubへのプッシュに失敗しました。終了コード: $result"
+    exit $result
+}
 
 Write-Host "=== Docker Hubへのプッシュ完了 ==="
