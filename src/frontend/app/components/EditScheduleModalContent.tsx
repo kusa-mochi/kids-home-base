@@ -30,10 +30,7 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
 
   return (
     <div css={componentStyle}>
-      <div css={trashIconStyle} onClick={handleTrash}>
-        <TrashIcon />
-      </div>
-      <div>
+      <div css={modalHeaderStyle}>
         <input
           type="datetime-local"
           id="edit-schedule-datetime"
@@ -41,6 +38,9 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
           defaultValue={toDatetimeLocalValue(initialDatetime)}
           css={datetimeStyle}
         />
+        <span css={trashIconStyle} onClick={handleTrash}>
+          <TrashIcon />
+        </span>
       </div>
       <div>
         <input
@@ -68,20 +68,24 @@ const componentStyle = css`
   height: fit-content;
 `;
 
-const trashIconStyle = css`
-  width: 80px;
-  height: 80px;
-  padding: 16px;
-  cursor: pointer;
-
-  position: absolute;
-  top: 8px;
-  right: 4px;
-
+const modalHeaderStyle = css`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+`;
+
+const trashIconStyle = css`
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  margin: -16px 0 0 0;
+  cursor: pointer;
+
+  // display: flex;
+  // flex-direction: row;
+  // justify-content: center;
+  // align-items: center;
 `;
 
 const datetimeStyle = css`
