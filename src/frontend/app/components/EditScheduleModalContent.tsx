@@ -8,17 +8,30 @@ import { TrashIcon } from "../assets/iconComponents/TrashIcon";
 type EditScheduleModalContentProps = {
   initialDatetime: Date;
   initialTask: string;
-  handleSave: (e: MouseEvent<HTMLButtonElement>, datetime: Date, task: string) => void;
+  handleSave: (
+    e: MouseEvent<HTMLButtonElement>,
+    datetime: Date,
+    task: string,
+  ) => void;
   handleCancel: (e: MouseEvent<HTMLButtonElement>) => void;
   handleTrash: (e: MouseEvent<HTMLDivElement>) => void;
 };
 
-export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ initialDatetime, initialTask, handleSave, handleCancel, handleTrash }) => {
-
+export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
+  initialDatetime,
+  initialTask,
+  handleSave,
+  handleCancel,
+  handleTrash,
+}) => {
   function handleStartSave(e: MouseEvent<HTMLButtonElement>) {
     // 入力値の検証
-    const datetimeInput = document.getElementById("edit-schedule-datetime") as HTMLInputElement;
-    const taskInput = document.getElementById("edit-schedule-task") as HTMLInputElement;
+    const datetimeInput = document.getElementById(
+      "edit-schedule-datetime",
+    ) as HTMLInputElement;
+    const taskInput = document.getElementById(
+      "edit-schedule-task",
+    ) as HTMLInputElement;
     if (!datetimeInput.value || !taskInput.value) {
       alert("にちじとタスクをりょうほう入力してください。");
       return;
@@ -52,8 +65,12 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
         />
       </div>
       <div>
-        <button css={saveButtonStyle} onClick={handleStartSave}>ほぞん</button>
-        <button css={cancelButtonStyle} onClick={handleCancel}>キャンセル</button>
+        <button css={saveButtonStyle} onClick={handleStartSave}>
+          ほぞん
+        </button>
+        <button css={cancelButtonStyle} onClick={handleCancel}>
+          キャンセル
+        </button>
       </div>
     </div>
   );
