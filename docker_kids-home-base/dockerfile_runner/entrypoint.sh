@@ -1,4 +1,10 @@
 #!/bin/sh
+set -eu
+
+envsubst '${BACKEND_HOST} ${BACKEND_PORT}' \
+  < /etc/nginx/template/nginx.conf.template \
+  > /etc/nginx/nginx.conf
+
 /usr/local/bin/kids-home-base-backend &
 BACKEND_PID=$!
 exec nginx -g 'daemon off;' &
