@@ -4,11 +4,15 @@ ARG BASE_IMAGE_ALPINE_VERSION=20260805
 ARG NODE_VERSION=24.17.0-r0
 ARG NPM_VERSION=11.11.0-r0
 ARG GO_VERSION=1.25.10-r0
+ARG BACKEND_PORT=20080
+ARG BACKEND_HOST=192.168.0.10
 FROM alpine:${BASE_IMAGE_ALPINE_VERSION}
 
 ARG NODE_VERSION
 ARG NPM_VERSION
 ARG GO_VERSION
+ARG BACKEND_PORT
+ARG BACKEND_HOST
 
 # パッケージリストの更新
 RUN apk update && \
@@ -41,7 +45,7 @@ COPY --chown=backenduser:backenduser src/backend/bin/kids-home-base-backend /usr
 COPY --chown=backenduser:backenduser src/frontend/dist /usr/share/nginx/html
 
 # nginxの設定ファイルを配置する。
-COPY --chown=backenduser:backenduser src/frontend/nginx.conf /etc/nginx
+COPY --chown=backenduser:backenduser src/frontend/nginx.conf.template /etc/nginx/template/nginx.conf.template
 
 # エントリーポイントスクリプトを配置する。
 COPY docker_kids-home-base/dockerfile_runner/entrypoint.sh /usr/local/bin/entrypoint.sh

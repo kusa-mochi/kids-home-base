@@ -28,9 +28,9 @@ http {
     gzip          on;
 
     server {
-        # 自宅内LANのみで公開する。サーバのIPアドレスは192.168.0.100固定、TLSは使用しない。
-        listen 23000;
-        server_name 192.168.0.100;
+        # 自宅内LANのみで公開する。TLSは使用しない。
+        listen ${BACKEND_PORT};
+        server_name ${BACKEND_HOST};
 
         root /usr/share/nginx/html;
         index index.html;
