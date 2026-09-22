@@ -134,14 +134,13 @@ export const EditSchedule: FC = () => {
 
   function handleConfirmTrash(e: MouseEvent<HTMLButtonElement>) {
     // Implement the actual trash functionality here
-    if (editingScheduleIndex !== null) {
-      const itemId = upcomingSchedule.items[editingScheduleIndex].id;
+    if (editingScheduleId !== null) {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-schedule-item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: itemId }),
+        body: JSON.stringify({ id: editingScheduleId }),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -152,7 +151,7 @@ export const EditSchedule: FC = () => {
           console.error("Error deleting schedule item:", error);
         });
     }
-    
+
     setTrashConfirmVisible(false);
     setModalVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
@@ -229,7 +228,11 @@ export const EditSchedule: FC = () => {
       {trashConfirmVisible && (
         <div css={modalBackdropStyle} onClick={() => setTrashConfirmVisible(false)}>
           <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
-            <p>{upcomingSchedule.items[editingScheduleIndex ?? 0].task}を削除してもよろしいですか？</p>
+            <p>
+              {upcomingSchedule.items.find((item) => item.id === editingScheduleId)
+                ?.task ?? ""}
+              を削除してもよろしいですか？
+            </p>
             <button onClick={handleConfirmTrash}>はい</button>
             <button onClick={handleCancelTrash}>いいえ</button>
           </div>
