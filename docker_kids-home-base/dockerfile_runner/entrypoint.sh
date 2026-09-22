@@ -1,7 +1,10 @@
 #!/bin/sh
+
+envsubst '${BACKEND_HOST} ${BACKEND_PORT}' < /etc/nginx/template/nginx.conf.template > /tmp/nginx.conf
+
 /usr/local/bin/kids-home-base-backend &
 BACKEND_PID=$!
-exec nginx -g 'daemon off;' &
+exec nginx -c /tmp/nginx.conf -g 'daemon off;' &
 NGINX_PID=$!
 
 # どちらかのプロセスが終了したら、エントリポイントも終了する。

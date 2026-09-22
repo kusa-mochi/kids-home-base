@@ -18,6 +18,7 @@ ARG BACKEND_HOST
 RUN apk update && \
     apk add --no-cache \
     bash \
+    gettext \
     git \
     curl \
     wget \

@@ -14,6 +14,8 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       SALT: ${SALT}
       ADD_TEST_DATA: "0"
+      BACKEND_HOST: ${BACKEND_HOST}
+      BACKEND_PORT: ${BACKEND_PORT}
     volumes:
       - app:/app
     ports:
