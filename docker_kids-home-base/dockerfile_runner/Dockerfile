@@ -23,6 +23,7 @@ RUN apk update && \
     curl \
     wget \
     ca-certificates \
+    gettext \
     build-base \
     nodejs=${NODE_VERSION} \
     npm=${NPM_VERSION} \
