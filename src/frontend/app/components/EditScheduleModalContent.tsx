@@ -54,7 +54,7 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
           css={datetimeStyle}
         />
         {canTrash && (
-          <button css={trashIconStyle} onClick={handleTrash}>
+          <button type="button" css={trashIconStyle} onClick={handleTrash} aria-label="予定を削除する">
             <TrashIcon />
           </button>
         )}
@@ -69,10 +69,10 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
         />
       </div>
       <div>
-        <button css={saveButtonStyle} onClick={handleStartSave}>
+        <button type="button" css={saveButtonStyle} onClick={handleStartSave} aria-label="予定を保存する">
           ほぞん
         </button>
-        <button css={cancelButtonStyle} onClick={handleCancel}>
+        <button type="button" css={cancelButtonStyle} onClick={handleCancel} aria-label="予定の編集をキャンセルする">
           キャンセル
         </button>
       </div>
