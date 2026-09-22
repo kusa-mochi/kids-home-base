@@ -134,14 +134,13 @@ export const EditSchedule: FC = () => {
 
   function handleConfirmTrash(e: MouseEvent<HTMLButtonElement>) {
     // Implement the actual trash functionality here
-    if (editingScheduleIndex !== null) {
-      const itemId = upcomingSchedule.items[editingScheduleIndex].id;
+    if (editingScheduleId !== null) {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-schedule-item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: itemId }),
+        body: JSON.stringify({ id: editingScheduleId }),
       })
         .then((response) => response.json())
         .then((data) => {
