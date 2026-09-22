@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+
 envsubst '${BACKEND_HOST} ${BACKEND_PORT}' < /etc/nginx/template/nginx.conf.template > /tmp/nginx.conf
 
 /usr/local/bin/kids-home-base-backend &
