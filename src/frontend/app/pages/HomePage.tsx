@@ -6,6 +6,7 @@ import { ScheduleResponse } from "../dataStructures/Schedule";
 import { now, utcIsoToTokyoDisplay } from "../timezone";
 import { css } from "@emotion/react";
 import { WeatherIconMap } from "../dataStructures/WeatherIconMap";
+import { apiPath } from "../api";
 
 export const HomePage: FC = () => {
   const { currentPage, setCurrentPage } = useCurrentPage();
@@ -91,7 +92,7 @@ export const HomePage: FC = () => {
 
   useEffect(() => {
     // バックエンドの /get-today-schedule API から今日のスケジュールを取得する。
-    fetch(`/get-today-schedule`)
+    fetch(apiPath("/get-today-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });

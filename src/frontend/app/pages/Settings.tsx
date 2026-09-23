@@ -1,6 +1,7 @@
 "use client";
 import { FC } from "react";
 import { useLoginData } from "../contexts/LoginContext";
+import { apiPath } from "../api";
 
 export const Settings: FC = () => {
   const { loginData, setLoginData } = useLoginData();
@@ -12,7 +13,7 @@ export const Settings: FC = () => {
     ) as HTMLInputElement;
     const userId = userIdInput.value;
     const password = passwordInput.value;
-    fetch(`/login`, {
+    fetch(apiPath("/login"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

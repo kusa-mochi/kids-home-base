@@ -4,6 +4,7 @@ import { useTodaySchedule } from "../contexts/TodayScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { now } from "../timezone";
+import { apiPath } from "../api";
 
 export const TodaySchedule: FC = () => {
   const { todaySchedule, setTodaySchedule } = useTodaySchedule();
@@ -15,7 +16,7 @@ export const TodaySchedule: FC = () => {
   const [todayDay, setTodayDay] = useState<number>(nowDateTime.getDate());
 
   useEffect(() => {
-    fetch(`/get-today-schedule`)
+    fetch(apiPath("/get-today-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });

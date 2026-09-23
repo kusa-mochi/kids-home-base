@@ -16,6 +16,7 @@ import { SideMenu } from "./pages/SideMenu";
 import { useTodaySchedule } from "./contexts/TodayScheduleContext";
 import { useTomorrowSchedule } from "./contexts/TomorrowScheduleContext";
 import { ScheduleItem, ScheduleResponse } from "./dataStructures/Schedule";
+import { apiPath } from "./api";
 
 function getInputValue(id: string): string {
   const input = document.getElementById(id) as HTMLInputElement | null;
@@ -39,14 +40,14 @@ export default function Home() {
   }
 
   function handleClickToGet() {
-    fetch(`/ping`)
+    fetch(apiPath("/ping"))
       .then((response) => response.json())
       .then((data) => setSuccess("Ping", data))
       .catch((error) => setFailure("Ping", error));
   }
 
   function handleClickToPost() {
-    fetch(`/echo`, {
+    fetch(apiPath("/echo"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export default function Home() {
     const userId = getInputValue("user_id");
     const password = getInputValue("password");
 
-    fetch(`/login`, {
+    fetch(apiPath("/login"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -86,7 +87,7 @@ export default function Home() {
       return;
     }
 
-    fetch(`/auth/jwt-test`, {
+    fetch(apiPath("/auth/jwt-test"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +100,7 @@ export default function Home() {
   }
 
   function handleClickToGetTodaySchedule() {
-    fetch(`/get-today-schedule`)
+    fetch(apiPath("/get-today-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });
@@ -109,7 +110,7 @@ export default function Home() {
   }
 
   function handleClickToGetTomorrowSchedule() {
-    fetch(`/get-tomorrow-schedule`)
+    fetch(apiPath("/get-tomorrow-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTomorrowSchedule({ items: data.schedules ?? [] });
@@ -130,7 +131,7 @@ export default function Home() {
       return;
     }
 
-    fetch(`/add-schedule-item`, {
+    fetch(apiPath("/add-schedule-item"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,7 +154,7 @@ export default function Home() {
     );
     const newTask = getInputValue("updateScheduleItemTask");
 
-    fetch(`/update-schedule-item-with-id`, {
+    fetch(apiPath("/update-schedule-item-with-id"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -172,7 +173,7 @@ export default function Home() {
   function handleClickToDeleteScheduleItem() {
     const scheduleItemId = parseInt(getInputValue("deleteScheduleItemId"), 10);
 
-    fetch(`/delete-schedule-item`, {
+    fetch(apiPath("/delete-schedule-item"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -200,7 +201,7 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch(`/add-recurring-schedule-item`, {
+    fetch(apiPath("/add-recurring-schedule-item"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -236,7 +237,7 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch(`/update-recurring-schedule-item-with-id`, {
+    fetch(apiPath("/update-recurring-schedule-item-with-id"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -261,7 +262,7 @@ export default function Home() {
       10,
     );
 
-    fetch(`/delete-recurring-schedule-item`, {
+    fetch(apiPath("/delete-recurring-schedule-item"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -286,7 +287,7 @@ export default function Home() {
     const currentPassword = getInputValue("changePasswordCurrentPassword");
     const newPassword = getInputValue("changePasswordNewPassword");
 
-    fetch(`/auth/change-password`, {
+    fetch(apiPath("/auth/change-password"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -11,6 +11,7 @@ import {
   utcIsoToTokyoDate,
 } from "../timezone";
 import { AddScheduleItemButton } from "../components/AddScheduleItemButton";
+import { apiPath } from "../api";
 
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
@@ -31,7 +32,7 @@ export const EditSchedule: FC = () => {
   }, []);
 
   function refreshUpcomingSchedule() {
-    fetch(`/get-upcoming-schedule`)
+    fetch(apiPath("/get-upcoming-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setUpcomingSchedule({ items: data.schedules ?? [] });
@@ -71,7 +72,7 @@ export const EditSchedule: FC = () => {
     // editingScheduleId が null の場合は新規追加、それ以外は更新
     if (editingScheduleId === null) {
       // /add-schedule-item API に datetime と task を送信する。
-      fetch(`/add-schedule-item`, {
+      fetch(apiPath("/add-schedule-item"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +92,7 @@ export const EditSchedule: FC = () => {
         });
     } else {
       // /update-schedule-item-with-id API に datetime と task を送信する。
-      fetch(`/update-schedule-item-with-id`, {
+      fetch(apiPath("/update-schedule-item-with-id"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,7 +133,7 @@ export const EditSchedule: FC = () => {
   function handleConfirmTrash(e: MouseEvent<HTMLButtonElement>) {
     // Implement the actual trash functionality here
     if (editingScheduleId !== null) {
-      fetch(`/delete-schedule-item`, {
+      fetch(apiPath("/delete-schedule-item"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { useTomorrowSchedule } from "../contexts/TomorrowScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { now } from "../timezone";
+import { apiPath } from "../api";
 
 export const TomorrowSchedule: FC = () => {
   const { tomorrowSchedule, setTomorrowSchedule } = useTomorrowSchedule();
@@ -19,7 +20,7 @@ export const TomorrowSchedule: FC = () => {
   );
 
   useEffect(() => {
-    fetch(`/get-tomorrow-schedule`)
+    fetch(apiPath("/get-tomorrow-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTomorrowSchedule({ items: data.schedules ?? [] });
