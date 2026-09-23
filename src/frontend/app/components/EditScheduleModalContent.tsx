@@ -8,16 +8,32 @@ import { TrashIcon } from "../assets/iconComponents/TrashIcon";
 type EditScheduleModalContentProps = {
   initialDatetime: Date;
   initialTask: string;
-  handleSave: (e: MouseEvent<HTMLButtonElement>, datetime: Date, task: string) => void;
+  handleSave: (
+    e: MouseEvent<HTMLButtonElement>,
+    datetime: Date,
+    task: string,
+  ) => void;
   handleCancel: (e: MouseEvent<HTMLButtonElement>) => void;
+  handleTrash: (e: MouseEvent<HTMLButtonElement>) => void;
+  canTrash: boolean;
 };
 
-export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ initialDatetime, initialTask, handleSave, handleCancel }) => {
-
+export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
+  initialDatetime,
+  initialTask,
+  handleSave,
+  handleCancel,
+  handleTrash,
+  canTrash,
+}) => {
   function handleStartSave(e: MouseEvent<HTMLButtonElement>) {
     // 入力値の検証
-    const datetimeInput = document.getElementById("edit-schedule-datetime") as HTMLInputElement;
-    const taskInput = document.getElementById("edit-schedule-task") as HTMLInputElement;
+    const datetimeInput = document.getElementById(
+      "edit-schedule-datetime",
+    ) as HTMLInputElement;
+    const taskInput = document.getElementById(
+      "edit-schedule-task",
+    ) as HTMLInputElement;
     if (!datetimeInput.value || !taskInput.value) {
       alert("にちじとタスクをりょうほう入力してください。");
       return;
@@ -29,10 +45,7 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
 
   return (
     <div css={componentStyle}>
-      <div css={trashIconStyle}>
-        <TrashIcon />
-      </div>
-      <div>
+      <div css={modalHeaderStyle}>
         <input
           type="datetime-local"
           id="edit-schedule-datetime"
@@ -40,6 +53,11 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
           defaultValue={toDatetimeLocalValue(initialDatetime)}
           css={datetimeStyle}
         />
+        {canTrash && (
+          <button type="button" css={trashIconStyle} onClick={handleTrash} aria-label="予定を削除する">
+            <TrashIcon />
+          </button>
+        )}
       </div>
       <div>
         <input
@@ -51,8 +69,12 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({ in
         />
       </div>
       <div>
-        <button css={saveButtonStyle} onClick={handleStartSave}>ほぞん</button>
-        <button css={cancelButtonStyle} onClick={handleCancel}>キャンセル</button>
+        <button type="button" css={saveButtonStyle} onClick={handleStartSave} aria-label="予定を保存する">
+          ほぞん
+        </button>
+        <button type="button" css={cancelButtonStyle} onClick={handleCancel} aria-label="予定の編集をキャンセルする">
+          キャンセル
+        </button>
       </div>
     </div>
   );
@@ -67,19 +89,25 @@ const componentStyle = css`
   height: fit-content;
 `;
 
-const trashIconStyle = css`
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-
-  position: absolute;
-  top: 16px;
-  right: 16px;
-
+const modalHeaderStyle = css`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+`;
+
+const trashIconStyle = css`
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  margin: -16px 0 0 0;
+  background-color: black;
+  border: none;
+
+  // display: flex;
+  // flex-direction: row;
+  // justify-content: center;
+  // align-items: center;
 `;
 
 const datetimeStyle = css`
@@ -94,7 +122,7 @@ const taskInputStyle = css`
 
   font-size: 48px;
   margin-bottom: 16px;
-  width: 300px;
+  width: 720px;
 `;
 
 const saveButtonStyle = css`

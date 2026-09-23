@@ -16,6 +16,7 @@ import { SideMenu } from "./pages/SideMenu";
 import { useTodaySchedule } from "./contexts/TodayScheduleContext";
 import { useTomorrowSchedule } from "./contexts/TomorrowScheduleContext";
 import { ScheduleItem, ScheduleResponse } from "./dataStructures/Schedule";
+import { apiPath } from "./api";
 
 function getInputValue(id: string): string {
   const input = document.getElementById(id) as HTMLInputElement | null;
@@ -39,14 +40,14 @@ export default function Home() {
   }
 
   function handleClickToGet() {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ping`)
+    fetch(apiPath("/ping"))
       .then((response) => response.json())
       .then((data) => setSuccess("Ping", data))
       .catch((error) => setFailure("Ping", error));
   }
 
   function handleClickToPost() {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/echo`, {
+    fetch(apiPath("/echo"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export default function Home() {
     const userId = getInputValue("user_id");
     const password = getInputValue("password");
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, {
+    fetch(apiPath("/login"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -86,7 +87,7 @@ export default function Home() {
       return;
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/jwt-test`, {
+    fetch(apiPath("/auth/jwt-test"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +100,7 @@ export default function Home() {
   }
 
   function handleClickToGetTodaySchedule() {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
+    fetch(apiPath("/get-today-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });
@@ -109,7 +110,7 @@ export default function Home() {
   }
 
   function handleClickToGetTomorrowSchedule() {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-tomorrow-schedule`)
+    fetch(apiPath("/get-tomorrow-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTomorrowSchedule({ items: data.schedules ?? [] });
@@ -130,7 +131,7 @@ export default function Home() {
       return;
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/add-schedule-item`, {
+    fetch(apiPath("/add-schedule-item"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,20 +154,17 @@ export default function Home() {
     );
     const newTask = getInputValue("updateScheduleItemTask");
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: scheduleItemId,
-          dt: scheduleItemStartTimeUTC,
-          task: newTask,
-        }),
+    fetch(apiPath("/update-schedule-item-with-id"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    )
+      body: JSON.stringify({
+        id: scheduleItemId,
+        dt: scheduleItemStartTimeUTC,
+        task: newTask,
+      }),
+    })
       .then((response) => response.json())
       .then((data) => setSuccess("Update Schedule", data))
       .catch((error) => setFailure("Update Schedule", error));
@@ -175,7 +173,7 @@ export default function Home() {
   function handleClickToDeleteScheduleItem() {
     const scheduleItemId = parseInt(getInputValue("deleteScheduleItemId"), 10);
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-schedule-item`, {
+    fetch(apiPath("/delete-schedule-item"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -203,22 +201,19 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/add-recurring-schedule-item`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          start_time: startTimeRFC3339,
-          day_of_week: dayOfWeek,
-          start_date: startDateRFC3339,
-          end_date: endDateRFC3339,
-          task,
-        }),
+    fetch(apiPath("/add-recurring-schedule-item"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    )
+      body: JSON.stringify({
+        start_time: startTimeRFC3339,
+        day_of_week: dayOfWeek,
+        start_date: startDateRFC3339,
+        end_date: endDateRFC3339,
+        task,
+      }),
+    })
       .then((response) => response.json())
       .then((data) => setSuccess("Add Recurring", data))
       .catch((error) => setFailure("Add Recurring", error));
@@ -242,23 +237,20 @@ export default function Home() {
     const startDateRFC3339 = tokyoLocalDateInputToUTCISO(startDate);
     const endDateRFC3339 = tokyoLocalDateInputToUTCISO(endDate);
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-recurring-schedule-item-with-id`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: recurringScheduleItemId,
-          start_time: startTimeRFC3339,
-          day_of_week: dayOfWeek,
-          start_date: startDateRFC3339,
-          end_date: endDateRFC3339,
-          task,
-        }),
+    fetch(apiPath("/update-recurring-schedule-item-with-id"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    )
+      body: JSON.stringify({
+        id: recurringScheduleItemId,
+        start_time: startTimeRFC3339,
+        day_of_week: dayOfWeek,
+        start_date: startDateRFC3339,
+        end_date: endDateRFC3339,
+        task,
+      }),
+    })
       .then((response) => response.json())
       .then((data) => setSuccess("Update Recurring", data))
       .catch((error) => setFailure("Update Recurring", error));
@@ -270,18 +262,15 @@ export default function Home() {
       10,
     );
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-recurring-schedule-item`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: recurringScheduleItemId,
-        }),
+    fetch(apiPath("/delete-recurring-schedule-item"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    )
+      body: JSON.stringify({
+        id: recurringScheduleItemId,
+      }),
+    })
       .then((response) => response.json())
       .then((data) => setSuccess("Delete Recurring", data))
       .catch((error) => setFailure("Delete Recurring", error));
@@ -298,7 +287,7 @@ export default function Home() {
     const currentPassword = getInputValue("changePasswordCurrentPassword");
     const newPassword = getInputValue("changePasswordNewPassword");
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/change-password`, {
+    fetch(apiPath("/auth/change-password"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

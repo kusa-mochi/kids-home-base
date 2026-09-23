@@ -1,13 +1,17 @@
-# 開発環境で、DockerイメージのビルドとDocker Hubへのプッシュを行うためのDocker Compose ymlファイル
+# 運用環境をターゲットとするフロントエンドとバックエンドのプログラムのビルドをそれぞれ行うためのDocker Compose ymlファイル
 # ビルドターゲット：Raspberry Pi 4B (arm64v8)
-# ビルドイメージにはバックエンドのビルド出力と、フロントエンドのビルド出力を含め、compose.pull.ymlで定義されたイメージをプルすることができる。
+# このymlファイルを用いてプログラムをビルドした後、`.\push.ps1`によりイメージのビルドとプッシュを行う想定。
 
 services:
   # バックエンドのビルド
   build-backend:
-    image: whoatemyapplepie/kids-home-base-backend:latest
+    platform: linux/arm64
+    image: whoatemyapplepie/kids-home-base-backend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-arm64
     build:
       context: ./dockerfile_go_builder
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        GO_VERSION: ${GO_VERSION}
     user: builder
     volumes:
       - ../src/backend:/home/builder/app
@@ -19,13 +23,19 @@ services:
         go mod download
         go mod verify
         mkdir -p /home/builder/app/bin
-        GOOS=linux GOARCH=arm64 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
+        CGO_ENABLED=1 go build -o /home/builder/app/bin/kids-home-base-backend ./main.go
 
   # フロントエンドのビルド
   build-frontend:
-    image: whoatemyapplepie/kids-home-base-frontend:latest
+    image: whoatemyapplepie/kids-home-base-frontend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
     build:
       context: ./dockerfile_node_builder
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        NPM_VERSION: ${NPM_VERSION}
+    environment:
+      - NEXT_PUBLIC_WEATHER_FORECAST_URL=${NEXT_PUBLIC_WEATHER_FORECAST_URL}
     user: builder
     volumes:
       - ../src/frontend:/home/builder/app
@@ -35,7 +45,36 @@ services:
       - |
         # フロントエンドのビルドを実行する。
         npm install
+        rm -rf .next dist
         npm run build
+        # /home/builder/app に index.html と _not-found.html が生成されていない場合、異常終了する。
+        if [ ! -f /home/builder/app/dist/index.html ] || [ ! -f /home/builder/app/dist/_not-found.html ]; then
+          echo "Error: index.html or _not-found.html not found in /home/builder/app/dist in the frontend builder container."
+          exit 1
+        fi
 
   # ビルド出力を用いてDockerイメージをビルドする。
-  # Docker Hubにプッシュする。
+  build-image:
+    image: whoatemyapplepie/kids-home-base:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-node${NODE_VERSION}
+    platform: linux/arm64
+    depends_on:
+      build-backend:
+        condition: service_completed_successfully
+      build-frontend:
+        condition: service_completed_successfully
+    build:
+      context: ..
+      dockerfile: docker_kids-home-base/dockerfile_runner/Dockerfile
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        GO_VERSION: ${GO_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        NPM_VERSION: ${NPM_VERSION}
+        BACKEND_PORT: ${BACKEND_PORT}
+        BACKEND_HOST: ${BACKEND_HOST}
+    environment:
+      - INITIAL_PASSWORD_HASH=${INITIAL_PASSWORD_HASH}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SALT=${SALT}
+      - ADD_TEST_DATA=${ADD_TEST_DATA}
+      - NEXT_PUBLIC_WEATHER_FORECAST_URL=${NEXT_PUBLIC_WEATHER_FORECAST_URL}

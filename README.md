@@ -50,7 +50,34 @@
 - 子どもと一緒に今日・明日の予定を組み立てる。
 - 子どもと一緒に定期的な予定を組み立てる。
 
+## ビルド方法
+
+### 事前準備
+
+1. `docker_kids-home-base\.env.example`を同じディレクトリにコピーし、ファイル名を`.env.build`に変える。
+1. `.env.example`の内容を参考に、`.env.build`の環境変数に自分が必要とする値を設定する。
+
+### ビルド手順
+
+ユーザーに提供するDockerイメージは、PowerShellで次のコマンドを実行することでビルドする。（Composeファイル内に記載したイメージ名は適宜調整すること）
+
+1. `cd docker_kids-home-base`
+1. `.\build.ps1`
+
+## プッシュ方法
+
+ビルドしたDockerイメージは次のコマンドでDocker Hubにプッシュする。（Composeファイル内に記載したイメージ名は適宜調整すること）
+
+1. `.\push.ps1`
+
 ## プログラム実行方法（開発用）
+
+### 事前準備
+
+1. `docker_kids-home-base\.env.example`を同じディレクトリにコピーし、ファイル名を`.env.dev`に変える。
+1. `.env.example`の内容を参考に、`.env.dev`の環境変数に、自分がデバッグ環境で必要とする値を設定する。
+
+### 実行手順
 
 `docker_kids-home-base` ディレクトリ直下で、 PowerShell で次のコマンドを実行する。
 

@@ -1,19 +1,22 @@
 "use client";
-import { FC, useEffect, useState } from "react";
+import { FC, Fragment, useEffect, useState } from "react";
 import { useTodaySchedule } from "../contexts/TodayScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { now } from "../timezone";
+import { apiPath } from "../api";
 
 export const TodaySchedule: FC = () => {
   const { todaySchedule, setTodaySchedule } = useTodaySchedule();
 
   const nowDateTime = now();
-  const [todayMonth, setTodayMonth] = useState<number>(nowDateTime.getMonth() + 1);
+  const [todayMonth, setTodayMonth] = useState<number>(
+    nowDateTime.getMonth() + 1,
+  );
   const [todayDay, setTodayDay] = useState<number>(nowDateTime.getDate());
-  
+
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
+    fetch(apiPath("/get-today-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });
@@ -25,30 +28,45 @@ export const TodaySchedule: FC = () => {
 
   return (
     <div css={componentStyle}>
-      <div css={dateStyle}>{todayMonth}月{todayDay}日</div>
-      <table css={tableStyle}>
-        <tbody>
-          {todaySchedule.items.map((item, index) => {
-            const itemDate = new Date(item.dt);
-            const itemTime = itemDate.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
-            return (
-              <tr key={item.id} css={tableRowStyle}>
-                <td css={itemTimeStyle} valign="top">{itemTime}</td>
-                <td valign="top">{item.task}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div css={dateHeaderStyle}>{`${todayMonth}月${todayDay}日`}</div>
+      {(() => {
+        return todaySchedule.items.map((item, index) => {
+          const itemDate = new Date(item.dt);
+          const itemDateKey = itemDate.toLocaleDateString("ja-JP", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          const itemTime = itemDate.toLocaleTimeString("ja-JP", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          return (
+            <Fragment key={item.id}>
+              <div css={tableRowStyle}>
+                <span css={itemTimeStyle}>{itemTime}</span>
+                <span css={itemTaskStyle}>{item.task}</span>
+              </div>
+            </Fragment>
+          );
+        });
+      })()}
     </div>
   );
 };
 
 const componentStyle = css`
+  position: relative;
   width: 100%;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+`;
+
+const dateHeaderStyle = css`
+  font-size: 56px;
+  margin: 16px;
 `;
 
 const dateStyle = css`
@@ -63,9 +81,37 @@ const tableStyle = css`
 `;
 
 const tableRowStyle = css`
-  height: 48px;
+  font-size: 48px;
+  height: 56px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
 const itemTimeStyle = css`
-  font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  height: 72px;
+  margin-right: 16px;
+  font-family:
+    SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const itemTaskStyle = css`
+  height: 72px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
 `;

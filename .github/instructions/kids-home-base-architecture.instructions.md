@@ -1,7 +1,7 @@
 ---
 name: "Kids Home Base Architecture"
 description: "Use when modifying the Kids Home Base frontend, Go backend API and database, development test data, Docker Compose files, or container environment variables. Documents the current repository architecture and operational constraints."
-applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "sample.json"]
+applyTo: "src/frontend/**, src/backend/**, docker_kids-home-base/**, sample.json"
 ---
 
 # Kids Home Base の設計・開発ガイド
@@ -17,7 +17,7 @@ applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "samp
 - 実装は `src/frontend` の Next.js 16、React 19、TypeScript である。
 - App Router の入口は `app/layout.tsx` と `app/page.tsx`。画面は `app/pages/`、再利用部品は `app/components/`、状態は `app/contexts/`、通信データ型は `app/dataStructures/` に置く。
 - `layout.tsx` ではログイン状態と今日・明日・今後の予定、現在ページの Context Provider を合成している。画面間で共有する状態は既存の Context に追加し、画面固有の状態はコンポーネント内に置く。
-- バックエンドへの通信は `NEXT_PUBLIC_BACKEND_URL` を基点に `fetch` で行う。API のリクエスト・レスポンス変更時は、対応する Go の構造体・handler・command とフロントエンドの型・呼び出しを同時に確認する。
+- バックエンドへの通信は同一オリジンに対して `fetch` で行う。API のリクエスト・レスポンス変更時は、対応する Go の構造体・handler・command とフロントエンドの型・呼び出しを同時に確認する。
 - 日時は `app/timezone.ts` の変換関数を利用する。画面入力の日本時間を UTC ISO 8601/RFC3339 へ変換して送信し、UTC の応答を日本時間として表示する。変換処理を画面ごとに独自実装しない。
 - `src/frontend/AGENTS.md` の Next.js 固有ルールを優先する。Next.js API を変更する前に、インストール済み Next.js のドキュメントを確認する。
 - 基本コマンドは `npm run dev`、`npm run build`、`npm run lint`。依存関係は `package.json` に従う。
@@ -36,7 +36,7 @@ applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "samp
 
 ## テスト用データと時刻固定
 
-- 開発用の環境変数例は `docker_kids-home-base/.env.example`、ローカル実値は同ディレクトリの `.env.local` に置く。`.env.local` の秘密値は共有しない。
+- 開発用の環境変数例は `docker_kids-home-base/.env.example`、ローカル実値は同ディレクトリの `.env.dev` に置く。`.env.dev` の秘密値は共有しない。
 - `ADD_TEST_DATA=1` でバックエンドを起動すると、`main.go` の `AddTestData` が実行される。
 - `AddTestData` は予定データをリセットし、`utils.Now()` を基準に Asia/Tokyo の当日・翌日・翌々日の単発予定を投入する。既存の予定を消すため、開発・検証環境だけで有効にする。
 - `DEBUG_NOW` に RFC3339 の日時を設定すると、`utils.Now()` がその値を返す。日付またぎや予定取得の再現テストでは `ADD_TEST_DATA=1` と組み合わせる。
@@ -44,7 +44,7 @@ applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "samp
 
 ## Docker と開発・運用フロー
 
-- Docker 関連は `docker_kids-home-base/` に集約する。実行前にこのディレクトリで `.env.local` を用意する。
+- Docker 関連は `docker_kids-home-base/` に集約する。実行前にこのディレクトリで `.env.dev` を用意する。
 - 開発環境は `dev.up.ps1` を使用する。`compose.dev.yml` で Go と Next.js のビルダーコンテナを起動し、`src/backend` と `src/frontend` をマウントしてそれぞれ `:21226` と `:3000` を公開する。
 - 開発コンテナは `ADD_TEST_DATA`、`DEBUG_NOW`、`NEXT_PUBLIC_BACKEND_URL`、`NEXT_PUBLIC_DEBUG_NOW`、`NEXT_PUBLIC_WEATHER_FORECAST_URL` を Compose 経由で受け取る。環境変数を増減するときは、Compose 定義・`.env.example`・アプリ側の参照を同期する。
 - 停止は `dev.down.ps1`、再起動は `dev.restart.ps1` を使用する。スクリプトは自身の配置ディレクトリへ移動してから Compose を実行する。
@@ -57,3 +57,9 @@ applyTo: ["src/frontend/**", "src/backend/**", "docker_kids-home-base/**", "samp
 - API を変える場合は、handler、Command、DBManager、フロントエンドの呼び出し・型の整合性を確認する。
 - 日時・予定取得を変える場合は、日本時間の日付境界、UTC 保存、`DEBUG_NOW` 使用時の挙動を確認する。
 - Docker・環境変数を変える場合は、開発用起動、arm64 ビルド、秘密値の非公開を確認する。
+
+## 質問への回答
+
+- 質問に対しては、事実と推測を明確に区別して回答する。事実については根拠となる情報源を示す。
+- 1つの質問に対し重複する回答を避ける。必要に応じて、以前の回答への参照を示す。
+- 回答が不明確な場合は、推測で答えずに「不明」と明示する。

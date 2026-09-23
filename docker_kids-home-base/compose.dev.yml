@@ -4,9 +4,12 @@
 services:
   # バックエンドのビルド
   build-backend:
-    image: whoatemyapplepie/kids-home-base-backend:latest
+    image: whoatemyapplepie/kids-home-base-backend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-go${GO_VERSION}-amd64
     build:
       context: ./dockerfile_go_builder
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        GO_VERSION: ${GO_VERSION}
     user: builder
     volumes:
       - ../src/backend:/home/builder/app
@@ -33,9 +36,13 @@ services:
 
   # フロントエンドのデバッグ実行
   build-frontend:
-    image: whoatemyapplepie/kids-home-base-frontend:latest
+    image: whoatemyapplepie/kids-home-base-frontend:v${KIDS_HOME_BASE_VERSION}-alpine${BASE_IMAGE_ALPINE_VERSION}-node${NODE_VERSION}
     build:
       context: ./dockerfile_node_builder
+      args:
+        BASE_IMAGE_ALPINE_VERSION: ${BASE_IMAGE_ALPINE_VERSION}
+        NODE_VERSION: ${NODE_VERSION}
+        NPM_VERSION: ${NPM_VERSION}
     user: builder
     volumes:
       - ../src/frontend:/home/builder/app
@@ -52,6 +59,7 @@ services:
         set -e
         # フロントエンドをデバッグ実行する。
         npm install
+        rm -rf .next dist
         npm run dev
 
   # ビルド出力を用いてDockerイメージをビルドする。

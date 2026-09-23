@@ -5,24 +5,34 @@ import { useUpcomingSchedule } from "../contexts/UpcomingScheduleContext";
 import { ScheduleResponse } from "../dataStructures/Schedule";
 import { css } from "@emotion/react";
 import { EditScheduleModalContent } from "../components/EditScheduleModalContent";
-import { tokyoLocalDateToUTCISOString, utcIsoToTokyoDate } from "../timezone";
+import {
+  now,
+  tokyoLocalDateToUTCISOString,
+  utcIsoToTokyoDate,
+} from "../timezone";
+import { AddScheduleItemButton } from "../components/AddScheduleItemButton";
+import { apiPath } from "../api";
 
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [trashConfirmVisible, setTrashConfirmVisible] = useState(false);
   const [editingScheduleId, setEditingScheduleId] = useState<number | null>(
     null,
   );
-  const [editingScheduleIndex, setEditingScheduleIndex] = useState<number | null>(
-    null,
-  );
-  const [editingScheduleDatetime, setEditingScheduleDatetime] = useState<Date | null>(
-    null,
-  );
+  const [editingScheduleIndex, setEditingScheduleIndex] = useState<
+    number | null
+  >(null);
+  const [editingScheduleDatetime, setEditingScheduleDatetime] =
+    useState<Date | null>(null);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-upcoming-schedule`)
+    refreshUpcomingSchedule();
+  }, []);
+
+  function refreshUpcomingSchedule() {
+    fetch(apiPath("/get-upcoming-schedule"))
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setUpcomingSchedule({ items: data.schedules ?? [] });
@@ -30,7 +40,7 @@ export const EditSchedule: FC = () => {
       .catch((error) => {
         console.error("Error fetching upcoming schedule:", error);
       });
-  }, []);
+  }
 
   function handleEditSchedule(
     e: MouseEvent<HTMLDivElement>,
@@ -39,12 +49,16 @@ export const EditSchedule: FC = () => {
   ) {
     setEditingScheduleId(scheduleId);
     setEditingScheduleIndex(scheduleIndex);
-    setEditingScheduleDatetime(utcIsoToTokyoDate(upcomingSchedule.items[scheduleIndex].dt));
+    setEditingScheduleDatetime(
+      utcIsoToTokyoDate(upcomingSchedule.items[scheduleIndex].dt),
+    );
     setModalVisible(true);
+    setTrashConfirmVisible(false);
   }
 
   function handleCloseModal(e: MouseEvent<HTMLDivElement>) {
     setModalVisible(false);
+    setTrashConfirmVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
@@ -55,10 +69,30 @@ export const EditSchedule: FC = () => {
   ) {
     const utcDatetime = tokyoLocalDateToUTCISOString(datetime);
 
-    // /update-schedule-item-with-id API に datetime と task を送信する。
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
-      {
+    // editingScheduleId が null の場合は新規追加、それ以外は更新
+    if (editingScheduleId === null) {
+      // /add-schedule-item API に datetime と task を送信する。
+      fetch(apiPath("/add-schedule-item"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dt: utcDatetime,
+          task,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Add response:", data);
+          refreshUpcomingSchedule();
+        })
+        .catch((error) => {
+          console.error("Error adding schedule item:", error);
+        });
+    } else {
+      // /update-schedule-item-with-id API に datetime と task を送信する。
+      fetch(apiPath("/update-schedule-item-with-id"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,22 +102,71 @@ export const EditSchedule: FC = () => {
           dt: utcDatetime,
           task,
         }),
-      },
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Update response:", data);
       })
-      .catch((error) => {
-        console.error("Error updating schedule item:", error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Update response:", data);
+          refreshUpcomingSchedule();
+        })
+        .catch((error) => {
+          console.error("Error updating schedule item:", error);
+        });
+    }
 
     setModalVisible(false);
+    setTrashConfirmVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
   function handleCancel(e: MouseEvent<HTMLButtonElement>) {
     setModalVisible(false);
+    setTrashConfirmVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleTrash(e: MouseEvent<HTMLButtonElement>) {
+    setModalVisible(false);
+    setTrashConfirmVisible(true);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleConfirmTrash(e: MouseEvent<HTMLButtonElement>) {
+    // Implement the actual trash functionality here
+    if (editingScheduleId !== null) {
+      fetch(apiPath("/delete-schedule-item"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: editingScheduleId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Delete response:", data);
+          refreshUpcomingSchedule();
+        })
+        .catch((error) => {
+          console.error("Error deleting schedule item:", error);
+        });
+    }
+
+    setTrashConfirmVisible(false);
+    setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleCancelTrash(e: MouseEvent<HTMLButtonElement>) {
+    setTrashConfirmVisible(false);
+    setModalVisible(false);
+    e.stopPropagation(); // Prevent the click event from propagating to the backdrop
+  }
+
+  function handleAddScheduleItem(e: MouseEvent<HTMLButtonElement>) {
+    setEditingScheduleId(null);
+    setEditingScheduleIndex(null);
+    setEditingScheduleDatetime(now());
+    setModalVisible(true);
+    setTrashConfirmVisible(false);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
@@ -114,22 +197,46 @@ export const EditSchedule: FC = () => {
                 css={tableRowStyle}
                 onClick={(e) => handleEditSchedule(e, item.id ?? null, index)}
               >
-                <span>{itemTime}</span>
-                <span>{item.task}</span>
+                <span css={itemTimeStyle}>{itemTime}</span>
+                <span css={itemTaskStyle}>{item.task}</span>
               </div>
             </Fragment>
           );
         });
       })()}
+      <AddScheduleItemButton onClick={handleAddScheduleItem} />
       {modalVisible && (
         <div css={modalBackdropStyle} onClick={handleCloseModal}>
           <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <EditScheduleModalContent
               initialDatetime={editingScheduleDatetime ?? new Date(2000, 0, 1)}
-              initialTask={upcomingSchedule.items[editingScheduleIndex ?? 0].task}
+              initialTask={
+                editingScheduleIndex !== null
+                  ? upcomingSchedule.items[editingScheduleIndex].task
+                  : ""
+              }
               handleSave={handleSave}
               handleCancel={handleCancel}
+              handleTrash={handleTrash}
+              canTrash={editingScheduleIndex !== null}
             />
+          </div>
+        </div>
+      )}
+      {trashConfirmVisible && (
+        <div
+          css={modalBackdropStyle}
+          onClick={() => setTrashConfirmVisible(false)}
+        >
+          <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <p>
+              {upcomingSchedule.items.find(
+                (item) => item.id === editingScheduleId,
+              )?.task ?? ""}
+              を削除してもよろしいですか？
+            </p>
+            <button onClick={handleConfirmTrash}>はい</button>
+            <button onClick={handleCancelTrash}>いいえ</button>
           </div>
         </div>
       )}
@@ -152,13 +259,44 @@ const dateHeaderStyle = css`
 
 const tableStyle = css`
   width: 100%;
-  margin-left: 16px;
+  margin: 0 16px 0 8px;
   font-size: 56px;
 `;
 
 const tableRowStyle = css`
   font-size: 48px;
   height: 56px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const itemTimeStyle = css`
+  height: 72px;
+  margin-right: 16px;
+  font-family:
+    SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const itemTaskStyle = css`
+  height: 72px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
 const modalBackdropStyle = css`
