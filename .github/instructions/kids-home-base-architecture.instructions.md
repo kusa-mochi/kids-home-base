@@ -17,7 +17,7 @@ applyTo: "src/frontend/**, src/backend/**, docker_kids-home-base/**, sample.json
 - 実装は `src/frontend` の Next.js 16、React 19、TypeScript である。
 - App Router の入口は `app/layout.tsx` と `app/page.tsx`。画面は `app/pages/`、再利用部品は `app/components/`、状態は `app/contexts/`、通信データ型は `app/dataStructures/` に置く。
 - `layout.tsx` ではログイン状態と今日・明日・今後の予定、現在ページの Context Provider を合成している。画面間で共有する状態は既存の Context に追加し、画面固有の状態はコンポーネント内に置く。
-- バックエンドへの通信は `NEXT_PUBLIC_BACKEND_URL` を基点に `fetch` で行う。API のリクエスト・レスポンス変更時は、対応する Go の構造体・handler・command とフロントエンドの型・呼び出しを同時に確認する。
+- バックエンドへの通信は同一オリジンに対して `fetch` で行う。API のリクエスト・レスポンス変更時は、対応する Go の構造体・handler・command とフロントエンドの型・呼び出しを同時に確認する。
 - 日時は `app/timezone.ts` の変換関数を利用する。画面入力の日本時間を UTC ISO 8601/RFC3339 へ変換して送信し、UTC の応答を日本時間として表示する。変換処理を画面ごとに独自実装しない。
 - `src/frontend/AGENTS.md` の Next.js 固有ルールを優先する。Next.js API を変更する前に、インストール済み Next.js のドキュメントを確認する。
 - 基本コマンドは `npm run dev`、`npm run build`、`npm run lint`。依存関係は `package.json` に従う。

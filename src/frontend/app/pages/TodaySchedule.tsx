@@ -15,7 +15,7 @@ export const TodaySchedule: FC = () => {
   const [todayDay, setTodayDay] = useState<number>(nowDateTime.getDate());
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
+    fetch(`/get-today-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });

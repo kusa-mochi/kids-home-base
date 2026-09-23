@@ -19,7 +19,7 @@ export const TomorrowSchedule: FC = () => {
   );
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-tomorrow-schedule`)
+    fetch(`/get-tomorrow-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTomorrowSchedule({ items: data.schedules ?? [] });

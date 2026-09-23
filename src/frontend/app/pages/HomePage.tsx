@@ -44,11 +44,17 @@ export const HomePage: FC = () => {
         // jsonData[0].timeSeries[2].areas[0].tempsで取得できる配列の中の最低値が最低気温、最高値が最高気温となる。
         const temps = jsonData[0]?.timeSeries[2]?.areas[0]?.temps;
         if (!temps || temps.length < 1) {
-          console.error("Failed to extract temperature information from JSON data.");
+          console.error(
+            "Failed to extract temperature information from JSON data.",
+          );
           return;
         }
-        const minTemperatureValue = Math.min(...temps.map((temp: string) => parseInt(temp, 10)));
-        const maxTemperatureValue = Math.max(...temps.map((temp: string) => parseInt(temp, 10)));
+        const minTemperatureValue = Math.min(
+          ...temps.map((temp: string) => parseInt(temp, 10)),
+        );
+        const maxTemperatureValue = Math.max(
+          ...temps.map((temp: string) => parseInt(temp, 10)),
+        );
 
         if (
           !timeDefined ||
@@ -85,7 +91,7 @@ export const HomePage: FC = () => {
 
   useEffect(() => {
     // バックエンドの /get-today-schedule API から今日のスケジュールを取得する。
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-today-schedule`)
+    fetch(`/get-today-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setTodaySchedule({ items: data.schedules ?? [] });
@@ -135,7 +141,9 @@ export const HomePage: FC = () => {
     <div onClick={gotoTodaySchedule} css={containerStyle}>
       <div css={nowStyle}>いまは</div>
       <div>
-        <div css={taskStyle}>{currentTask} <span css={taskSpanStyle}>をする時間だよ。</span></div>
+        <div css={taskStyle}>
+          {currentTask} <span css={taskSpanStyle}>をする時間だよ。</span>
+        </div>
       </div>
       <div>
         <div css={nextTaskStyle}>

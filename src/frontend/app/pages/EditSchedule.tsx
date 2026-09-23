@@ -31,7 +31,7 @@ export const EditSchedule: FC = () => {
   }, []);
 
   function refreshUpcomingSchedule() {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/get-upcoming-schedule`)
+    fetch(`/get-upcoming-schedule`)
       .then((response) => response.json())
       .then((data: ScheduleResponse) => {
         setUpcomingSchedule({ items: data.schedules ?? [] });
@@ -71,7 +71,7 @@ export const EditSchedule: FC = () => {
     // editingScheduleId が null の場合は新規追加、それ以外は更新
     if (editingScheduleId === null) {
       // /add-schedule-item API に datetime と task を送信する。
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/add-schedule-item`, {
+      fetch(`/add-schedule-item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,20 +91,17 @@ export const EditSchedule: FC = () => {
         });
     } else {
       // /update-schedule-item-with-id API に datetime と task を送信する。
-      fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/update-schedule-item-with-id`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: editingScheduleId,
-            dt: utcDatetime,
-            task,
-          }),
+      fetch(`/update-schedule-item-with-id`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      )
+        body: JSON.stringify({
+          id: editingScheduleId,
+          dt: utcDatetime,
+          task,
+        }),
+      })
         .then((response) => response.json())
         .then((data) => {
           console.log("Update response:", data);
@@ -135,7 +132,7 @@ export const EditSchedule: FC = () => {
   function handleConfirmTrash(e: MouseEvent<HTMLButtonElement>) {
     // Implement the actual trash functionality here
     if (editingScheduleId !== null) {
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-schedule-item`, {
+      fetch(`/delete-schedule-item`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -226,11 +223,15 @@ export const EditSchedule: FC = () => {
         </div>
       )}
       {trashConfirmVisible && (
-        <div css={modalBackdropStyle} onClick={() => setTrashConfirmVisible(false)}>
+        <div
+          css={modalBackdropStyle}
+          onClick={() => setTrashConfirmVisible(false)}
+        >
           <div css={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <p>
-              {upcomingSchedule.items.find((item) => item.id === editingScheduleId)
-                ?.task ?? ""}
+              {upcomingSchedule.items.find(
+                (item) => item.id === editingScheduleId,
+              )?.task ?? ""}
               を削除してもよろしいですか？
             </p>
             <button onClick={handleConfirmTrash}>はい</button>
