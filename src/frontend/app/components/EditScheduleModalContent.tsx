@@ -1,9 +1,10 @@
 "use client";
 
 import { css } from "@emotion/react";
-import { FC, MouseEvent } from "react";
+import { FC, MouseEvent, useState } from "react";
 import { toDatetimeLocalValue } from "../timezone";
 import { TrashIcon } from "../assets/iconComponents/TrashIcon";
+import { DatetimeInput } from "./DatetimeInput";
 
 type EditScheduleModalContentProps = {
   initialDatetime: Date;
@@ -26,32 +27,30 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
   handleTrash,
   canTrash,
 }) => {
+  const [datetime, setDatetime] = useState(toDatetimeLocalValue(initialDatetime));
+
   function handleStartSave(e: MouseEvent<HTMLButtonElement>) {
     // 入力値の検証
-    const datetimeInput = document.getElementById(
-      "edit-schedule-datetime",
-    ) as HTMLInputElement;
     const taskInput = document.getElementById(
       "edit-schedule-task",
     ) as HTMLInputElement;
-    if (!datetimeInput.value || !taskInput.value) {
+    if (!datetime || !taskInput.value) {
       alert("にちじとタスクをりょうほう入力してください。");
       return;
     }
 
-    handleSave(e, new Date(datetimeInput.value), taskInput.value);
+    handleSave(e, new Date(datetime), taskInput.value);
     e.stopPropagation(); // Prevent the click event from propagating to the backdrop
   }
 
   return (
     <div css={componentStyle}>
       <div css={modalHeaderStyle}>
-        <input
-          type="datetime-local"
-          id="edit-schedule-datetime"
-          name="edit-schedule-datetime"
-          defaultValue={toDatetimeLocalValue(initialDatetime)}
-          css={datetimeStyle}
+        <DatetimeInput
+          value={datetime}
+          onChange={(e: string) => {
+            setDatetime(e);
+          }}
         />
         {canTrash && (
           <button type="button" css={trashIconStyle} onClick={handleTrash} aria-label="予定を削除する">
