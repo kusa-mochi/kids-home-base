@@ -29,6 +29,7 @@ export const DatetimeInput = ({
           value={date}
           css={dateInputStyle}
           onChange={(e) => onChange?.(`${e.target.value}T${time}`)}
+          aria-label="年月日入力"
         />
       </div>
 
@@ -53,6 +54,7 @@ export const DatetimeInput = ({
                   `${date || "1970-01-01"}T${e.target.value.padStart(2, "0")}:${minute || "00"}`,
                 )
               }
+              aria-label="時入力"
             />
           </div>
         </div>
@@ -73,6 +75,7 @@ export const DatetimeInput = ({
                   `${date || "1970-01-01"}T${hour || "00"}:${e.target.value.padStart(2, "0")}`,
                 )
               }
+              aria-label="分入力"
             />
           </div>
         </div>
