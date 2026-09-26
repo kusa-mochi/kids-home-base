@@ -44,11 +44,20 @@ export const TodaySchedule: FC = () => {
             minute: "2-digit",
           }).replace(/^午前|^午後/, "");
 
+          const nHour: number = Number(
+            new Intl.DateTimeFormat("en-US", {
+              timeZone: "Asia/Tokyo",
+              hour: "2-digit",
+              hourCycle: "h23",
+            }).format(itemDate),
+          );
+
+          const period = nHour < 12 ? "午前" : "午後";
+
           return (
             <Fragment key={item.id}>
               {/* 見出し "午前" または "午後" を表示する場合はここに追加。最初の午前の予定の直前に "午前" を表示する。最初の午後の予定の直前に "午後" を表示する。 */}
               {(() => {
-                const period = itemDate.getHours() < 12 ? "午前" : "午後";
                 if (period !== lastPeriod) {
                   lastPeriod = period;
                   return <div css={ampmStyle}>{period}</div>;

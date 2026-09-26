@@ -182,21 +182,32 @@ export const EditSchedule: FC = () => {
             month: "2-digit",
             day: "2-digit",
           });
-          const itemTime = itemDate.toLocaleTimeString("ja-JP", {
-            hour: "2-digit",
-            hour12: true,
-            minute: "2-digit",
-          }).replace(/^午前|^午後/, "");
+          const itemTime = itemDate
+            .toLocaleTimeString("ja-JP", {
+              hour: "2-digit",
+              hour12: true,
+              minute: "2-digit",
+            })
+            .replace(/^午前|^午後/, "");
           const showDateHeader = itemDateKey !== lastDateKey;
           if (showDateHeader) {
             lastDateKey = itemDateKey;
           }
 
+          const nHour: number = Number(
+            new Intl.DateTimeFormat("en-US", {
+              timeZone: "Asia/Tokyo",
+              hour: "2-digit",
+              hourCycle: "h23",
+            }).format(itemDate),
+          );
+
+          const period = nHour < 12 ? "午前" : "午後";
+
           return (
             <Fragment key={item.id}>
               {showDateHeader && <div css={dateHeaderStyle}>{itemDateKey}</div>}
               {(() => {
-                const period = itemDate.getHours() < 12 ? "午前" : "午後";
                 if (period !== lastPeriod) {
                   lastPeriod = period;
                   return <div css={ampmStyle}>{period}</div>;
