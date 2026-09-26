@@ -36,7 +36,7 @@ export const EditScheduleModalContent: FC<EditScheduleModalContentProps> = ({
     const taskInput = document.getElementById(
       "edit-schedule-task",
     ) as HTMLInputElement;
-    if (!datetime || !taskInput.value) {
+    if (Number.isNaN(new Date(datetime).getTime()) || !taskInput.value) {
       alert("にちじとタスクをりょうほう入力してください。");
       return;
     }
