@@ -40,8 +40,9 @@ export const TodaySchedule: FC = () => {
           });
           const itemTime = itemDate.toLocaleTimeString("ja-JP", {
             hour: "2-digit",
+            hour12: true,
             minute: "2-digit",
-          });
+          }).replace(/^午前|^午後/, "");
 
           return (
             <Fragment key={item.id}>
