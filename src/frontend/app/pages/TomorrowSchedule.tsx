@@ -36,6 +36,7 @@ export const TomorrowSchedule: FC = () => {
         {tomorrowMonth}月{tomorrowDay}日
       </div>
       {(() => {
+        let lastPeriod: "午前" | "午後" | null = null;
         return tomorrowSchedule.items.map((item, index) => {
           const itemDate = new Date(item.dt);
           const itemDateKey = itemDate.toLocaleDateString("ja-JP", {
@@ -49,6 +50,15 @@ export const TomorrowSchedule: FC = () => {
           });
           return (
             <Fragment key={item.id}>
+              {/* 見出し "午前" または "午後" を表示する場合はここに追加。最初の午前の予定の直前に "午前" を表示する。最初の午後の予定の直前に "午後" を表示する。 */}
+              {(() => {
+                const period = itemDate.getHours() < 12 ? "午前" : "午後";
+                if (period !== lastPeriod) {
+                  lastPeriod = period;
+                  return <div css={ampmStyle}>{period}</div>;
+                }
+                return null;
+              })()}
               <div css={tableRowStyle}>
                 <span css={itemTimeStyle}>{itemTime}</span>
                 <span css={itemTaskStyle}>{item.task}</span>
@@ -78,6 +88,11 @@ const tableStyle = css`
   width: 100%;
   margin-left: 16px;
   font-size: 48px;
+`;
+
+const ampmStyle = css`
+  font-size: 48px;
+  margin: 16px 0;
 `;
 
 const tableRowStyle = css`
