@@ -174,6 +174,7 @@ export const EditSchedule: FC = () => {
     <div css={componentStyle}>
       {(() => {
         let lastDateKey = "";
+        let lastPeriod: "午前" | "午後" | null = null;
         return upcomingSchedule.items.map((item, index) => {
           const itemDate = new Date(item.dt);
           const itemDateKey = itemDate.toLocaleDateString("ja-JP", {
@@ -181,18 +182,38 @@ export const EditSchedule: FC = () => {
             month: "2-digit",
             day: "2-digit",
           });
-          const itemTime = itemDate.toLocaleTimeString("ja-JP", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+          const itemTime = itemDate
+            .toLocaleTimeString("ja-JP", {
+              hour: "2-digit",
+              hour12: true,
+              minute: "2-digit",
+            })
+            .replace(/^午前|^午後/, "");
           const showDateHeader = itemDateKey !== lastDateKey;
           if (showDateHeader) {
             lastDateKey = itemDateKey;
           }
 
+          const nHour: number = Number(
+            new Intl.DateTimeFormat("en-US", {
+              timeZone: "Asia/Tokyo",
+              hour: "2-digit",
+              hourCycle: "h23",
+            }).format(itemDate),
+          );
+
+          const period = nHour < 12 ? "午前" : "午後";
+
           return (
             <Fragment key={item.id}>
               {showDateHeader && <div css={dateHeaderStyle}>{itemDateKey}</div>}
+              {(() => {
+                if (period !== lastPeriod) {
+                  lastPeriod = period;
+                  return <div css={ampmStyle}>{period}</div>;
+                }
+                return null;
+              })()}
               <div
                 css={tableRowStyle}
                 onClick={(e) => handleEditSchedule(e, item.id ?? null, index)}
@@ -261,6 +282,11 @@ const tableStyle = css`
   width: 100%;
   margin: 0 16px 0 8px;
   font-size: 56px;
+`;
+
+const ampmStyle = css`
+  font-size: 48px;
+  margin: 16px 0;
 `;
 
 const tableRowStyle = css`
