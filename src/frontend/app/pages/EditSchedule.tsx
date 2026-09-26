@@ -184,8 +184,9 @@ export const EditSchedule: FC = () => {
           });
           const itemTime = itemDate.toLocaleTimeString("ja-JP", {
             hour: "2-digit",
+            hour12: true,
             minute: "2-digit",
-          });
+          }).replace(/^午前|^午後/, "");
           const showDateHeader = itemDateKey !== lastDateKey;
           if (showDateHeader) {
             lastDateKey = itemDateKey;

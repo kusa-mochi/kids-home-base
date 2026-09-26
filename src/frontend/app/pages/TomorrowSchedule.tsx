@@ -46,8 +46,9 @@ export const TomorrowSchedule: FC = () => {
           });
           const itemTime = itemDate.toLocaleTimeString("ja-JP", {
             hour: "2-digit",
+            hour12: true,
             minute: "2-digit",
-          });
+          }).replace(/^午前|^午後/, "");
           return (
             <Fragment key={item.id}>
               {/* 見出し "午前" または "午後" を表示する場合はここに追加。最初の午前の予定の直前に "午前" を表示する。最初の午後の予定の直前に "午後" を表示する。 */}
