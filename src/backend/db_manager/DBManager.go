@@ -105,10 +105,19 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	}
 
 	// 定期的な計画
+	// reccuring_type: "daily", "weekly", "monthly"
+	// days_of_week: 最下位ビットは日曜日、第2ビットは月曜日、・・・、第7ビットは土曜日を表す。
+	// week_of_month: recurring_type が "monthly" の場合に使用される第N週（1〜5）の情報。"monthly" 以外では NULL となる。
+	// schedule_time: 予定の開始時刻
+	// start_date: 開始日（ユーザーが設定した日が自動的に開始日になる）
+	// end_date: 終了日（ユーザーが明示的に指定する）
+	// schedule_task: 予定の内容
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS recurring_schedules (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		day_of_week INTEGER NOT NULL,
+		recurring_type TEXT NOT NULL,
+		days_of_week INTEGER NOT NULL,
+		week_of_month INTEGER,
 		schedule_time TIME NOT NULL,
 		start_date DATE NOT NULL,
 		end_date DATE NOT NULL,
@@ -355,8 +364,9 @@ func (m *DBManager) DeleteScheduleItem(id int) error {
 }
 
 // 定期的な計画要素を追加する関数。
+// 日時はUTCで保存される。
 func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringScheduleItem) error {
-	_, err := m.db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?)`, s.DayOfWeek, m.normalizeUTC(s.StartTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task)
+	_, err := m.db.Exec(`INSERT INTO recurring_schedules (recurring_type, day_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?, ?, ?)`, s.RecurringType, s.DayOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task)
 
 	if err != nil {
 		log.Println("exec error in AddRecurringScheduleItem:", err.Error())
@@ -368,7 +378,7 @@ func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringSchedule
 
 // 定期的な計画要素を更新する関数。
 func (m *DBManager) UpdateRecurringScheduleItem(s *datastructures.RecurringScheduleItemWithId) error {
-	_, err := m.db.Exec(`UPDATE recurring_schedules SET day_of_week = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.DayOfWeek, m.normalizeUTC(s.StartTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task, s.Id)
+	_, err := m.db.Exec(`UPDATE recurring_schedules SET recurring_type = ?, day_of_week = ?, week_of_month = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.RecurringType, s.DayOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task, s.Id)
 
 	if err != nil {
 		log.Println("exec error in UpdateRecurringScheduleItem:", err.Error())
