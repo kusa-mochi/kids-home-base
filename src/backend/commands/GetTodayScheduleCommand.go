@@ -4,6 +4,7 @@ import (
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
+	"kids_home_base/utils"
 )
 
 type GetTodayScheduleCommand struct {
@@ -37,7 +38,88 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 		return
 	}
 
-	logger.InfPrintln("GetTodayScheduleCommand.Execute")
+	logger.DbgPrintln("dbManager.GetTodayScheduleWithId succeeded")
+
+	recurringSchedules, err := dbManager.GetTodayRecurringScheduleItems()
+	if err != nil {
+		logger.ErrPrintln("GetTodayScheduleCommand.Execute failed to get recurring schedules:", err.Error())
+	}
+	// 今日（東京時間）の定期的なスケジュールを通常のスケジュールデータに変換する。
+	for _, recurringSchedule := range recurringSchedules {
+
+		// 今日が定期的なスケジュールの開始日と終了日の間（開始日と終了日を含む）に含まれない場合
+		if !utils.IsDateInRange(utils.Now(), recurringSchedule.StartDate, recurringSchedule.EndDate) {
+			continue
+		}
+
+		// 定期的なスケジュールが毎日のスケジュールの場合
+		if recurringSchedule.RecurringType == "daily" {
+			// TODO: スケジュール変更・削除の記録がある場合は反映する。
+
+			// 今日のスケジュールとして追加する。
+			schedules = append(schedules, datastructures.ScheduleItemWithId{
+				Id:   recurringSchedule.Id,
+				Dt:   recurringSchedule.ScheduleTime,
+				Task: recurringSchedule.Task,
+			})
+
+			continue
+		}
+
+		// 定期的なスケジュールが毎週のスケジュールの場合
+		if recurringSchedule.RecurringType == "weekly" {
+			// 今日の曜日
+			var todayWeekday uint8 = uint8(0x01 << utils.Now().Weekday())
+
+			// 今日の曜日が定期的なスケジュールの曜日に含まれていない場合
+			if recurringSchedule.DaysOfWeek&todayWeekday == 0 {
+				continue
+			}
+
+			// TODO: スケジュール変更・削除の記録がある場合は反映する。
+
+			// 今日のスケジュールとして追加する。
+			schedules = append(schedules, datastructures.ScheduleItemWithId{
+				Id:   recurringSchedule.Id,
+				Dt:   recurringSchedule.ScheduleTime,
+				Task: recurringSchedule.Task,
+			})
+			continue
+		}
+
+		// 定期的なスケジュールが毎月のスケジュールの場合
+		if recurringSchedule.RecurringType == "monthly" {
+			// 今日の曜日
+			var todayWeekday uint8 = uint8(0x01 << utils.Now().Weekday())
+
+			// 今日の日が定期的なスケジュールの曜日に含まれていない場合
+			if recurringSchedule.DaysOfWeek&todayWeekday == 0 {
+				continue
+			}
+
+			// 今日の曜日が今月の第何週に該当するかを計算する。
+			dayOfMonth := utils.Now().Day()
+			weekOfMonth := (dayOfMonth-1)/7 + 1
+			// 第何週に該当するかが定期的なスケジュールと一致しない場合
+			if recurringSchedule.WeekOfMonth != weekOfMonth {
+				continue
+			}
+
+			// TODO: スケジュール変更・削除の記録がある場合は反映する。
+
+			// 今日のスケジュールとして追加する。
+			schedules = append(schedules, datastructures.ScheduleItemWithId{
+				Id:   recurringSchedule.Id,
+				Dt:   recurringSchedule.ScheduleTime,
+				Task: recurringSchedule.Task,
+			})
+			continue
+		}
+	}
+
+	logger.DbgPrintln("dbManager.GetTodayRecurringScheduleItems succeeded")
+
+	logger.InfPrintln("GetTodayScheduleCommand.Execute succeeded")
 	c.Response <- GetTodayScheduleResponse{
 		Success:   true,
 		Message:   "今日のスケジュールを取得しました",
