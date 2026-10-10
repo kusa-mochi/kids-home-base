@@ -120,6 +120,8 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る２"},
 	})
 
+	logger.DbgPrintln("added tomorrow test data")
+
 	// 明後日の年・月・日をそれぞれ取得
 	tomorrow2 := nowInTokyo.AddDate(0, 0, 2)
 	year, month, day = tomorrow2.Date()
@@ -133,7 +135,45 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		{Dt: time.Date(year, month, day, 21, 30, 0, 0, tokyoLoc), Task: "寝る３"},
 	})
 
-	logger.DbgPrintln("added tomorrow test data")
+	logger.DbgPrintln("added day after tomorrow test data")
+
+	// 以下、定期的な予定
+
+	// 毎日の予定
+	// 毎日午後7時に「がっこうのしゅくだい」をする予定。終了日は 2031年3月31日。
+	dbManager.AddRecurringScheduleItem(&datastructures.RecurringScheduleItem{
+		RecurringType: "daily",
+		DaysOfWeek:    0b00000000, // 毎日なので曜日のビットはすべて0に設定
+		WeekOfMonth:   0,          // 毎日なので第N週の情報は0に設定
+		ScheduleTime:  time.Date(0, 1, 1, 19, 0, 0, 0, tokyoLoc),
+		StartDate:     nowInTokyo,
+		EndDate:       time.Date(2031, 3, 31, 23, 59, 59, 0, tokyoLoc),
+		Task:          "がっこうのしゅくだい",
+	})
+
+	// 毎週の予定
+	// 毎週月・水曜日に「M!LKのダンス」をする予定。終了日は 2026年11月10日。
+	dbManager.AddRecurringScheduleItem(&datastructures.RecurringScheduleItem{
+		RecurringType: "weekly",
+		DaysOfWeek:    0b00001010, // 月曜日（第2ビット）と水曜日（第4ビット）のビットを立てる
+		WeekOfMonth:   0,          // 毎週なので第N週の情報は0に設定
+		ScheduleTime:  time.Date(0, 1, 1, 19, 0, 0, 0, tokyoLoc),
+		StartDate:     nowInTokyo,
+		EndDate:       time.Date(2026, 11, 10, 23, 59, 59, 0, tokyoLoc),
+		Task:          "M!LKのダンス",
+	})
+
+	// 毎月の予定
+	// 毎月第2土曜日に「ロボット教室に出発する」予定。終了日は 2027年5月31日。
+	dbManager.AddRecurringScheduleItem(&datastructures.RecurringScheduleItem{
+		RecurringType: "monthly",
+		DaysOfWeek:    0b01000000, // 土曜日（第7ビット）のビットを立てる
+		WeekOfMonth:   2,          // 第2週
+		ScheduleTime:  time.Date(0, 1, 1, 10, 0, 0, 0, tokyoLoc),
+		StartDate:     nowInTokyo,
+		EndDate:       time.Date(2027, 5, 31, 23, 59, 59, 0, tokyoLoc),
+		Task:          "ロボット教室に出発する",
+	})
 }
 
 func main() {
