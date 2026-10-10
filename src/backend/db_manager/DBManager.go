@@ -366,7 +366,7 @@ func (m *DBManager) DeleteScheduleItem(id int) error {
 // 定期的な計画要素を追加する関数。
 // 日時はUTCで保存される。
 func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringScheduleItem) error {
-	_, err := m.db.Exec(`INSERT INTO recurring_schedules (recurring_type, day_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?, ?, ?)`, s.RecurringType, s.DayOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task)
+	_, err := m.db.Exec(`INSERT INTO recurring_schedules (recurring_type, days_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?, ?, ?)`, s.RecurringType, s.DaysOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task)
 
 	if err != nil {
 		log.Println("exec error in AddRecurringScheduleItem:", err.Error())
@@ -378,7 +378,7 @@ func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringSchedule
 
 // 定期的な計画要素を更新する関数。
 func (m *DBManager) UpdateRecurringScheduleItem(s *datastructures.RecurringScheduleItemWithId) error {
-	_, err := m.db.Exec(`UPDATE recurring_schedules SET recurring_type = ?, day_of_week = ?, week_of_month = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.RecurringType, s.DayOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task, s.Id)
+	_, err := m.db.Exec(`UPDATE recurring_schedules SET recurring_type = ?, days_of_week = ?, week_of_month = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.RecurringType, s.DaysOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task, s.Id)
 
 	if err != nil {
 		log.Println("exec error in UpdateRecurringScheduleItem:", err.Error())
