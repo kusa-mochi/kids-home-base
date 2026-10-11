@@ -144,22 +144,6 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
 
-	// // 計画の初期データ（UTCで記録）
-	// seedScheduleUTC := utils.Now().UTC()
-	// _, err = db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) SELECT ?, 'テストタスク' WHERE NOT EXISTS (SELECT 1 FROM schedules);`, seedScheduleUTC)
-	// if err != nil {
-	// 	log.Fatal("exec error in NewDBManager:", err.Error())
-	// }
-
-	// // 定期的な計画の初期データ（UTCで記録）
-	// seedRecurringStartTimeUTC := utils.Now().UTC()
-	// seedRecurringStartDateUTC := utils.Now().UTC()
-	// seedRecurringEndDateUTC := utils.Now().AddDate(0, 3, 0).UTC()
-	// _, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 1, ?, ?, ?, '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`, seedRecurringStartTimeUTC, seedRecurringStartDateUTC, seedRecurringEndDateUTC)
-	// if err != nil {
-	// 	log.Fatal("exec error in NewDBManager:", err.Error())
-	// }
-
 	return &DBManager{db: db, loc: loc}
 }
 
