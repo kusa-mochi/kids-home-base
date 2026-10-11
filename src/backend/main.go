@@ -145,7 +145,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		RecurringType: "daily",
 		DaysOfWeek:    0b00000000, // 毎日なので曜日のビットはすべて0に設定
 		WeekOfMonth:   0,          // 毎日なので第N週の情報は0に設定
-		ScheduleTime:  time.Date(0, 1, 1, 19, 0, 0, 0, tokyoLoc),
+		ScheduleTime:  time.Date(2000, 1, 1, 19, 0, 0, 0, tokyoLoc),
 		StartDate:     nowInTokyo,
 		EndDate:       time.Date(2031, 3, 31, 23, 59, 59, 0, tokyoLoc),
 		Task:          "がっこうのしゅくだい",
@@ -157,7 +157,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		RecurringType: "weekly",
 		DaysOfWeek:    0b00001010, // 月曜日（第2ビット）と水曜日（第4ビット）のビットを立てる
 		WeekOfMonth:   0,          // 毎週なので第N週の情報は0に設定
-		ScheduleTime:  time.Date(0, 1, 1, 19, 0, 0, 0, tokyoLoc),
+		ScheduleTime:  time.Date(2000, 1, 1, 20, 20, 0, 0, tokyoLoc),
 		StartDate:     nowInTokyo,
 		EndDate:       time.Date(2026, 11, 10, 23, 59, 59, 0, tokyoLoc),
 		Task:          "M!LKのダンス",
@@ -169,7 +169,7 @@ func AddTestData(dbManager *dbmanager.DBManager) {
 		RecurringType: "monthly",
 		DaysOfWeek:    0b01000000, // 土曜日（第7ビット）のビットを立てる
 		WeekOfMonth:   2,          // 第2週
-		ScheduleTime:  time.Date(0, 1, 1, 10, 0, 0, 0, tokyoLoc),
+		ScheduleTime:  time.Date(2000, 1, 1, 10, 0, 0, 0, tokyoLoc),
 		StartDate:     nowInTokyo,
 		EndDate:       time.Date(2027, 5, 31, 23, 59, 59, 0, tokyoLoc),
 		Task:          "ロボット教室に出発する",

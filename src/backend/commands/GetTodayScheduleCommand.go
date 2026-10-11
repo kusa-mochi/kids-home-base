@@ -6,6 +6,7 @@ import (
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
 	"kids_home_base/utils"
+	"sort"
 	"time"
 )
 
@@ -48,6 +49,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 	}
 	tokyoLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
 	today := utils.Now().In(tokyoLocation)
+	todayUTC := today.In(time.UTC)
 	// 今日（東京時間）の定期的なスケジュールを通常のスケジュールデータに変換する。
 	for _, recurringSchedule := range recurringSchedules {
 
@@ -60,12 +62,15 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 		// 定期的なスケジュールが毎日のスケジュールの場合
 		if recurringSchedule.RecurringType == "daily" {
+			// 今日の予定の時刻をUTCで生成する。
+			todayScheduleTime := time.Date(todayUTC.Year(), todayUTC.Month(), todayUTC.Day(), recurringSchedule.ScheduleTime.Hour(), recurringSchedule.ScheduleTime.Minute(), recurringSchedule.ScheduleTime.Second(), recurringSchedule.ScheduleTime.Nanosecond(), time.UTC)
+
 			// TODO: スケジュール変更・削除の記録がある場合は反映する。
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
 				Id:   recurringSchedule.Id + datastructures.RecurringScheduleItemIdBase,
-				Dt:   recurringSchedule.ScheduleTime,
+				Dt:   todayScheduleTime,
 				Task: recurringSchedule.Task,
 			})
 
@@ -82,12 +87,15 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 				continue
 			}
 
+			// 今日の予定の時刻をUTCで生成する。
+			todayScheduleTime := time.Date(todayUTC.Year(), todayUTC.Month(), todayUTC.Day(), recurringSchedule.ScheduleTime.Hour(), recurringSchedule.ScheduleTime.Minute(), recurringSchedule.ScheduleTime.Second(), recurringSchedule.ScheduleTime.Nanosecond(), time.UTC)
+
 			// TODO: スケジュール変更・削除の記録がある場合は反映する。
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
 				Id:   recurringSchedule.Id + datastructures.RecurringScheduleItemIdBase,
-				Dt:   recurringSchedule.ScheduleTime,
+				Dt:   todayScheduleTime,
 				Task: recurringSchedule.Task,
 			})
 			continue
@@ -96,7 +104,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 		// 定期的なスケジュールが毎月のスケジュールの場合
 		if recurringSchedule.RecurringType == "monthly" {
 			// 今日の曜日
-			var todayWeekday uint8 = uint8(0x01 << utils.Now().Weekday())
+			var todayWeekday uint8 = uint8(0x01 << today.Weekday())
 
 			// 今日の日が定期的なスケジュールの曜日に含まれていない場合
 			if recurringSchedule.DaysOfWeek&todayWeekday == 0 {
@@ -111,17 +119,27 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 				continue
 			}
 
+			// 今日の予定の時刻をUTCで生成する。
+			todayScheduleTime := time.Date(todayUTC.Year(), todayUTC.Month(), todayUTC.Day(), recurringSchedule.ScheduleTime.Hour(), recurringSchedule.ScheduleTime.Minute(), recurringSchedule.ScheduleTime.Second(), recurringSchedule.ScheduleTime.Nanosecond(), time.UTC)
+
 			// TODO: スケジュール変更・削除の記録がある場合は反映する。
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
 				Id:   recurringSchedule.Id + datastructures.RecurringScheduleItemIdBase,
-				Dt:   recurringSchedule.ScheduleTime,
+				Dt:   todayScheduleTime,
 				Task: recurringSchedule.Task,
 			})
 			continue
 		}
 	}
+
+	logger.DbgPrintln("recurring schedule item were added")
+
+	// schedules の要素を、東京時刻における時刻の昇順にソートする。
+	sort.Slice(schedules, func(i, j int) bool {
+		return schedules[i].Dt.In(tokyoLocation).Before(schedules[j].Dt.In(tokyoLocation))
+	})
 
 	logger.DbgPrintln("dbManager.GetTodayRecurringScheduleItems succeeded")
 
