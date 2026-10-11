@@ -118,7 +118,7 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 		recurring_type TEXT NOT NULL,
 		days_of_week INTEGER NOT NULL,
 		week_of_month INTEGER,
-		schedule_time TIME NOT NULL,
+		schedule_time DATETIME NOT NULL,
 		start_date DATE NOT NULL,
 		end_date DATE NOT NULL,
 		schedule_task TEXT NOT NULL
