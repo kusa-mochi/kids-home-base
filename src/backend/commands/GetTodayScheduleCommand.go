@@ -47,9 +47,11 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 	if err != nil {
 		logger.ErrPrintln("GetTodayScheduleCommand.Execute failed to get recurring schedules:", err.Error())
 	}
+
 	tokyoLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
 	today := utils.Now().In(tokyoLocation)
 	todayUTC := today.In(time.UTC)
+
 	// 今日（東京時間）の定期的なスケジュールを通常のスケジュールデータに変換する。
 	for _, recurringSchedule := range recurringSchedules {
 
@@ -134,14 +136,12 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 		}
 	}
 
-	logger.DbgPrintln("recurring schedule item were added")
+	logger.DbgPrintln("recurring schedule items were added")
 
 	// schedules の要素を、東京時刻における時刻の昇順にソートする。
 	sort.Slice(schedules, func(i, j int) bool {
 		return schedules[i].Dt.In(tokyoLocation).Before(schedules[j].Dt.In(tokyoLocation))
 	})
-
-	logger.DbgPrintln("dbManager.GetTodayRecurringScheduleItems succeeded")
 
 	logger.InfPrintln("GetTodayScheduleCommand.Execute succeeded")
 	c.Response <- GetTodayScheduleResponse{
