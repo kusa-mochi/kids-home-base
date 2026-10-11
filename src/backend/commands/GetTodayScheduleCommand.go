@@ -1,10 +1,12 @@
 package commands
 
 import (
+	"fmt"
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
 	"kids_home_base/utils"
+	"time"
 )
 
 type GetTodayScheduleCommand struct {
@@ -44,13 +46,17 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 	if err != nil {
 		logger.ErrPrintln("GetTodayScheduleCommand.Execute failed to get recurring schedules:", err.Error())
 	}
+	tokyoLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
+	today := utils.Now().In(tokyoLocation)
 	// 今日（東京時間）の定期的なスケジュールを通常のスケジュールデータに変換する。
 	for _, recurringSchedule := range recurringSchedules {
 
-		// 今日が定期的なスケジュールの開始日と終了日の間（開始日と終了日を含む）に含まれない場合
-		if !utils.IsDateInRange(utils.Now(), recurringSchedule.StartDate, recurringSchedule.EndDate) {
+		// 今日（東京時間）が定期的なスケジュールの開始日（東京時間換算）と終了日（東京時間換算）の間（開始日と終了日を含む）に含まれない場合
+		if !utils.IsDateInRange(today, recurringSchedule.StartDate.In(tokyoLocation), recurringSchedule.EndDate.In(tokyoLocation)) {
 			continue
 		}
+
+		logger.DbgPrintln(fmt.Sprintf("recurring schedule item:%+v", recurringSchedule))
 
 		// 定期的なスケジュールが毎日のスケジュールの場合
 		if recurringSchedule.RecurringType == "daily" {
@@ -58,7 +64,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id,
+				Id:   recurringSchedule.Id + datastructures.RecurringScheduleItemIdBase,
 				Dt:   recurringSchedule.ScheduleTime,
 				Task: recurringSchedule.Task,
 			})
@@ -80,7 +86,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id,
+				Id:   recurringSchedule.Id + datastructures.RecurringScheduleItemIdBase,
 				Dt:   recurringSchedule.ScheduleTime,
 				Task: recurringSchedule.Task,
 			})
@@ -109,7 +115,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id,
+				Id:   recurringSchedule.Id + datastructures.RecurringScheduleItemIdBase,
 				Dt:   recurringSchedule.ScheduleTime,
 				Task: recurringSchedule.Task,
 			})

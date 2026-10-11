@@ -22,3 +22,7 @@ type RecurringScheduleItemWithId struct {
 	EndDate       time.Time `json:"end_date"`
 	Task          string    `json:"task"`
 }
+
+const (
+	RecurringScheduleItemIdBase int = 100000
+)
