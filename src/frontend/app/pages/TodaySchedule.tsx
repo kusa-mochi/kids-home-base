@@ -38,11 +38,13 @@ export const TodaySchedule: FC = () => {
             month: "2-digit",
             day: "2-digit",
           });
-          const itemTime = itemDate.toLocaleTimeString("ja-JP", {
-            hour: "2-digit",
-            hour12: true,
-            minute: "2-digit",
-          }).replace(/^午前|^午後/, "");
+          const itemTime = itemDate
+            .toLocaleTimeString("ja-JP", {
+              hour: "2-digit",
+              hour12: true,
+              minute: "2-digit",
+            })
+            .replace(/^午前|^午後/, "");
 
           const nHour: number = Number(
             new Intl.DateTimeFormat("en-US", {
