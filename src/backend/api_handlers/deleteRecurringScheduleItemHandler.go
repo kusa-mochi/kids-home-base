@@ -19,5 +19,9 @@ func DeleteRecurringScheduleItemHandler(c *gin.Context, apiRequest chan commands
 	deleteRecurringScheduleItemCommand := commands.NewDeleteRecurringScheduleItemCommand(requestBody.RecurringScheduleItemId)
 	apiRequest <- deleteRecurringScheduleItemCommand
 	response := <-deleteRecurringScheduleItemCommand.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

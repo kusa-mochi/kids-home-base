@@ -10,5 +10,9 @@ func GetLogsHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	getLogsCommand := commands.NewGetLogsCommand()
 	apiRequest <- getLogsCommand
 	response := <-getLogsCommand.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }
