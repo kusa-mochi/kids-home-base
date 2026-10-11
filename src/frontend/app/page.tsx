@@ -208,7 +208,7 @@ export default function Home() {
       },
       body: JSON.stringify({
         start_time: startTimeRFC3339,
-        day_of_week: dayOfWeek,
+        days_of_week: dayOfWeek,
         start_date: startDateRFC3339,
         end_date: endDateRFC3339,
         task,
@@ -245,7 +245,7 @@ export default function Home() {
       body: JSON.stringify({
         id: recurringScheduleItemId,
         start_time: startTimeRFC3339,
-        day_of_week: dayOfWeek,
+        days_of_week: dayOfWeek,
         start_date: startDateRFC3339,
         end_date: endDateRFC3339,
         task,
