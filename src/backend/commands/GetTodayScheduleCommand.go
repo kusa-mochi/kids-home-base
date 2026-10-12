@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
@@ -50,97 +49,12 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 	tokyoLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
 	today := utils.Now().In(tokyoLocation)
-	todayUTC := today.In(time.UTC)
 
-	// 定期的なスケジュールのIDを生成するためのカウンタ
-	recurringScheduleItemId := 1
-
-	// 今日（東京時間）の定期的なスケジュールを通常のスケジュールデータに変換する。
-	for _, recurringSchedule := range recurringSchedules {
-
-		// 今日（東京時間）が定期的なスケジュールの開始日（東京時間換算）と終了日（東京時間換算）の間（開始日と終了日を含む）に含まれない場合
-		if !utils.IsDateInRange(today, recurringSchedule.StartDate.In(tokyoLocation), recurringSchedule.EndDate.In(tokyoLocation)) {
-			continue
-		}
-
-		logger.DbgPrintln(fmt.Sprintf("recurring schedule item:%+v", recurringSchedule))
-
-		// 定期的なスケジュールが毎日のスケジュールの場合
-		if recurringSchedule.RecurringType == "daily" {
-			// 今日の予定の時刻をUTCで生成する。
-			todayScheduleTime := time.Date(todayUTC.Year(), todayUTC.Month(), todayUTC.Day(), recurringSchedule.ScheduleTime.Hour(), recurringSchedule.ScheduleTime.Minute(), recurringSchedule.ScheduleTime.Second(), recurringSchedule.ScheduleTime.Nanosecond(), time.UTC)
-
-			// TODO: スケジュール変更・削除の記録がある場合は反映する。
-
-			// 今日のスケジュールとして追加する。
-			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
-				Dt:   todayScheduleTime,
-				Task: recurringSchedule.Task,
-			})
-			recurringScheduleItemId++
-
-			continue
-		}
-
-		// 定期的なスケジュールが毎週のスケジュールの場合
-		if recurringSchedule.RecurringType == "weekly" {
-			// 今日の曜日
-			var todayWeekday uint8 = uint8(0x01 << utils.Now().Weekday())
-
-			// 今日の曜日が定期的なスケジュールの曜日に含まれていない場合
-			if recurringSchedule.DaysOfWeek&todayWeekday == 0 {
-				continue
-			}
-
-			// 今日の予定の時刻をUTCで生成する。
-			todayScheduleTime := time.Date(todayUTC.Year(), todayUTC.Month(), todayUTC.Day(), recurringSchedule.ScheduleTime.Hour(), recurringSchedule.ScheduleTime.Minute(), recurringSchedule.ScheduleTime.Second(), recurringSchedule.ScheduleTime.Nanosecond(), time.UTC)
-
-			// TODO: スケジュール変更・削除の記録がある場合は反映する。
-
-			// 今日のスケジュールとして追加する。
-			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
-				Dt:   todayScheduleTime,
-				Task: recurringSchedule.Task,
-			})
-			recurringScheduleItemId++
-			continue
-		}
-
-		// 定期的なスケジュールが毎月のスケジュールの場合
-		if recurringSchedule.RecurringType == "monthly" {
-			// 今日の曜日
-			var todayWeekday uint8 = uint8(0x01 << today.Weekday())
-
-			// 今日の日が定期的なスケジュールの曜日に含まれていない場合
-			if recurringSchedule.DaysOfWeek&todayWeekday == 0 {
-				continue
-			}
-
-			// 今日の曜日が今月の第何週に該当するかを計算する。
-			dayOfMonth := utils.Now().Day()
-			weekOfMonth := (dayOfMonth-1)/7 + 1
-			// 第何週に該当するかが定期的なスケジュールと一致しない場合
-			if recurringSchedule.WeekOfMonth != weekOfMonth {
-				continue
-			}
-
-			// 今日の予定の時刻をUTCで生成する。
-			todayScheduleTime := time.Date(todayUTC.Year(), todayUTC.Month(), todayUTC.Day(), recurringSchedule.ScheduleTime.Hour(), recurringSchedule.ScheduleTime.Minute(), recurringSchedule.ScheduleTime.Second(), recurringSchedule.ScheduleTime.Nanosecond(), time.UTC)
-
-			// TODO: スケジュール変更・削除の記録がある場合は反映する。
-
-			// 今日のスケジュールとして追加する。
-			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
-				Dt:   todayScheduleTime,
-				Task: recurringSchedule.Task,
-			})
-			recurringScheduleItemId++
-
-			continue
-		}
+	schedulesFromRecurring, err := utils.ConvertRecurringToScheduleItems(recurringSchedules, today, today)
+	if err != nil {
+		logger.ErrPrintln("GetTodayScheduleCommand.Execute failed to convert recurring schedules:", err.Error())
+	} else {
+		schedules = append(schedules, schedulesFromRecurring...)
 	}
 
 	logger.DbgPrintln("recurring schedule items were added")
