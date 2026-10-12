@@ -206,6 +206,7 @@ export const EditSchedule: FC = () => {
 
           return (
             <Fragment key={item.id}>
+              {lastPeriod !== null && showDateHeader && <div css={dividerStyle}></div>}
               {showDateHeader && <div css={dateHeaderStyle}>{itemDateKey}</div>}
               {(() => {
                 if (period !== lastPeriod) {
@@ -271,6 +272,11 @@ const componentStyle = css`
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+`;
+
+const dividerStyle = css`
+  height: 48px;
+  width: 100%;
 `;
 
 const dateHeaderStyle = css`
