@@ -501,7 +501,13 @@ func (m *DBManager) UpdatePasswordHashByUserId(userId string, newPasswordHash st
 func (m *DBManager) ResetScheduleData() error {
 	_, err := m.db.Exec(`DELETE FROM schedules`)
 	if err != nil {
-		log.Println("exec error in ResetScheduleData:", err.Error())
+		log.Println("exec delete from schedules error in ResetScheduleData:", err.Error())
+		// エラーが発生した場合は返す
+		return err
+	}
+	_, err = m.db.Exec(`DELETE FROM recurring_schedules`)
+	if err != nil {
+		log.Println("exec delete from recurring_schedules error in ResetScheduleData:", err.Error())
 		// エラーが発生した場合は返す
 		return err
 	}
