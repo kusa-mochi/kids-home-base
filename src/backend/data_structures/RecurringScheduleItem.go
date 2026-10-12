@@ -24,5 +24,5 @@ type RecurringScheduleItemWithId struct {
 }
 
 const (
-	RecurringScheduleItemIdBase int = 100000
+	RecurringScheduleItemIdBaseBit int = 7
 )

@@ -51,7 +51,9 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 	tokyoLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
 	today := utils.Now().In(tokyoLocation)
 	todayUTC := today.In(time.UTC)
-	recurringScheduleItemId := datastructures.RecurringScheduleItemIdBase
+
+	// 定期的なスケジュールのIDを生成するためのカウンタ
+	recurringScheduleItemId := 1
 
 	// 今日（東京時間）の定期的なスケジュールを通常のスケジュールデータに変換する。
 	for _, recurringSchedule := range recurringSchedules {
@@ -72,7 +74,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id + recurringScheduleItemId,
+				Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
 				Dt:   todayScheduleTime,
 				Task: recurringSchedule.Task,
 			})
@@ -98,7 +100,7 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id + recurringScheduleItemId,
+				Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
 				Dt:   todayScheduleTime,
 				Task: recurringSchedule.Task,
 			})
@@ -131,11 +133,12 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 
 			// 今日のスケジュールとして追加する。
 			schedules = append(schedules, datastructures.ScheduleItemWithId{
-				Id:   recurringSchedule.Id + recurringScheduleItemId,
+				Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
 				Dt:   todayScheduleTime,
 				Task: recurringSchedule.Task,
 			})
 			recurringScheduleItemId++
+
 			continue
 		}
 	}
