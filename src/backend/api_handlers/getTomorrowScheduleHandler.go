@@ -10,5 +10,9 @@ func GetTomorrowScheduleHandler(c *gin.Context, apiRequest chan commands.IComman
 	cmd := commands.NewGetTomorrowScheduleCommand()
 	apiRequest <- cmd
 	response := <-cmd.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

@@ -17,5 +17,9 @@ func AddScheduleItemHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	cmd := commands.NewAddScheduleItemCommand(scheduleItem)
 	apiRequest <- cmd
 	response := <-cmd.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

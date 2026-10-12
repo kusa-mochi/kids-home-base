@@ -4,6 +4,9 @@ import (
 	datastructures "kids_home_base/data_structures"
 	dbmanager "kids_home_base/db_manager"
 	"kids_home_base/logger"
+	"kids_home_base/utils"
+	"sort"
+	"time"
 )
 
 type GetTodayScheduleCommand struct {
@@ -37,7 +40,31 @@ func (c *GetTodayScheduleCommand) Execute(dbManager *dbmanager.DBManager, conf *
 		return
 	}
 
-	logger.InfPrintln("GetTodayScheduleCommand.Execute")
+	logger.DbgPrintln("dbManager.GetTodayScheduleWithId succeeded")
+
+	recurringSchedules, err := dbManager.GetTodayRecurringScheduleItems()
+	if err != nil {
+		logger.ErrPrintln("GetTodayScheduleCommand.Execute failed to get recurring schedules:", err.Error())
+	}
+
+	tokyoLocation := time.FixedZone("Asia/Tokyo", 9*60*60)
+	today := utils.Now().In(tokyoLocation)
+
+	schedulesFromRecurring, err := utils.ConvertRecurringToScheduleItems(recurringSchedules, today, today)
+	if err != nil {
+		logger.ErrPrintln("GetTodayScheduleCommand.Execute failed to convert recurring schedules:", err.Error())
+	} else {
+		schedules = append(schedules, schedulesFromRecurring...)
+	}
+
+	logger.DbgPrintln("recurring schedule items were added")
+
+	// schedules の要素を、東京時刻における時刻の昇順にソートする。
+	sort.Slice(schedules, func(i, j int) bool {
+		return schedules[i].Dt.In(tokyoLocation).Before(schedules[j].Dt.In(tokyoLocation))
+	})
+
+	logger.InfPrintln("GetTodayScheduleCommand.Execute succeeded")
 	c.Response <- GetTodayScheduleResponse{
 		Success:   true,
 		Message:   "今日のスケジュールを取得しました",

@@ -22,5 +22,9 @@ func ChangePasswordHandler(c *gin.Context, apiRequest chan commands.ICommand) {
 	cmd := commands.NewChangePasswordCommand(request.UserID, request.CurrentPassword, request.NewPassword)
 	apiRequest <- cmd
 	response := <-cmd.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

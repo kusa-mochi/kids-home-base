@@ -17,5 +17,9 @@ func UpdateRecurringScheduleItemWithIdHandler(c *gin.Context, apiRequest chan co
 	updateRecurringScheduleItemCommand := commands.NewUpdateRecurringScheduleItemCommand(s)
 	apiRequest <- updateRecurringScheduleItemCommand
 	response := <-updateRecurringScheduleItemCommand.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

@@ -21,5 +21,9 @@ func DeleteScheduleItemHandler(c *gin.Context, apiRequest chan commands.ICommand
 	deleteScheduleItemCommand := commands.NewDeleteScheduleItemCommand(requestBody.ScheduleItemId)
 	apiRequest <- deleteScheduleItemCommand
 	response := <-deleteScheduleItemCommand.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

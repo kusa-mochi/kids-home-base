@@ -21,5 +21,9 @@ func UpdateScheduleItemWithIdHandler(c *gin.Context, apiRequest chan commands.IC
 	updateScheduleItemCommand := commands.NewUpdateScheduleItemCommand(s)
 	apiRequest <- updateScheduleItemCommand
 	response := <-updateScheduleItemCommand.Response
-	c.JSON(200, response)
+	if response.Success {
+		c.JSON(200, response)
+	} else {
+		c.JSON(400, response)
+	}
 }

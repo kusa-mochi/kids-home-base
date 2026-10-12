@@ -105,11 +105,20 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 	}
 
 	// 定期的な計画
+	// reccuring_type: "daily", "weekly", "monthly"
+	// days_of_week: 最下位ビットは日曜日、第2ビットは月曜日、・・・、第7ビットは土曜日を表す。
+	// week_of_month: recurring_type が "monthly" の場合に使用される第N週（1〜5）の情報。"monthly" 以外では NULL となる。
+	// schedule_time: 予定の開始時刻
+	// start_date: 開始日（ユーザーが設定した日が自動的に開始日になる）
+	// end_date: 終了日（ユーザーが明示的に指定する）
+	// schedule_task: 予定の内容
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS recurring_schedules (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		day_of_week INTEGER NOT NULL,
-		schedule_time TIME NOT NULL,
+		recurring_type TEXT NOT NULL,
+		days_of_week INTEGER NOT NULL,
+		week_of_month INTEGER,
+		schedule_time DATETIME NOT NULL,
 		start_date DATE NOT NULL,
 		end_date DATE NOT NULL,
 		schedule_task TEXT NOT NULL
@@ -131,22 +140,6 @@ func NewDBManager(initialPasswordHash string) *DBManager {
 
 	// ログの初期データ（UTCで記録）
 	_, err = db.Exec(`INSERT INTO logs (user_id, log_level, log_message, created_at) SELECT 1, 'INF', 'ログテスト', ? WHERE NOT EXISTS (SELECT 1 FROM logs);`, utils.Now().UTC())
-	if err != nil {
-		log.Fatal("exec error in NewDBManager:", err.Error())
-	}
-
-	// 計画の初期データ（UTCで記録）
-	seedScheduleUTC := utils.Now().UTC()
-	_, err = db.Exec(`INSERT INTO schedules (schedule_datetime, schedule_task) SELECT ?, 'テストタスク' WHERE NOT EXISTS (SELECT 1 FROM schedules);`, seedScheduleUTC)
-	if err != nil {
-		log.Fatal("exec error in NewDBManager:", err.Error())
-	}
-
-	// 定期的な計画の初期データ（UTCで記録）
-	seedRecurringStartTimeUTC := utils.Now().UTC()
-	seedRecurringStartDateUTC := utils.Now().UTC()
-	seedRecurringEndDateUTC := utils.Now().AddDate(0, 3, 0).UTC()
-	_, err = db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) SELECT 1, ?, ?, ?, '定期タスク' WHERE NOT EXISTS (SELECT 1 FROM recurring_schedules);`, seedRecurringStartTimeUTC, seedRecurringStartDateUTC, seedRecurringEndDateUTC)
 	if err != nil {
 		log.Fatal("exec error in NewDBManager:", err.Error())
 	}
@@ -354,9 +347,99 @@ func (m *DBManager) DeleteScheduleItem(id int) error {
 	return nil
 }
 
+// DBから定期的な計画要素のうち、東京時間で今日のものを取得する関数。DBにはUTCで保存されている。
+func (m *DBManager) GetTodayRecurringScheduleItems() ([]datastructures.RecurringScheduleItemWithId, error) {
+	// 今日の日付を取得
+	today := time.Now().In(time.FixedZone("Asia/Tokyo", 9*60*60))
+	rows, err := m.db.Query(`SELECT id, recurring_type, days_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task FROM recurring_schedules WHERE start_date <= ? AND end_date >= ?`, today, today)
+	if err != nil {
+		log.Println("query error in GetTodayRecurringScheduleItems:", err.Error())
+		return nil, err
+	}
+	if rows.Err() != nil {
+		log.Println("rows error in GetTodayRecurringScheduleItems:", rows.Err().Error())
+		return nil, rows.Err()
+	}
+	defer rows.Close()
+
+	var items []datastructures.RecurringScheduleItemWithId
+	for rows.Next() {
+		var item datastructures.RecurringScheduleItemWithId
+		err := rows.Scan(&item.Id, &item.RecurringType, &item.DaysOfWeek, &item.WeekOfMonth, &item.ScheduleTime, &item.StartDate, &item.EndDate, &item.Task)
+		if err != nil {
+			log.Println("scan error in GetTodayRecurringScheduleItems:", err.Error())
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
+// DBから定期的な計画要素のうち、東京時間で明日のものを取得する関数。DBにはUTCで保存されている。
+func (m *DBManager) GetTomorrowRecurringScheduleItems() ([]datastructures.RecurringScheduleItemWithId, error) {
+	// 明日の日付を取得
+	tomorrow := time.Now().In(time.FixedZone("Asia/Tokyo", 9*60*60)).AddDate(0, 0, 1)
+	rows, err := m.db.Query(`SELECT id, recurring_type, days_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task FROM recurring_schedules WHERE start_date <= ? AND end_date >= ?`, tomorrow, tomorrow)
+	if err != nil {
+		log.Println("query error in GetTomorrowRecurringScheduleItems:", err.Error())
+		return nil, err
+	}
+	if rows.Err() != nil {
+		log.Println("rows error in GetTomorrowRecurringScheduleItems:", rows.Err().Error())
+		return nil, rows.Err()
+	}
+	defer rows.Close()
+
+	var items []datastructures.RecurringScheduleItemWithId
+	for rows.Next() {
+		var item datastructures.RecurringScheduleItemWithId
+		err := rows.Scan(&item.Id, &item.RecurringType, &item.DaysOfWeek, &item.WeekOfMonth, &item.ScheduleTime, &item.StartDate, &item.EndDate, &item.Task)
+		if err != nil {
+			log.Println("scan error in GetTomorrowRecurringScheduleItems:", err.Error())
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
+// DBから定期的な計画要素のうち、東京時間で現在から3カ月先までのものを取得する関数。DBにはUTCで保存されている。
+func (m *DBManager) GetUpcomingRecurringScheduleItems() ([]datastructures.RecurringScheduleItemWithId, error) {
+	// 現在の日付を取得
+	now := time.Now().In(time.FixedZone("Asia/Tokyo", 9*60*60))
+	// 3カ月先の日付を取得
+	threeMonthsLater := now.AddDate(0, 3, 0)
+	rows, err := m.db.Query(`SELECT id, recurring_type, days_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task FROM recurring_schedules WHERE start_date <= ? AND end_date >= ?`, threeMonthsLater, now)
+	if err != nil {
+		log.Println("query error in GetUpcomingRecurringScheduleItems:", err.Error())
+		return nil, err
+	}
+	if rows.Err() != nil {
+		log.Println("rows error in GetUpcomingRecurringScheduleItems:", rows.Err().Error())
+		return nil, rows.Err()
+	}
+	defer rows.Close()
+
+	var items []datastructures.RecurringScheduleItemWithId
+	for rows.Next() {
+		var item datastructures.RecurringScheduleItemWithId
+		err := rows.Scan(&item.Id, &item.RecurringType, &item.DaysOfWeek, &item.WeekOfMonth, &item.ScheduleTime, &item.StartDate, &item.EndDate, &item.Task)
+		if err != nil {
+			log.Println("scan error in GetUpcomingRecurringScheduleItems:", err.Error())
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
 // 定期的な計画要素を追加する関数。
+// 日時はUTCで保存される。
 func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringScheduleItem) error {
-	_, err := m.db.Exec(`INSERT INTO recurring_schedules (day_of_week, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?)`, s.DayOfWeek, m.normalizeUTC(s.StartTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task)
+	_, err := m.db.Exec(`INSERT INTO recurring_schedules (recurring_type, days_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task) VALUES (?, ?, ?, ?, ?, ?, ?)`, s.RecurringType, s.DaysOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task)
 
 	if err != nil {
 		log.Println("exec error in AddRecurringScheduleItem:", err.Error())
@@ -368,7 +451,7 @@ func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringSchedule
 
 // 定期的な計画要素を更新する関数。
 func (m *DBManager) UpdateRecurringScheduleItem(s *datastructures.RecurringScheduleItemWithId) error {
-	_, err := m.db.Exec(`UPDATE recurring_schedules SET day_of_week = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.DayOfWeek, m.normalizeUTC(s.StartTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task, s.Id)
+	_, err := m.db.Exec(`UPDATE recurring_schedules SET recurring_type = ?, days_of_week = ?, week_of_month = ?, schedule_time = ?, start_date = ?, end_date = ?, schedule_task = ? WHERE id = ?`, s.RecurringType, s.DaysOfWeek, s.WeekOfMonth, m.normalizeUTC(s.ScheduleTime), m.normalizeUTC(s.StartDate), m.normalizeUTC(s.EndDate), s.Task, s.Id)
 
 	if err != nil {
 		log.Println("exec error in UpdateRecurringScheduleItem:", err.Error())
@@ -418,7 +501,13 @@ func (m *DBManager) UpdatePasswordHashByUserId(userId string, newPasswordHash st
 func (m *DBManager) ResetScheduleData() error {
 	_, err := m.db.Exec(`DELETE FROM schedules`)
 	if err != nil {
-		log.Println("exec error in ResetScheduleData:", err.Error())
+		log.Println("exec delete from schedules error in ResetScheduleData:", err.Error())
+		// エラーが発生した場合は返す
+		return err
+	}
+	_, err = m.db.Exec(`DELETE FROM recurring_schedules`)
+	if err != nil {
+		log.Println("exec delete from recurring_schedules error in ResetScheduleData:", err.Error())
 		// エラーが発生した場合は返す
 		return err
 	}
