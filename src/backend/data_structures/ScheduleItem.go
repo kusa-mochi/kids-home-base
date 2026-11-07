@@ -8,7 +8,8 @@ type ScheduleItem struct {
 }
 
 type ScheduleItemWithId struct {
-	Id   int       `json:"id"`
-	Dt   time.Time `json:"dt"`
-	Task string    `json:"task"`
+	Id          int       `json:"id"`
+	Dt          time.Time `json:"dt"`
+	Task        string    `json:"task"`
+	IsRecurring bool      `json:"is_recurring"`
 }

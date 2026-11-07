@@ -38,9 +38,10 @@ func ConvertRecurringToScheduleItems(items []datastructures.RecurringScheduleIte
 
 				// 日付 d のスケジュールとして schedules に追加する。
 				schedules = append(schedules, datastructures.ScheduleItemWithId{
-					Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
-					Dt:   scheduleDatetime,
-					Task: recurringSchedule.Task,
+					Id:          recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
+					Dt:          scheduleDatetime,
+					Task:        recurringSchedule.Task,
+					IsRecurring: true,
 				})
 				recurringScheduleItemId++
 
@@ -64,9 +65,10 @@ func ConvertRecurringToScheduleItems(items []datastructures.RecurringScheduleIte
 
 				// 日付 d のスケジュールとして schedules に追加する。
 				schedules = append(schedules, datastructures.ScheduleItemWithId{
-					Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
-					Dt:   scheduleDatetime,
-					Task: recurringSchedule.Task,
+					Id:          recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
+					Dt:          scheduleDatetime,
+					Task:        recurringSchedule.Task,
+					IsRecurring: true,
 				})
 				recurringScheduleItemId++
 
@@ -97,9 +99,10 @@ func ConvertRecurringToScheduleItems(items []datastructures.RecurringScheduleIte
 
 				// 日付 d のスケジュールとして schedules に追加する。
 				schedules = append(schedules, datastructures.ScheduleItemWithId{
-					Id:   recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
-					Dt:   scheduleDatetime,
-					Task: recurringSchedule.Task,
+					Id:          recurringSchedule.Id + (recurringScheduleItemId << datastructures.RecurringScheduleItemIdBaseBit),
+					Dt:          scheduleDatetime,
+					Task:        recurringSchedule.Task,
+					IsRecurring: true,
 				})
 				recurringScheduleItemId++
 

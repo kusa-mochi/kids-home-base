@@ -208,6 +208,7 @@ func (m *DBManager) GetTodayScheduleWithId() ([]datastructures.ScheduleItemWithI
 			return nil, err
 		}
 		s.Dt = m.normalizeUTC(s.Dt)
+		s.IsRecurring = false
 		schedules = append(schedules, s)
 	}
 
@@ -239,6 +240,7 @@ func (m *DBManager) GetTomorrowScheduleWithId() ([]datastructures.ScheduleItemWi
 			return nil, err
 		}
 		s.Dt = m.normalizeUTC(s.Dt)
+		s.IsRecurring = false
 		schedules = append(schedules, s)
 	}
 
@@ -273,6 +275,7 @@ func (m *DBManager) GetUpcomingSchedulesWithId() ([]datastructures.ScheduleItemW
 			return nil, err
 		}
 		s.Dt = m.normalizeUTC(s.Dt)
+		s.IsRecurring = false
 		schedules = append(schedules, s)
 	}
 

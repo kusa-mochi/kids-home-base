@@ -12,6 +12,7 @@ import {
 } from "../timezone";
 import { AddScheduleItemButton } from "../components/AddScheduleItemButton";
 import { apiPath } from "../api";
+import { RecurringIcon } from "../assets/iconComponents/RecurringIcon";
 
 export const EditSchedule: FC = () => {
   const { upcomingSchedule, setUpcomingSchedule } = useUpcomingSchedule();
@@ -221,6 +222,7 @@ export const EditSchedule: FC = () => {
               >
                 <span css={itemTimeStyle}>{itemTime}</span>
                 <span css={itemTaskStyle}>{item.task}</span>
+                {item.is_recurring && <div css={recurringIconStyle}><RecurringIcon /></div>}
               </div>
             </Fragment>
           );
@@ -296,6 +298,7 @@ const ampmStyle = css`
 `;
 
 const tableRowStyle = css`
+  position: relative;
   font-size: 48px;
   height: 56px;
 
@@ -309,7 +312,7 @@ const tableRowStyle = css`
 
 const itemTimeStyle = css`
   height: 72px;
-  margin-right: 16px;
+  margin: 0 16px 0 32px;
   font-family:
     SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
@@ -329,6 +332,14 @@ const itemTaskStyle = css`
   align-content: center;
   justify-content: flex-start;
   align-items: center;
+`;
+
+const recurringIconStyle = css`
+  position: absolute;
+  top: -10px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
 `;
 
 const modalBackdropStyle = css`
