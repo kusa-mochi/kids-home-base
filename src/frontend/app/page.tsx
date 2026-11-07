@@ -207,11 +207,13 @@ export default function Home() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        start_time: startTimeRFC3339,
+        recurring_type: "test", // TODO: バックエンドで認識できる文字列が渡るように実装する。
         days_of_week: dayOfWeek,
+        week_of_month: 2, // TODO: 変数化する。
+        schedule_time: startTimeRFC3339,
         start_date: startDateRFC3339,
         end_date: endDateRFC3339,
-        task,
+        task: task,
       }),
     })
       .then((response) => response.json())
