@@ -439,6 +439,32 @@ func (m *DBManager) GetUpcomingRecurringScheduleItems() ([]datastructures.Recurr
 	return items, nil
 }
 
+func (m *DBManager) GetRecurringSchedulesWithId() ([]datastructures.RecurringScheduleItemWithId, error) {
+	rows, err := m.db.Query(`SELECT id, recurring_type, days_of_week, week_of_month, schedule_time, start_date, end_date, schedule_task FROM recurring_schedules`)
+	if err != nil {
+		log.Println("query error in GetRecurringSchedulesWithId:", err.Error())
+		return nil, err
+	}
+	if rows.Err() != nil {
+		log.Println("rows error in GetRecurringSchedulesWithId:", rows.Err().Error())
+		return nil, rows.Err()
+	}
+	defer rows.Close()
+
+	var items []datastructures.RecurringScheduleItemWithId
+	for rows.Next() {
+		var item datastructures.RecurringScheduleItemWithId
+		err := rows.Scan(&item.Id, &item.RecurringType, &item.DaysOfWeek, &item.WeekOfMonth, &item.ScheduleTime, &item.StartDate, &item.EndDate, &item.Task)
+		if err != nil {
+			log.Println("scan error in GetRecurringSchedulesWithId:", err.Error())
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
 // 定期的な計画要素を追加する関数。
 // 日時はUTCで保存される。
 func (m *DBManager) AddRecurringScheduleItem(s *datastructures.RecurringScheduleItem) error {
