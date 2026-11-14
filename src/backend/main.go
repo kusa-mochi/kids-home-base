@@ -48,10 +48,6 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	r.POST("/add-schedule-item", func(c *gin.Context) { api_handlers.AddScheduleItemHandler(c, apiRequest) })
 	r.POST("/update-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateScheduleItemWithIdHandler(c, apiRequest) })
 	r.POST("/delete-schedule-item", func(c *gin.Context) { api_handlers.DeleteScheduleItemHandler(c, apiRequest) })
-	r.GET("/get-recurring-schedule", func(c *gin.Context) { api_handlers.GetRecurringScheduleHandler(c, apiRequest) })
-	r.POST("/add-recurring-schedule-item", func(c *gin.Context) { api_handlers.AddRecurringScheduleItemHandler(c, apiRequest) })
-	r.POST("/update-recurring-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateRecurringScheduleItemWithIdHandler(c, apiRequest) })
-	r.POST("/delete-recurring-schedule-item", func(c *gin.Context) { api_handlers.DeleteRecurringScheduleItemHandler(c, apiRequest) })
 	r.POST("/login", func(c *gin.Context) { api_handlers.LoginHandler(c, apiRequest) })
 
 	//// JWT認証ミドルウェアを使用するAPIグループ
@@ -60,6 +56,10 @@ func RunAPIServerGoroutine(apiRequest chan commands.ICommand, jwtSecretKey strin
 	{
 		authGroup.GET("/jwt-test", api_handlers.JwtTestHandler)
 		authGroup.POST("/change-password", func(c *gin.Context) { api_handlers.ChangePasswordHandler(c, apiRequest) })
+		authGroup.GET("/get-recurring-schedule", func(c *gin.Context) { api_handlers.GetRecurringScheduleHandler(c, apiRequest) })
+		authGroup.POST("/add-recurring-schedule-item", func(c *gin.Context) { api_handlers.AddRecurringScheduleItemHandler(c, apiRequest) })
+		authGroup.POST("/update-recurring-schedule-item-with-id", func(c *gin.Context) { api_handlers.UpdateRecurringScheduleItemWithIdHandler(c, apiRequest) })
+		authGroup.POST("/delete-recurring-schedule-item", func(c *gin.Context) { api_handlers.DeleteRecurringScheduleItemHandler(c, apiRequest) })
 	}
 
 	//// サーバー起動
